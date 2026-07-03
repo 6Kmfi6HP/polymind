@@ -1,5 +1,5 @@
 """
-Execution layer: intent → order lifecycle, fill simulation, paper trading.
+Execution layer: intent -> order lifecycle, fill simulation, paper trading.
 
 Phase 3 components bridge strategy intents and exchange-specific transport.
 """
