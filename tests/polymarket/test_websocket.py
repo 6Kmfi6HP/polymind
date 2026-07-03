@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import json
 from datetime import datetime
-from unittest.mock import AsyncMock, MagicMock, PropertyMock, patch
+from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
 from websockets.exceptions import ConnectionClosed
@@ -99,9 +99,7 @@ class TestPolymarketWebSocketAdapter:
         """Create an adapter with a mocked WebSocket connection."""
         mock_conn = AsyncMock()
         mock_conn.__aenter__.return_value = mock_ws
-        with patch(
-            "polymind.polymarket.websocket.ws_connect", return_value=mock_conn
-        ):
+        with patch("polymind.polymarket.websocket.ws_connect", return_value=mock_conn):
             a = PolymarketWebSocketAdapter(config)
             await a.connect()
             yield a
@@ -128,9 +126,7 @@ class TestPolymarketWebSocketAdapter:
         """connect() sends an auth message when auth_token is set."""
         mock_conn = AsyncMock()
         mock_conn.__aenter__.return_value = mock_ws
-        with patch(
-            "polymind.polymarket.websocket.ws_connect", return_value=mock_conn
-        ) as mock_connect:
+        with patch("polymind.polymarket.websocket.ws_connect", return_value=mock_conn):
             cfg = WebSocketConfig(url="ws://test", auth_token="tok123")
             adapter = PolymarketWebSocketAdapter(cfg)
             await adapter.connect()
@@ -139,13 +135,13 @@ class TestPolymarketWebSocketAdapter:
             await adapter.close()
 
     @pytest.mark.asyncio
-    async def test_connect_skips_auth_when_no_token(self, config: WebSocketConfig, mock_ws: MagicMock):
+    async def test_connect_skips_auth_when_no_token(
+        self, config: WebSocketConfig, mock_ws: MagicMock
+    ):
         """connect() does not send auth when auth_token is None."""
         mock_conn = AsyncMock()
         mock_conn.__aenter__.return_value = mock_ws
-        with patch(
-            "polymind.polymarket.websocket.ws_connect", return_value=mock_conn
-        ) as mock_connect:
+        with patch("polymind.polymarket.websocket.ws_connect", return_value=mock_conn):
             adapter = PolymarketWebSocketAdapter(config)
             await adapter.connect()
             mock_ws.send.assert_not_awaited()
@@ -159,11 +155,13 @@ class TestPolymarketWebSocketAdapter:
     ):
         """subscribe sends a subscribe JSON message and records the subscription."""
         await adapter.subscribe(WebSocketChannel.BOOK, ["0xabc", "0xdef"])
-        expected = json.dumps({
-            "type": "subscribe",
-            "channel": "book",
-            "market_ids": ["0xabc", "0xdef"],
-        })
+        expected = json.dumps(
+            {
+                "type": "subscribe",
+                "channel": "book",
+                "market_ids": ["0xabc", "0xdef"],
+            }
+        )
         mock_ws.send.assert_awaited_with(expected)
         assert WebSocketChannel.BOOK in adapter.active_subscriptions
         assert adapter.active_subscriptions[WebSocketChannel.BOOK] == {"0xabc", "0xdef"}
@@ -175,11 +173,13 @@ class TestPolymarketWebSocketAdapter:
         """Multiple subscribe calls accumulate in separate channel entries."""
         await adapter.subscribe(WebSocketChannel.BOOK, ["m1"])
         await adapter.subscribe(WebSocketChannel.TICKER, ["m2"])
-        expected = json.dumps({
-            "type": "subscribe",
-            "channel": "ticker",
-            "market_ids": ["m2"],
-        })
+        expected = json.dumps(
+            {
+                "type": "subscribe",
+                "channel": "ticker",
+                "market_ids": ["m2"],
+            }
+        )
         mock_ws.send.assert_awaited_with(expected)
         assert WebSocketChannel.BOOK in adapter.active_subscriptions
         assert WebSocketChannel.TICKER in adapter.active_subscriptions
@@ -201,11 +201,13 @@ class TestPolymarketWebSocketAdapter:
         await adapter.subscribe(WebSocketChannel.BOOK, ["m1", "m2", "m3"])
         mock_ws.send.reset_mock()
         await adapter.unsubscribe(WebSocketChannel.BOOK, ["m1", "m3"])
-        expected = json.dumps({
-            "type": "unsubscribe",
-            "channel": "book",
-            "market_ids": ["m1", "m3"],
-        })
+        expected = json.dumps(
+            {
+                "type": "unsubscribe",
+                "channel": "book",
+                "market_ids": ["m1", "m3"],
+            }
+        )
         mock_ws.send.assert_awaited_with(expected)
         assert adapter.active_subscriptions[WebSocketChannel.BOOK] == {"m2"}
 
@@ -238,12 +240,14 @@ class TestPolymarketWebSocketAdapter:
     ):
         """on_events parses a JSON message and yields a MarketEvent."""
         mock_ws.recv.side_effect = [
-            json.dumps({
-                "type": "price_change",
-                "channel": "book",
-                "market_id": "0xabc",
-                "price": "0.55",
-            }),
+            json.dumps(
+                {
+                    "type": "price_change",
+                    "channel": "book",
+                    "market_id": "0xabc",
+                    "price": "0.55",
+                }
+            ),
             ConnectionClosed(None, None),
         ]
         events = []
@@ -308,22 +312,28 @@ class TestPolymarketWebSocketAdapter:
         adapter._subscriptions[WebSocketChannel.BOOK].add("m1")
         adapter._ws = fresh_ws
 
-        with patch("polymind.polymarket.websocket.ws_connect", return_value=fresh_conn) as mock_conn:
+        with patch(
+            "polymind.polymarket.websocket.ws_connect", return_value=fresh_conn
+        ) as mock_conn:
             await adapter._reconnect()
             assert mock_conn.called
             assert adapter._ws is not None
         await adapter.close()
 
     @pytest.mark.asyncio
-    async def test_reconnect_exhausts_max_retries(self, config: WebSocketConfig, mock_ws: MagicMock):
+    async def test_reconnect_exhausts_max_retries(
+        self, config: WebSocketConfig, mock_ws: MagicMock
+    ):
         """Adapter stops reconnecting after exhausting max_reconnects."""
         cfg = WebSocketConfig(url=config.url, max_reconnects=2, reconnect_delay=0.01)
         adapter = PolymarketWebSocketAdapter(cfg)
         adapter._ws = mock_ws
         adapter._running = True  # on_events would set this
 
-        with patch("polymind.polymarket.websocket.ws_connect") as mock_connect, \
-             patch("asyncio.sleep"):
+        with (
+            patch("polymind.polymarket.websocket.ws_connect") as mock_connect,
+            patch("asyncio.sleep"),
+        ):
             mock_connect.side_effect = Exception("fail")
             await adapter._reconnect()  # attempt 1
             assert adapter._reconnect_count == 1

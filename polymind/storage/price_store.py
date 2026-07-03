@@ -68,9 +68,7 @@ class PriceStore:
                 continue
             yield s
 
-    async def read_snapshots_batch(
-        self, market_id: str, limit: int = 0
-    ) -> list[PriceSnapshot]:
+    async def read_snapshots_batch(self, market_id: str, limit: int = 0) -> list[PriceSnapshot]:
         """Read all snapshots for *market_id* as a list (up to *limit*)."""
         self._check_open()
         if self._path is None:

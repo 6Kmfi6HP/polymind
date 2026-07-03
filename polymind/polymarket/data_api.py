@@ -154,7 +154,7 @@ class PolymarketDataAPI:
     def _parse_timestamp(ts: Any) -> datetime | None:
         if ts is None:
             return None
-        if isinstance(ts, (int, float)):
+        if isinstance(ts, int | float):
             return datetime.utcfromtimestamp(ts)
         if isinstance(ts, str):
             ts_stripped = ts.replace("Z", "+00:00")
@@ -184,12 +184,10 @@ class PolymarketDataAPI:
         params = {"market": market_id}
         data = await self._request("GET", "/orderbook", params=params)
         bids = [
-            OrderLevel(price=float(b["price"]), size=float(b["size"]))
-            for b in data.get("bids", [])
+            OrderLevel(price=float(b["price"]), size=float(b["size"])) for b in data.get("bids", [])
         ]
         asks = [
-            OrderLevel(price=float(a["price"]), size=float(a["size"]))
-            for a in data.get("asks", [])
+            OrderLevel(price=float(a["price"]), size=float(a["size"])) for a in data.get("asks", [])
         ]
         timestamp = self._parse_timestamp(data.get("timestamp"))
         return OrderbookSnapshot(
@@ -236,9 +234,7 @@ class PolymarketDataAPI:
             )
         return candles
 
-    async def get_trades(
-        self, market_id: str, limit: int = 100
-    ) -> list[Trade]:
+    async def get_trades(self, market_id: str, limit: int = 100) -> list[Trade]:
         """Fetch recent trades for a market."""
         params: dict[str, str] = {"market": market_id, "limit": str(limit)}
         data = await self._request("GET", "/trades", params=params)

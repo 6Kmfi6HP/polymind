@@ -40,9 +40,7 @@ class SecretsManager:
         """Return the secret *name* or raise :class:`SecretNotFound`."""
         value = self.get(name)
         if value is None:
-            raise SecretNotFound(
-                f"Secret '{self._env_key(name)}' is not set in the environment"
-            )
+            raise SecretNotFound(f"Secret '{self._env_key(name)}' is not set in the environment")
         return value
 
 

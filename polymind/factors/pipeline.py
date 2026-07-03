@@ -100,8 +100,6 @@ class FactorPipeline:
         """Score all markets based on their features."""
         return self.score_fn(universe)
 
-    async def _construct_portfolio(
-        self, scores: ScoreResult
-    ) -> list[PortfolioTarget]:
+    async def _construct_portfolio(self, scores: ScoreResult) -> list[PortfolioTarget]:
         """Convert scores into portfolio targets."""
         return self.portfolio_fn(scores)

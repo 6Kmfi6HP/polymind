@@ -258,15 +258,11 @@ class TestDataLoader:
         loader = DataLoader(initial)
 
         # Before load_in_memory
-        ids1 = await loader.get_market_ids(
-            BacktestDataConfig(source=DataSource.IN_MEMORY)
-        )
+        ids1 = await loader.get_market_ids(BacktestDataConfig(source=DataSource.IN_MEMORY))
         assert ids1 == ["0x111"]
 
         loader.load_in_memory(replacement)
 
         # After load_in_memory
-        ids2 = await loader.get_market_ids(
-            BacktestDataConfig(source=DataSource.IN_MEMORY)
-        )
+        ids2 = await loader.get_market_ids(BacktestDataConfig(source=DataSource.IN_MEMORY))
         assert ids2 == ["0x222"]

@@ -102,7 +102,9 @@ class EventMMStateMachine:
 
     def is_active(self) -> bool:
         return self.state not in (
-            EventMMState.COMPLETED, EventMMState.FAILED, EventMMState.HALTED,
+            EventMMState.COMPLETED,
+            EventMMState.FAILED,
+            EventMMState.HALTED,
         )
 
     def reset(self) -> None:

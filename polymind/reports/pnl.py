@@ -9,16 +9,13 @@ from polymind.storage.ledger import LedgerStore
 
 async def get_pnl_report(ledger: LedgerStore) -> list[dict]:
     """Fetch per-market P&L from the ledger store."""
-    conn = await ledger._ensure_connection()
+    await ledger._ensure_connection()
     assert ledger._conn is not None
     rows = await ledger._conn.fetch_all(
         "SELECT market_id, COALESCE(SUM(delta_cash), 0.0) AS realized_pnl "
         "FROM ledger_entries GROUP BY market_id ORDER BY realized_pnl DESC"
     )
-    return [
-        {"market_id": row["market_id"], "realized_pnl": row["realized_pnl"]}
-        for row in rows
-    ]
+    return [{"market_id": row["market_id"], "realized_pnl": row["realized_pnl"]} for row in rows]
 
 
 def format_pnl_table(report: list[dict], total_cash: float) -> Table:
@@ -35,7 +32,11 @@ def format_pnl_table(report: list[dict], total_cash: float) -> Table:
         table.add_row(r["market_id"][:10] + "...", pnl_str)
 
     table.add_section()
-    total_str = f"[green]+${total_pnl:.2f}[/green]" if total_pnl >= 0 else f"[red]-${abs(total_pnl):.2f}[/red]"
+    total_str = (
+        f"[green]+${total_pnl:.2f}[/green]"
+        if total_pnl >= 0
+        else f"[red]-${abs(total_pnl):.2f}[/red]"
+    )
     table.add_row("[bold]Total P&L[/bold]", total_str)
     table.add_row("[bold]Cash Balance[/bold]", f"${total_cash:.2f}")
 

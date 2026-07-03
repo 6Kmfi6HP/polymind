@@ -152,16 +152,10 @@ class TakerExecutionModel:
         SELL) plus slippage estimated from the order size and market
         liquidity.
         """
-        book_liquidity = (
-            snapshot.ask_size if intent.side == OrderSide.BUY else snapshot.bid_size
-        )
+        book_liquidity = snapshot.ask_size if intent.side == OrderSide.BUY else snapshot.bid_size
         additional_slippage = self.estimate_slippage(intent.size, book_liquidity)
         total_slippage_bps = self.config.slippage_bps + additional_slippage
-        base_price = (
-            snapshot.ask_price
-            if intent.side == OrderSide.BUY
-            else snapshot.bid_price
-        )
+        base_price = snapshot.ask_price if intent.side == OrderSide.BUY else snapshot.bid_price
 
         slippage_factor = total_slippage_bps / 10_000.0
         if intent.side == OrderSide.BUY:

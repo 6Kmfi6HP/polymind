@@ -5,22 +5,21 @@ Tests for BacktestEngine.
 from __future__ import annotations
 
 from datetime import datetime, timedelta
-from typing import List
 
 import pytest
 
+from polymind.backtesting.engine import BacktestConfig, BacktestEngine
 from polymind.core.portfolio import PortfolioTarget, PositionDirection
 from polymind.factors.pipeline import FactorPipeline, MarketFeatures, ScoreResult, UniverseSnapshot
-from polymind.backtesting.engine import BacktestConfig, BacktestEngine
 
 
 def _varying_pipeline(
-    target_sets: List[List[PortfolioTarget]],
+    target_sets: list[list[PortfolioTarget]],
 ) -> FactorPipeline:
     """Pipeline that returns different targets per call index."""
     call_count = [0]
 
-    async def run_fn(u: UniverseSnapshot) -> List[PortfolioTarget]:
+    async def run_fn(u: UniverseSnapshot) -> list[PortfolioTarget]:
         idx = call_count[0]
         call_count[0] += 1
         if idx < len(target_sets):
@@ -68,7 +67,7 @@ class TestBacktestEngine:
         engine = BacktestEngine(pipeline, BacktestConfig(initial_capital=1000.0))
 
         snapshots = [
-            _snapshot("0xabc", 0.50, now),       # open long (buy at 0.50)
+            _snapshot("0xabc", 0.50, now),  # open long (buy at 0.50)
             _snapshot("0xabc", 0.80, now + timedelta(hours=24)),  # close (sell at 0.80)
         ]
 
@@ -90,7 +89,7 @@ class TestBacktestEngine:
         engine = BacktestEngine(pipeline, BacktestConfig(initial_capital=1000.0))
 
         snapshots = [
-            _snapshot("0xabc", 0.50, now),       # open long (buy at 0.50)
+            _snapshot("0xabc", 0.50, now),  # open long (buy at 0.50)
             _snapshot("0xabc", 0.40, now + timedelta(hours=1)),  # close (sell at 0.40)
         ]
 
@@ -99,9 +98,7 @@ class TestBacktestEngine:
 
     @pytest.mark.asyncio
     async def test_portfolio_value_tracking(self):
-        engine = BacktestEngine(
-            _varying_pipeline([]), BacktestConfig(initial_capital=5000.0)
-        )
+        engine = BacktestEngine(_varying_pipeline([]), BacktestConfig(initial_capital=5000.0))
         result = await engine.run([])
         assert len(result.portfolio_values) > 0
         assert result.portfolio_values[0] == 5000.0

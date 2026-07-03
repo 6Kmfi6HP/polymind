@@ -18,7 +18,6 @@ Covers three end-to-end scenarios:
 
 from __future__ import annotations
 
-from dataclasses import dataclass, field
 from datetime import datetime
 from typing import Any
 
@@ -26,22 +25,16 @@ import pytest
 
 from polymind.core.fills import FillEvent, FillSource
 from polymind.core.intents import (
-    CancelIntent,
     IntentExecutor,
     OrderIntent,
     OrderSide,
     StrategyIntent,
 )
-from polymind.core.ledger import EntryType, LedgerEntry
+from polymind.core.ledger import EntryType
 from polymind.execution.executor import PaperExecutor
 from polymind.execution.fill_model import (
-    FillModel,
-    FillModelConfig,
-    FillMode,
-    FillResult,
     MarketSnapshot,
 )
-from polymind.execution.order_identity import OrderIdentity
 from polymind.polymarket.websocket import (
     MarketEvent,
     PolymarketWebSocketAdapter,
@@ -59,7 +52,6 @@ from polymind.storage.database import DatabaseConfig
 from polymind.storage.ledger import LedgerStore
 from polymind.utils.killswitch import KillSwitch
 from polymind.utils.preflight import PreflightChecker, PreflightReport, PreflightSeverity
-
 
 # ─────────────────────────────────────────────────────────────────────────────
 # Scenario 1 — KillSwitch + Preflight + PaperExecutor safety integration
@@ -408,9 +400,7 @@ class TestLedgerStoreIntegration:
         assert snapshot.onchain_balance == 0.0
 
     @pytest.mark.asyncio
-    async def test_balance_reconciler_with_bridge(
-        self, paper_executor: PaperExecutor
-    ) -> None:
+    async def test_balance_reconciler_with_bridge(self, paper_executor: PaperExecutor) -> None:
         """BalanceReconciler reconciles PaperExecutor positions against a stubbed gateway."""
         snapshot = MarketSnapshot(
             market_id="0xrecon1",
@@ -545,9 +535,7 @@ class TestLedgerStoreIntegration:
         assert record.action == RecoveryAction.RETRY_ORDER
 
     @pytest.mark.asyncio
-    async def test_full_reconciliation_flow(
-        self, paper_executor: PaperExecutor
-    ) -> None:
+    async def test_full_reconciliation_flow(self, paper_executor: PaperExecutor) -> None:
         """End-to-end: PaperExecutor fills → LedgerStore persists → RecoveryManager assesses.
 
         This test validates the complete pipeline from order execution through
@@ -880,9 +868,7 @@ async def _event_stream(events: list[MarketEvent]):
         yield event
 
 
-def _make_fill(
-    market_id: str, fill_id: str, size: float, price: float
-) -> FillEvent:
+def _make_fill(market_id: str, fill_id: str, size: float, price: float) -> FillEvent:
     """Convenience factory for FillEvent fixtures."""
     return FillEvent(
         fill_id=fill_id,

@@ -47,5 +47,4 @@ class RiskGate(ABC):
         self,
         intent: StrategyIntent,
         context: RiskContext,
-    ) -> RiskDecision:
-        ...
+    ) -> RiskDecision: ...

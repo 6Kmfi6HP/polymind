@@ -168,7 +168,7 @@ def format_positions_table(positions: list[PositionRecord]) -> Table:
     table.add_column("Size", justify="right")
     table.add_column("Avg Entry", justify="right")
     table.add_column("Realized P&L", justify="right")
-    
+
     for p in positions:
         pnl_str = f"[green]+${p.realized_pnl:.2f}[/green]" if p.realized_pnl >= 0 else f"[red]-${abs(p.realized_pnl):.2f}[/red]"
         table.add_row(
@@ -178,7 +178,7 @@ def format_positions_table(positions: list[PositionRecord]) -> Table:
             f"${p.avg_entry:.4f}",
             pnl_str,
         )
-    
+
     return table
 ```
 
@@ -283,19 +283,19 @@ def format_pnl_table(report: list[dict], total_cash: float) -> Table:
     table = Table(title="Profit & Loss Summary", show_header=True, header_style="bold")
     table.add_column("Market", style="cyan", no_wrap=True)
     table.add_column("Realized P&L", justify="right")
-    
+
     total_pnl = 0.0
     for r in report:
         pnl = r["realized_pnl"]
         total_pnl += pnl
         pnl_str = f"[green]+${pnl:.2f}[/green]" if pnl >= 0 else f"[red]-${abs(pnl):.2f}[/red]"
         table.add_row(r["market_id"][:10] + "...", pnl_str)
-    
+
     table.add_section()
     total_str = f"[green]+${total_pnl:.2f}[/green]" if total_pnl >= 0 else f"[red]-${abs(total_pnl):.2f}[/red]"
     table.add_row("[bold]Total P&L[/bold]", total_str)
     table.add_row("[bold]Cash Balance[/bold]", f"${total_cash:.2f}")
-    
+
     return table
 ```
 
@@ -402,7 +402,7 @@ def get_risk_report(risk_mgr: RiskManager, limits_mgr: LimitsManager) -> RiskRep
     drawdown_pct = 0.0
     if risk_mgr.peak_capital > 0:
         drawdown_pct = (1 - risk_mgr.current_capital / risk_mgr.peak_capital) * 100
-    
+
     return RiskReport(
         total_exposure=0.0,  # Would sum position notional in full impl
         max_exposure=limits_mgr.config.exposure.max_total_exposure if limits_mgr.config.exposure else 5000.0,
@@ -419,17 +419,17 @@ def format_risk_table(report: RiskReport) -> Table:
     table.add_column("Metric", style="cyan")
     table.add_column("Value", justify="right")
     table.add_column("Status")
-    
+
     health = "[green]HEALTHY[/green]" if report.is_healthy else "[red]ALERT[/red]"
     dd_color = "green" if report.drawdown_pct < 5 else "yellow" if report.drawdown_pct < 10 else "red"
-    
+
     table.add_row("Drawdown", f"[{dd_color}]{report.drawdown_pct:.1f}%[/{dd_color}]", health)
-    table.add_row("Total Exposure", f"${report.total_exposure:.2f}", 
+    table.add_row("Total Exposure", f"${report.total_exposure:.2f}",
                   "[green]OK[/green]" if report.total_exposure < report.max_exposure else "[red]OVER[/red]")
     table.add_row("Daily Loss", f"${report.daily_loss:.2f}",
                   "[green]OK[/green]" if report.daily_loss < report.max_daily_loss else "[red]LIMIT HIT[/red]")
     table.add_row("System Health", "", health)
-    
+
     return table
 ```
 
@@ -517,7 +517,7 @@ async def generate_dashboard(
     pnl_data = await get_pnl_report(ledger)
     cash = await ledger.get_cash_balance()
     risk = get_risk_report(risk_mgr, limits_mgr)
-    
+
     return [
         format_positions_table(positions),
         format_pnl_table(pnl_data, cash),
@@ -556,16 +556,16 @@ def dashboard():
     from polymind.risk.manager import RiskManager
     from polymind.risk.limits import LimitsConfig, LimitsManager
     from polymind.reports.dashboard import generate_dashboard, display_dashboard
-    
+
     import asyncio
     loop = asyncio.new_event_loop()
     asyncio.set_event_loop(loop)
-    
+
     config = load_config()
     ledger = LedgerStore(DatabaseConfig(path=config.db_path or ":memory:"))
     risk_mgr = RiskManager()
     limits_mgr = LimitsManager(LimitsConfig(positions=[], order_rate=None, daily_loss=None, exposure=None))
-    
+
     tables = loop.run_until_complete(generate_dashboard(ledger, risk_mgr, limits_mgr))
     display_dashboard(tables)
     loop.close()
@@ -577,12 +577,12 @@ def positions():
     import asyncio
     loop = asyncio.new_event_loop()
     asyncio.set_event_loop(loop)
-    
+
     config = load_config()
     from polymind.storage.database import DatabaseConfig
     from polymind.storage.ledger import LedgerStore
     from polymind.reports.positions import get_position_report, format_positions_table
-    
+
     ledger = LedgerStore(DatabaseConfig(path=config.db_path or ":memory:"))
     positions = loop.run_until_complete(get_position_report(ledger))
     console.print(format_positions_table(positions))
@@ -595,12 +595,12 @@ def pnl():
     import asyncio
     loop = asyncio.new_event_loop()
     asyncio.set_event_loop(loop)
-    
+
     config = load_config()
     from polymind.storage.database import DatabaseConfig
     from polymind.storage.ledger import LedgerStore
     from polymind.reports.pnl import get_pnl_report, format_pnl_table
-    
+
     ledger = LedgerStore(DatabaseConfig(path=config.db_path or ":memory:"))
     report = loop.run_until_complete(get_pnl_report(ledger))
     cash = loop.run_until_complete(ledger.get_cash_balance())
@@ -614,7 +614,7 @@ def risk():
     from polymind.risk.manager import RiskManager
     from polymind.risk.limits import LimitsConfig, LimitsManager
     from polymind.reports.risk import get_risk_report, format_risk_table
-    
+
     risk_mgr = RiskManager()
     limits_mgr = LimitsManager(LimitsConfig(positions=[], order_rate=None, daily_loss=None, exposure=None))
     report = get_risk_report(risk_mgr, limits_mgr)

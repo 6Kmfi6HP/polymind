@@ -5,9 +5,6 @@ Tests for execution models.
 from __future__ import annotations
 
 from datetime import datetime
-from typing import Optional
-
-import pytest
 
 from polymind.backtesting.execution_model import (
     ExecutionModelConfig,
@@ -15,7 +12,7 @@ from polymind.backtesting.execution_model import (
     TakerExecutionModel,
 )
 from polymind.core.intents import OrderIntent, OrderSide
-from polymind.execution.fill_model import FillResult, MarketSnapshot
+from polymind.execution.fill_model import MarketSnapshot
 
 
 def _snapshot(
@@ -25,7 +22,7 @@ def _snapshot(
     bid_size: float = 1000.0,
     ask_size: float = 1000.0,
     market_id: str = "0xabc",
-    ts: Optional[datetime] = None,
+    ts: datetime | None = None,
 ) -> MarketSnapshot:
     return MarketSnapshot(
         market_id=market_id,
@@ -111,18 +108,14 @@ class TestPassiveExecutionModel:
 
     def test_estimate_queue_position_zero_depth(self) -> None:
         """When book depth is zero, returns the configured pct."""
-        model = PassiveExecutionModel(
-            ExecutionModelConfig(queue_position_pct=0.3)
-        )
+        model = PassiveExecutionModel(ExecutionModelConfig(queue_position_pct=0.3))
         snap = _snapshot(bid=0.0, ask=0.0, bid_size=0.0, ask_size=0.0)
         pos = model.estimate_queue_position(1.0, snap)
         assert pos == 0.3
 
     def test_estimate_queue_position_adjusts_downward(self) -> None:
         """Queue position improves (goes toward 0) with depth."""
-        model = PassiveExecutionModel(
-            ExecutionModelConfig(queue_position_pct=0.5)
-        )
+        model = PassiveExecutionModel(ExecutionModelConfig(queue_position_pct=0.5))
         snap = _snapshot(bid=1.0, ask=1.1, bid_size=10.0, ask_size=10.0)
         pos = model.estimate_queue_position(1.05, snap)
         # 0.5 * (1 / (1 + 20)) = 0.5 / 21 ≈ 0.0238

@@ -68,14 +68,14 @@ class PolymarketWebSocketAdapter:
         self._ws_conn = ws_connect(self.config.url)
         self._ws = await self._ws_conn.__aenter__()
         if self.config.auth_token:
-            await self._send_json({
-                "type": "auth",
-                "token": self.config.auth_token,
-            })
+            await self._send_json(
+                {
+                    "type": "auth",
+                    "token": self.config.auth_token,
+                }
+            )
 
-    async def subscribe(
-        self, channel: WebSocketChannel, market_ids: list[str]
-    ) -> None:
+    async def subscribe(self, channel: WebSocketChannel, market_ids: list[str]) -> None:
         """Subscribe to *channel* for the given *market_ids*."""
         msg = {
             "type": "subscribe",
@@ -85,9 +85,7 @@ class PolymarketWebSocketAdapter:
         await self._send_json(msg)
         self._subscriptions[channel].update(market_ids)
 
-    async def unsubscribe(
-        self, channel: WebSocketChannel, market_ids: list[str]
-    ) -> None:
+    async def unsubscribe(self, channel: WebSocketChannel, market_ids: list[str]) -> None:
         """Unsubscribe *channel* for the given *market_ids*."""
         msg = {
             "type": "unsubscribe",

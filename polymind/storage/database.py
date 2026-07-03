@@ -91,9 +91,7 @@ class DatabaseConnection:
         rows = await cursor.fetchall()
         return [dict(row) for row in rows]
 
-    async def execute_many(
-        self, sql: str, params_list: list[tuple[Any, ...]]
-    ) -> None:
+    async def execute_many(self, sql: str, params_list: list[tuple[Any, ...]]) -> None:
         """Execute a statement against every parameter set in *params_list*."""
         conn = self._require_open()
         await conn.executemany(sql, params_list)
@@ -148,9 +146,7 @@ class AsyncDatabase:
         """
         mig_path = Path(migrations_dir)
         if not mig_path.is_dir():
-            raise NotADirectoryError(
-                f"Migrations directory not found: {migrations_dir}"
-            )
+            raise NotADirectoryError(f"Migrations directory not found: {migrations_dir}")
 
         sql_files = sorted(mig_path.glob("*.sql"))
         if not sql_files:

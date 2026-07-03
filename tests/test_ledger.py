@@ -6,8 +6,6 @@ from __future__ import annotations
 
 from datetime import datetime, timezone
 
-import pytest
-
 from polymind.core.ledger import EntryType, LedgerEntry
 
 
@@ -21,8 +19,13 @@ class TestEntryType:
 
     def test_all_types_defined(self):
         expected = {
-            "FILL", "FEE", "MERGE", "SPLIT", "REDEEM",
-            "CASH_ADJUSTMENT", "CORRECTION",
+            "FILL",
+            "FEE",
+            "MERGE",
+            "SPLIT",
+            "REDEEM",
+            "CASH_ADJUSTMENT",
+            "CORRECTION",
         }
         assert {e.name for e in EntryType} == expected
 

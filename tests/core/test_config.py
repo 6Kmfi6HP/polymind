@@ -8,8 +8,6 @@ import os
 import tempfile
 from pathlib import Path
 
-import pytest
-
 from polymind.core.config import Config, RiskLimits, load_config, save_config
 
 
@@ -78,13 +76,14 @@ class TestLoadConfig:
 
     def test_save_and_load_roundtrip(self):
         """save_config then load should preserve dry_run setting."""
-        from polymind.core.config import CONFIG_FILE, CONFIG_DIR
+        from polymind.core.config import CONFIG_DIR, CONFIG_FILE
 
         with tempfile.TemporaryDirectory() as tmp:
             orig_dir = CONFIG_DIR
             orig_file = CONFIG_FILE
             try:
                 import polymind.core.config as cfg_mod
+
                 cfg_mod.CONFIG_DIR = Path(tmp)
                 cfg_mod.CONFIG_FILE = Path(tmp) / "config.yaml"
 

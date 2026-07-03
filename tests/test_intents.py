@@ -3,14 +3,11 @@ Tests for the Intent / Executor domain layer (ADR 0002).
 """
 
 from datetime import datetime, timezone
-from typing import Any, Dict
-
-import pytest
+from typing import Any
 
 from polymind.core.intents import (
     CancelIntent,
     IntentExecutor,
-    IntentType,
     OrderIntent,
     OrderSide,
     StrategyIntent,
@@ -108,7 +105,7 @@ class TestIntentExecutor:
 
     async def test_dry_run_logs_and_returns(self):
         class DummyExecutor(IntentExecutor):
-            async def execute(self, intent: StrategyIntent) -> Dict[str, Any]:
+            async def execute(self, intent: StrategyIntent) -> dict[str, Any]:
                 return {"status": "executed"}
 
         executor = DummyExecutor()
@@ -134,7 +131,7 @@ class TestIntentExecutor:
 class ConcreteTestExecutor(IntentExecutor):
     """Concrete subclass for testing the abstract protocol."""
 
-    async def execute(self, intent: StrategyIntent) -> Dict[str, Any]:
+    async def execute(self, intent: StrategyIntent) -> dict[str, Any]:
         return {
             "status": "ok",
             "strategy": intent.strategy_name,

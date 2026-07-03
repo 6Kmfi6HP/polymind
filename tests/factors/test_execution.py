@@ -39,41 +39,89 @@ class TestExecutionBridgeConfig:
 
 class TestFactorExecutionBridge:
     @pytest.mark.asyncio
-    async def test_long_creates_buy_order(self, bridge: FactorExecutionBridge, snapshot: MarketSnapshot) -> None:
-        target = PortfolioTarget(market_id="0xabc", direction=PositionDirection.LONG, target_size=100.0, confidence=0.8, rank=1)
+    async def test_long_creates_buy_order(
+        self, bridge: FactorExecutionBridge, snapshot: MarketSnapshot
+    ) -> None:
+        target = PortfolioTarget(
+            market_id="0xabc",
+            direction=PositionDirection.LONG,
+            target_size=100.0,
+            confidence=0.8,
+            rank=1,
+        )
         orders = await bridge.to_order_intents(target, snapshot)
         assert len(orders) == 1
         assert orders[0].side.value == "BUY"
         assert orders[0].size == 100.0
 
     @pytest.mark.asyncio
-    async def test_short_creates_sell_order(self, bridge: FactorExecutionBridge, snapshot: MarketSnapshot) -> None:
-        target = PortfolioTarget(market_id="0xabc", direction=PositionDirection.SHORT, target_size=50.0, confidence=0.6, rank=3)
+    async def test_short_creates_sell_order(
+        self, bridge: FactorExecutionBridge, snapshot: MarketSnapshot
+    ) -> None:
+        target = PortfolioTarget(
+            market_id="0xabc",
+            direction=PositionDirection.SHORT,
+            target_size=50.0,
+            confidence=0.6,
+            rank=3,
+        )
         orders = await bridge.to_order_intents(target, snapshot)
         assert len(orders) == 1
         assert orders[0].side.value == "SELL"
 
     @pytest.mark.asyncio
-    async def test_neutral_gives_no_orders(self, bridge: FactorExecutionBridge, snapshot: MarketSnapshot) -> None:
-        target = PortfolioTarget(market_id="0xabc", direction=PositionDirection.NEUTRAL, target_size=100.0, confidence=0.0, rank=5)
+    async def test_neutral_gives_no_orders(
+        self, bridge: FactorExecutionBridge, snapshot: MarketSnapshot
+    ) -> None:
+        target = PortfolioTarget(
+            market_id="0xabc",
+            direction=PositionDirection.NEUTRAL,
+            target_size=100.0,
+            confidence=0.0,
+            rank=5,
+        )
         orders = await bridge.to_order_intents(target, snapshot)
         assert orders == []
 
     @pytest.mark.asyncio
-    async def test_size_capped_by_max_position(self, bridge: FactorExecutionBridge, snapshot: MarketSnapshot) -> None:
-        target = PortfolioTarget(market_id="0xabc", direction=PositionDirection.LONG, target_size=9999.0, confidence=0.9, rank=1)
+    async def test_size_capped_by_max_position(
+        self, bridge: FactorExecutionBridge, snapshot: MarketSnapshot
+    ) -> None:
+        target = PortfolioTarget(
+            market_id="0xabc",
+            direction=PositionDirection.LONG,
+            target_size=9999.0,
+            confidence=0.9,
+            rank=1,
+        )
         orders = await bridge.to_order_intents(target, snapshot)
         assert orders[0].size == 1000.0
 
     @pytest.mark.asyncio
-    async def test_size_limited_by_cash(self, bridge: FactorExecutionBridge, snapshot: MarketSnapshot) -> None:
-        target = PortfolioTarget(market_id="0xabc", direction=PositionDirection.LONG, target_size=1000.0, confidence=0.7, rank=2)
+    async def test_size_limited_by_cash(
+        self, bridge: FactorExecutionBridge, snapshot: MarketSnapshot
+    ) -> None:
+        target = PortfolioTarget(
+            market_id="0xabc",
+            direction=PositionDirection.LONG,
+            target_size=1000.0,
+            confidence=0.7,
+            rank=2,
+        )
         orders = await bridge.to_order_intents(target, snapshot, available_cash=50.0)
         assert orders[0].size == pytest.approx(99.01, rel=0.01)
 
     @pytest.mark.asyncio
-    async def test_size_below_min_returns_empty(self, bridge: FactorExecutionBridge, snapshot: MarketSnapshot) -> None:
-        target = PortfolioTarget(market_id="0xabc", direction=PositionDirection.LONG, target_size=0.1, confidence=0.5, rank=5)
+    async def test_size_below_min_returns_empty(
+        self, bridge: FactorExecutionBridge, snapshot: MarketSnapshot
+    ) -> None:
+        target = PortfolioTarget(
+            market_id="0xabc",
+            direction=PositionDirection.LONG,
+            target_size=0.1,
+            confidence=0.5,
+            rank=5,
+        )
         orders = await bridge.to_order_intents(target, snapshot)
         assert orders == []
 
@@ -83,7 +131,16 @@ class TestFactorExecutionBridge:
         assert len(cancels) == 2
 
     @pytest.mark.asyncio
-    async def test_order_has_metadata(self, bridge: FactorExecutionBridge, snapshot: MarketSnapshot) -> None:
-        target = PortfolioTarget(market_id="0xabc", direction=PositionDirection.LONG, target_size=100.0, confidence=0.95, rank=1, reason="momentum-7d")
+    async def test_order_has_metadata(
+        self, bridge: FactorExecutionBridge, snapshot: MarketSnapshot
+    ) -> None:
+        target = PortfolioTarget(
+            market_id="0xabc",
+            direction=PositionDirection.LONG,
+            target_size=100.0,
+            confidence=0.95,
+            rank=1,
+            reason="momentum-7d",
+        )
         orders = await bridge.to_order_intents(target, snapshot)
         assert orders[0].metadata["strategy"] == "momentum-7d"

@@ -1,7 +1,7 @@
 # Phase 3 Execution Layer Core — Design Spec
 
-**Status:** Draft  
-**Date:** 2026-07-03  
+**Status:** Draft
+**Date:** 2026-07-03
 **ADR:** ADR 0002 (Strategies emit intents; executors place orders)
 
 ## 1. Overview

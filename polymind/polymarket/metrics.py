@@ -101,7 +101,9 @@ class AdapterMetrics:
     # Public API
     # -----------------------------------------------------------------------
 
-    def record_request(self, method: str, endpoint: str, duration_ms: float, status_code: int) -> None:
+    def record_request(
+        self, method: str, endpoint: str, duration_ms: float, status_code: int
+    ) -> None:
         """Record a single API request.
 
         Updates aggregate counters and per-endpoint stats.  *duration_ms*
@@ -142,7 +144,9 @@ class AdapterMetrics:
                 return 0.0
             return errors / total
 
-    def get_latency_percentile(self, endpoint: str | None = None, percentile: float = 50.0) -> float:
+    def get_latency_percentile(
+        self, endpoint: str | None = None, percentile: float = 50.0
+    ) -> float:
         """Return the latency value at *percentile* (0–100) in milliseconds.
 
         When *endpoint* is ``None`` all recorded latencies are pooled.
@@ -152,11 +156,7 @@ class AdapterMetrics:
                 samples = self._latencies.get(endpoint, [])
             else:
                 # Pool all endpoints
-                samples = [
-                    ms
-                    for ep_samples in self._latencies.values()
-                    for ms in ep_samples
-                ]
+                samples = [ms for ep_samples in self._latencies.values() for ms in ep_samples]
             if not samples:
                 return 0.0
             sorted_samples = sorted(samples)
@@ -172,11 +172,7 @@ class AdapterMetrics:
             error_rate = total_errs / total_reqs if total_reqs > 0 else 0.0
 
             # Pooled latency stats
-            all_lats = [
-                ms
-                for ep_samples in self._latencies.values()
-                for ms in ep_samples
-            ]
+            all_lats = [ms for ep_samples in self._latencies.values() for ms in ep_samples]
             avg_ms = sum(all_lats) / len(all_lats) if all_lats else 0.0
             p50 = self._percentile_from_list(all_lats, 50.0)
             p95 = self._percentile_from_list(all_lats, 95.0)
@@ -184,10 +180,7 @@ class AdapterMetrics:
 
             # Per-endpoint summaries
             per_ep: dict[str, MetricsSummary] = {}
-            for ep in set(
-                list(self._request_counts.keys())
-                + list(self._error_counts.keys())
-            ):
+            for ep in set(list(self._request_counts.keys()) + list(self._error_counts.keys())):
                 ep_reqs = self._request_counts.get(ep, 0)
                 ep_errs = self._error_counts.get(ep, 0)
                 ep_lats = self._latencies.get(ep, [])
@@ -233,6 +226,7 @@ class AdapterMetrics:
         Increments ``errors_total`` if the body raises.
         """
         import time as _time
+
         start = _time.monotonic()
         try:
             yield

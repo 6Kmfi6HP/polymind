@@ -19,6 +19,7 @@ from polymind.core.intents import StrategyIntent
 @dataclass
 class StrategyConfig:
     """Configuration for a market-making strategy."""
+
     name: str
     enabled: bool = True
     params: dict[str, Any] = field(default_factory=dict)
@@ -32,6 +33,7 @@ class StrategySignal:
        Use :class:`StrategyIntent` instead.  This class is kept for
        backward compatibility during the migration to ADR 0002.
     """
+
     action: str  # "place", "cancel", "hold", "close"
     market_id: str
     outcome: str | None = None
@@ -91,9 +93,7 @@ class BaseMMStrategy(ABC):
         if order is None:
             return StrategySignal(
                 action="hold",
-                market_id=(
-                    intent.cancels[0].market_id if intent.cancels else ""
-                ),
+                market_id=(intent.cancels[0].market_id if intent.cancels else ""),
             )
 
         return StrategySignal(

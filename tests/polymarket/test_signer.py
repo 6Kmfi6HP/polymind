@@ -4,8 +4,6 @@ Tests for Signer authentication.
 
 from __future__ import annotations
 
-import pytest
-
 from polymind.polymarket.signer import ApiKeyCredentials, AuthTier, Signer, WalletCredentials
 
 

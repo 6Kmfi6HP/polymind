@@ -4,10 +4,6 @@ Tests for PortfolioTarget and PositionDirection.
 
 from __future__ import annotations
 
-from typing import Any, Dict
-
-import pytest
-
 from polymind.core.portfolio import PortfolioTarget, PositionDirection
 
 

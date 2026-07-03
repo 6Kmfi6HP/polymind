@@ -6,8 +6,6 @@ from __future__ import annotations
 
 from datetime import datetime, timezone
 
-import pytest
-
 from polymind.core.workflows import CommandType, WorkflowCommand
 
 
@@ -25,8 +23,15 @@ class TestCommandType:
 
     def test_all_commands_defined(self):
         expected = {
-            "START", "STOP", "PAUSE", "RESUME", "RESTART",
-            "SPLIT", "MERGE", "REDEEM", "SELL_REMAINDER",
+            "START",
+            "STOP",
+            "PAUSE",
+            "RESUME",
+            "RESTART",
+            "SPLIT",
+            "MERGE",
+            "REDEEM",
+            "SELL_REMAINDER",
             "ONE_SIDED_HALT",
         }
         assert {e.name for e in CommandType} == expected

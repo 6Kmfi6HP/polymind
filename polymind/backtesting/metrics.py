@@ -87,11 +87,7 @@ def compute_metrics(
         drawdown = (peak - cumulative) / (1 + peak) if peak > 0 else 0.0
         m.max_drawdown_pct = max(m.max_drawdown_pct, drawdown * 100)
 
-    m.calmar_ratio = (
-        m.annualized_return_pct / m.max_drawdown_pct
-        if m.max_drawdown_pct > 0
-        else 0.0
-    )
+    m.calmar_ratio = m.annualized_return_pct / m.max_drawdown_pct if m.max_drawdown_pct > 0 else 0.0
 
     m.avg_trade_pnl = sum(returns) / len(returns) * 100
 

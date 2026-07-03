@@ -171,9 +171,7 @@ class FactorBacktester:
             self._winners += 1
         return pnl
 
-    def _open_position(
-        self, market_id: str, entry_price: float
-    ) -> None:
+    def _open_position(self, market_id: str, entry_price: float) -> None:
         """Record a new position at *entry_price*."""
         self._positions[market_id] = entry_price
 
@@ -220,10 +218,10 @@ def _compute_sharpe(pnl_history: list[float], periods_per_year: int = 252) -> fl
         return 0.0
     mean_ = sum(pnl_history) / len(pnl_history)
     var_ = sum((x - mean_) ** 2 for x in pnl_history) / len(pnl_history)
-    std_ = var_ ** 0.5
+    std_ = var_**0.5
     if std_ == 0.0:
         return 0.0
-    return (mean_ / std_) * (periods_per_year ** 0.5)
+    return (mean_ / std_) * (periods_per_year**0.5)
 
 
 def _compute_sortino(pnl_history: list[float], periods_per_year: int = 252) -> float:
@@ -235,10 +233,10 @@ def _compute_sortino(pnl_history: list[float], periods_per_year: int = 252) -> f
     if not downside:
         return 0.0
     down_var = sum(x * x for x in downside) / len(pnl_history)
-    down_std = down_var ** 0.5
+    down_std = down_var**0.5
     if down_std == 0.0:
         return 0.0
-    return (mean_ / down_std) * (periods_per_year ** 0.5)
+    return (mean_ / down_std) * (periods_per_year**0.5)
 
 
 def _compute_max_drawdown(pnl_history: list[float]) -> float:

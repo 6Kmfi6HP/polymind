@@ -2,8 +2,6 @@
 
 from __future__ import annotations
 
-from typing import Optional
-
 from rich.console import Console
 from rich.table import Table
 
@@ -34,7 +32,7 @@ async def generate_dashboard(
     ]
 
 
-def display_dashboard(tables: list[Table], console: Optional[Console] = None) -> None:
+def display_dashboard(tables: list[Table], console: Console | None = None) -> None:
     """Print all dashboard tables to console."""
     console = console or Console()
     for i, table in enumerate(tables):

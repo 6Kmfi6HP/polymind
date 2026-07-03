@@ -16,7 +16,7 @@ from polymind.core.intents import (
     OrderSide,
     StrategyIntent,
 )
-from polymind.core.ledger import EntryType, LedgerEntry
+from polymind.core.ledger import LedgerEntry
 from polymind.execution.executor import OrderRecord, OrderStatus, PaperExecutor, PositionRecord
 from polymind.execution.fill_model import FillMode, FillModel, FillModelConfig, MarketSnapshot
 from polymind.execution.order_identity import OrderIdentity

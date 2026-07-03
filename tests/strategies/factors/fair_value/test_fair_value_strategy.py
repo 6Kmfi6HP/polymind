@@ -9,7 +9,7 @@ from datetime import datetime
 import pytest
 
 from polymind.factors.pipeline import MarketFeatures, UniverseSnapshot
-from polymind.strategies.factors.fair_value.strategy import FairValueConfig, FairValueFactor
+from polymind.strategies.factors.fair_value.strategy import FairValueFactor
 
 
 class TestFairValueFactor:
@@ -19,7 +19,8 @@ class TestFairValueFactor:
             timestamp=datetime.now(),
             markets={
                 "m1": MarketFeatures(
-                    market_id="m1", mid_price=0.5,
+                    market_id="m1",
+                    mid_price=0.5,
                     additional={"micro_price": 0.55},  # micro > mid = undervalued
                 ),
             },
@@ -34,7 +35,8 @@ class TestFairValueFactor:
             timestamp=datetime.now(),
             markets={
                 "m1": MarketFeatures(
-                    market_id="m1", mid_price=0.5,
+                    market_id="m1",
+                    mid_price=0.5,
                     additional={"micro_price": 0.45},  # micro < mid = overvalued
                 ),
             },

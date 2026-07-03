@@ -29,7 +29,9 @@ class TestContractsConfig:
 class TestSplitResult:
     def test_construction(self) -> None:
         ts = datetime(2026, 1, 1)
-        sr = SplitResult(tx_hash="0xhij", outcome_a_amount=50.0, outcome_b_amount=50.0, timestamp=ts)
+        sr = SplitResult(
+            tx_hash="0xhij", outcome_a_amount=50.0, outcome_b_amount=50.0, timestamp=ts
+        )
         assert sr.tx_hash == "0xhij"
         assert sr.outcome_a_amount == 50.0
         assert sr.outcome_b_amount == 50.0
@@ -76,7 +78,9 @@ class TestContractsGateway:
     def gateway(self) -> ContractsGateway:
         class TestGateway(ContractsGateway):
             async def split(self, market_id: str, outcome: str, amount: float) -> SplitResult:
-                return SplitResult(tx_hash="0xsplit", outcome_a_amount=amount / 2, outcome_b_amount=amount / 2)
+                return SplitResult(
+                    tx_hash="0xsplit", outcome_a_amount=amount / 2, outcome_b_amount=amount / 2
+                )
 
             async def merge(self, market_id: str, outcome_a: str, outcome_b: str) -> MergeResult:
                 return MergeResult(tx_hash="0xmerge")
@@ -125,7 +129,7 @@ class TestContractsGateway:
 
     @pytest.mark.asyncio
     async def test_context_manager(self) -> None:
-        async with ContractsGateway(ContractsConfig()) as gw:
+        async with ContractsGateway(ContractsConfig()):
             pass  # abstract — just verify enter/exit don't raise
 
     @pytest.mark.asyncio

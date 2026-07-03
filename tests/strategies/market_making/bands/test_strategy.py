@@ -11,7 +11,6 @@ import pytest
 from polymind.core.intents import OrderSide, StrategyIntent
 from polymind.execution.fill_model import MarketSnapshot
 from polymind.strategies.market_making.bands.pricing import BandConfig, BandPricingConfig
-from polymind.strategies.market_making.bands.sizing import BandSizingConfig
 from polymind.strategies.market_making.bands.strategy import BandsStrategy
 
 

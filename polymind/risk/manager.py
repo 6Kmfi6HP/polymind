@@ -9,6 +9,7 @@ from typing import Any
 @dataclass
 class TradeRecord:
     """Record of a completed trade."""
+
     market_id: str
     side: str
     size: float

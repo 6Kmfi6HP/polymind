@@ -15,6 +15,7 @@ from pydantic import BaseModel
 
 class Observation(BaseModel):
     """Market state observation."""
+
     timestamp: datetime
     markets: list[Any] = []
     positions: list[Any] = []
@@ -23,6 +24,7 @@ class Observation(BaseModel):
 
 class Decision(BaseModel):
     """Trading decision."""
+
     action: str  # "buy", "sell", "hold", "close"
     market_id: str | None = None
     outcome: str | None = None

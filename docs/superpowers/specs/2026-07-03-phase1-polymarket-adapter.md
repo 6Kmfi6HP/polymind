@@ -1,7 +1,7 @@
 # Phase 1 Polymarket Adapter Layer — Design Spec
 
-**Status:** Draft  
-**Date:** 2026-07-03  
+**Status:** Draft
+**Date:** 2026-07-03
 **ADR:** ADR 0004 (SDK adapter isolated from core)
 
 ## 1. Overview

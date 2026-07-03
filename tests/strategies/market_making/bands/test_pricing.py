@@ -4,8 +4,6 @@ Tests for Bands pricing.
 
 from __future__ import annotations
 
-import pytest
-
 from polymind.strategies.market_making.bands.pricing import (
     BandConfig,
     BandPricingConfig,

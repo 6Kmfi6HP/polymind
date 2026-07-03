@@ -74,10 +74,7 @@ class FactorExecutionBridge:
 
     async def to_cancel_intents(self, market_ids: list[str]) -> list[CancelIntent]:
         """Create CancelIntents for the given markets."""
-        return [
-            CancelIntent(market_id=mid, reason="factor-rebalance")
-            for mid in market_ids
-        ]
+        return [CancelIntent(market_id=mid, reason="factor-rebalance") for mid in market_ids]
 
     def _calculate_size(
         self,

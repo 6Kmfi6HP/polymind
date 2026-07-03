@@ -14,11 +14,11 @@ Run: python3 examples/factor_strategy_example.py
 from __future__ import annotations
 
 import asyncio
-from datetime import datetime, timedelta
+from datetime import datetime
 
 from polymind.core.intents import OrderIntent, StrategyIntent
-from polymind.core.portfolio import PortfolioTarget, PositionDirection
-from polymind.execution.fill_model import FillModel, FillModelConfig, FillMode, MarketSnapshot
+from polymind.core.portfolio import PortfolioTarget
+from polymind.execution.fill_model import FillMode, FillModel, FillModelConfig, MarketSnapshot
 from polymind.factors.execution import ExecutionBridgeConfig, FactorExecutionBridge
 from polymind.factors.pipeline import MarketFeatures, UniverseSnapshot
 from polymind.factors.portfolio_construction import PortfolioConfig, construct_portfolio
@@ -37,36 +37,46 @@ async def main() -> None:
     snapshots = {
         "0xaaa": MarketSnapshot(
             market_id="0xaaa",
-            bid_price=0.45, bid_size=2000.0,
-            ask_price=0.46, ask_size=1800.0,
+            bid_price=0.45,
+            bid_size=2000.0,
+            ask_price=0.46,
+            ask_size=1800.0,
             mid_price=0.455,
             timestamp=now,
         ),
         "0xbbb": MarketSnapshot(
             market_id="0xbbb",
-            bid_price=0.72, bid_size=1500.0,
-            ask_price=0.74, ask_size=1200.0,
+            bid_price=0.72,
+            bid_size=1500.0,
+            ask_price=0.74,
+            ask_size=1200.0,
             mid_price=0.73,
             timestamp=now,
         ),
         "0xccc": MarketSnapshot(
             market_id="0xccc",
-            bid_price=0.30, bid_size=3000.0,
-            ask_price=0.32, ask_size=2800.0,
+            bid_price=0.30,
+            bid_size=3000.0,
+            ask_price=0.32,
+            ask_size=2800.0,
             mid_price=0.31,
             timestamp=now,
         ),
         "0xddd": MarketSnapshot(
             market_id="0xddd",
-            bid_price=0.88, bid_size=800.0,
-            ask_price=0.90, ask_size=700.0,
+            bid_price=0.88,
+            bid_size=800.0,
+            ask_price=0.90,
+            ask_size=700.0,
             mid_price=0.89,
             timestamp=now,
         ),
         "0xeee": MarketSnapshot(
             market_id="0xeee",
-            bid_price=0.10, bid_size=5000.0,
-            ask_price=0.12, ask_size=4500.0,
+            bid_price=0.10,
+            bid_size=5000.0,
+            ask_price=0.12,
+            ask_size=4500.0,
             mid_price=0.11,
             timestamp=now,
         ),
@@ -81,32 +91,42 @@ async def main() -> None:
     # The features (momentum, spread, volume) represent derived signals.
     features = {
         "0xaaa": MarketFeatures(
-            market_id="0xaaa", mid_price=0.455,
-            spread_bps=22.0, volume_24h=50_000.0,
+            market_id="0xaaa",
+            mid_price=0.455,
+            spread_bps=22.0,
+            volume_24h=50_000.0,
             momentum_24h=0.12,  # positive momentum
             volatility_24h=0.15,
         ),
         "0xbbb": MarketFeatures(
-            market_id="0xbbb", mid_price=0.73,
-            spread_bps=27.0, volume_24h=35_000.0,
+            market_id="0xbbb",
+            mid_price=0.73,
+            spread_bps=27.0,
+            volume_24h=35_000.0,
             momentum_24h=0.08,
             volatility_24h=0.10,
         ),
         "0xccc": MarketFeatures(
-            market_id="0xccc", mid_price=0.31,
-            spread_bps=65.0, volume_24h=12_000.0,
+            market_id="0xccc",
+            mid_price=0.31,
+            spread_bps=65.0,
+            volume_24h=12_000.0,
             momentum_24h=-0.05,  # negative momentum
             volatility_24h=0.40,
         ),
         "0xddd": MarketFeatures(
-            market_id="0xddd", mid_price=0.89,
-            spread_bps=22.0, volume_24h=8_000.0,
+            market_id="0xddd",
+            mid_price=0.89,
+            spread_bps=22.0,
+            volume_24h=8_000.0,
             momentum_24h=0.21,  # strongest positive momentum
             volatility_24h=0.08,
         ),
         "0xeee": MarketFeatures(
-            market_id="0xeee", mid_price=0.11,
-            spread_bps=180.0, volume_24h=2_000.0,  # wide spread, low volume
+            market_id="0xeee",
+            mid_price=0.11,
+            spread_bps=180.0,
+            volume_24h=2_000.0,  # wide spread, low volume
             momentum_24h=-0.15,  # strongest negative momentum
             volatility_24h=0.60,
         ),
@@ -137,8 +157,10 @@ async def main() -> None:
 
     print("\n── 3. Portfolio Targets ──")
     for t in targets:
-        print(f"  {t.market_id}: {t.direction.name:6s}  size={t.target_size:.1f}  "
-              f"conf={t.confidence:.2f}  rank={t.rank}  reason={t.reason}")
+        print(
+            f"  {t.market_id}: {t.direction.name:6s}  size={t.target_size:.1f}  "
+            f"conf={t.confidence:.2f}  rank={t.rank}  reason={t.reason}"
+        )
 
     # ── 4. Convert PortfolioTargets → OrderIntents via FactorExecutionBridge
     bridge = FactorExecutionBridge(ExecutionBridgeConfig(max_position_size=500.0))
@@ -154,8 +176,10 @@ async def main() -> None:
         all_orders.extend(orders)
         direction = "LONG" if orders and orders[0].side.value == "BUY" else "SHORT"
         if orders:
-            print(f"  {target.market_id}: {direction}  {orders[0].size:.1f}  "
-                  f"slippage={orders[0].metadata['slippage_bps']}bps")
+            print(
+                f"  {target.market_id}: {direction}  {orders[0].size:.1f}  "
+                f"slippage={orders[0].metadata['slippage_bps']}bps"
+            )
 
     # ── 5. (Optional) Execute through PaperExecutor ────────────────────────
     from polymind.execution.executor import PaperExecutor
@@ -181,7 +205,7 @@ async def main() -> None:
     current_holdings = [t.market_id for t in targets]
     cancels = await bridge.to_cancel_intents(current_holdings)
 
-    print(f"\n── 6. Cancel Intents for Rebalancing ──")
+    print("\n── 6. Cancel Intents for Rebalancing ──")
     for c in cancels:
         print(f"  Cancel all orders on {c.market_id} (reason: {c.reason})")
 

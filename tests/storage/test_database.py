@@ -154,9 +154,7 @@ class TestAsyncDatabase:
             (mig_dir / "001_create_users.sql").write_text(
                 "CREATE TABLE users (id INTEGER PRIMARY KEY, name TEXT);"
             )
-            (mig_dir / "002_add_data.sql").write_text(
-                "INSERT INTO users (name) VALUES ('alice');"
-            )
+            (mig_dir / "002_add_data.sql").write_text("INSERT INTO users (name) VALUES ('alice');")
 
             config = DatabaseConfig(path=db_path, wal_mode=False)
             async with AsyncDatabase(config) as db:
@@ -188,6 +186,7 @@ class TestAsyncDatabase:
 def event_loop():
     """Module-scoped event loop for the module-level async fixtures."""
     import asyncio
+
     loop = asyncio.new_event_loop()
     yield loop
     loop.close()

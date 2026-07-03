@@ -58,9 +58,7 @@ class MomentumBridge(FactorExecutionBridge):
     def __init__(self, strategy_name: str = "momentum"):
         self.strategy_name = strategy_name
 
-    async def to_order_intents(
-        self, targets: list
-    ) -> list[StrategyIntent]:
+    async def to_order_intents(self, targets: list) -> list[StrategyIntent]:
         """Convert PortfolioTargets to StrategyIntents.
 
         Current implementation creates one bare StrategyIntent per target.

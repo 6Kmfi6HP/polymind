@@ -10,11 +10,9 @@ from polymind.storage.ledger import LedgerStore
 
 async def get_position_report(ledger: LedgerStore) -> list[PositionRecord]:
     """Fetch all positions from the ledger store."""
-    conn = await ledger._ensure_connection()
+    await ledger._ensure_connection()
     assert ledger._conn is not None
-    rows = await ledger._conn.fetch_all(
-        "SELECT * FROM positions ORDER BY market_id"
-    )
+    rows = await ledger._conn.fetch_all("SELECT * FROM positions ORDER BY market_id")
     return [
         PositionRecord(
             market_id=row["market_id"],

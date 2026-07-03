@@ -4,8 +4,6 @@ Tests for portfolio construction.
 
 from __future__ import annotations
 
-import pytest
-
 from polymind.core.portfolio import PortfolioTarget, PositionDirection
 from polymind.factors.portfolio_construction import (
     PortfolioConfig,

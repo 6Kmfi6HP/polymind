@@ -5,6 +5,7 @@ Tests for Sniper state machine.
 from __future__ import annotations
 
 import pytest
+
 from polymind.workflows.sniper.state_machine import SniperEvent, SniperState, SniperStateMachine
 
 

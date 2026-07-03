@@ -1,4 +1,3 @@
-
 """Base agent abstraction — observe, decide, act, reflect loop."""
 
 from __future__ import annotations
@@ -65,13 +64,10 @@ class BaseAgent(ABC):
         return Observation(data={})
 
     @abstractmethod
-    async def decide(self, observation: Observation) -> Decision:
-        ...
+    async def decide(self, observation: Observation) -> Decision: ...
 
     @abstractmethod
-    async def act(self, decision: Decision) -> ActionResult:
-        ...
+    async def act(self, decision: Decision) -> ActionResult: ...
 
     @abstractmethod
-    async def reflect(self, outcome: ActionResult) -> Reflection:
-        ...
+    async def reflect(self, outcome: ActionResult) -> Reflection: ...

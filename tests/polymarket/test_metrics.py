@@ -69,9 +69,8 @@ class TestAdapterMetricsExisting:
 
     def test_measure_increments_errors_on_exception(self):
         m = AdapterMetrics("test")
-        with pytest.raises(ValueError):
-            with m.measure():
-                raise ValueError("test")
+        with pytest.raises(ValueError), m.measure():
+            raise ValueError("test")
         assert m.errors_total.value == 1
         assert m.calls_total.value == 1
 
@@ -157,8 +156,8 @@ class TestLatencyPercentiles:
     def test_percentiles_accuracy(self):
         m = AdapterMetrics("test")
         latencies = [10.0, 20.0, 30.0, 40.0, 50.0, 60.0, 70.0, 80.0, 90.0, 100.0]
-        for l in latencies:
-            m.record_request("GET", "/ep", l, 200)
+        for latency in latencies:
+            m.record_request("GET", "/ep", latency, 200)
         p50 = m.get_latency_percentile("/ep", 50.0)
         p95 = m.get_latency_percentile("/ep", 95.0)
         p99 = m.get_latency_percentile("/ep", 99.0)

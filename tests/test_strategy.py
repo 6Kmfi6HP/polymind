@@ -3,7 +3,7 @@ Tests for BaseMMStrategy with the ADR 0002 intent migration.
 """
 
 from datetime import datetime, timezone
-from typing import Any, Optional
+from typing import Any
 
 import pytest
 
@@ -71,9 +71,7 @@ class TestBaseMMStrategy:
 
     @pytest.mark.asyncio
     async def test_get_config_summary(self):
-        strategy = PlaceOrderStrategy(
-            config=StrategyConfig(name="custom", params={"spread": 0.1})
-        )
+        strategy = PlaceOrderStrategy(config=StrategyConfig(name="custom", params={"spread": 0.1}))
         summary = strategy.get_config_summary()
         assert summary["strategy"] == "custom"
         assert summary["params"]["spread"] == 0.1
@@ -90,14 +88,14 @@ class TestBaseMMStrategy:
 class NoopStrategy(BaseMMStrategy):
     """Always returns None (no action)."""
 
-    async def analyze(self, market: Any) -> Optional[StrategyIntent]:
+    async def analyze(self, market: Any) -> StrategyIntent | None:
         return None
 
 
 class PlaceOrderStrategy(BaseMMStrategy):
     """Always returns a single BUY order intent."""
 
-    async def analyze(self, market: Any) -> Optional[StrategyIntent]:
+    async def analyze(self, market: Any) -> StrategyIntent | None:
         now = datetime.now(timezone.utc)
         order = OrderIntent(
             market_id="0x111",
@@ -111,7 +109,7 @@ class PlaceOrderStrategy(BaseMMStrategy):
 class EmptyIntentStrategy(BaseMMStrategy):
     """Returns an empty StrategyIntent (no orders, no cancels)."""
 
-    async def analyze(self, market: Any) -> Optional[StrategyIntent]:
+    async def analyze(self, market: Any) -> StrategyIntent | None:
         now = datetime.now(timezone.utc)
         return StrategyIntent(timestamp=now, strategy_name=self.name)
 
@@ -119,7 +117,7 @@ class EmptyIntentStrategy(BaseMMStrategy):
 class CancelOnlyStrategy(BaseMMStrategy):
     """Only produces a cancel intent, no orders."""
 
-    async def analyze(self, market: Any) -> Optional[StrategyIntent]:
+    async def analyze(self, market: Any) -> StrategyIntent | None:
         now = datetime.now(timezone.utc)
         cancel = CancelIntent(market_id="0x222", reason="reprice")
         return StrategyIntent(timestamp=now, strategy_name=self.name, cancels=[cancel])

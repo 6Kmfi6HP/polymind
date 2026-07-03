@@ -56,9 +56,7 @@ class LedgerStore:
         )
         await conn.commit()
 
-    async def get_entries(
-        self, market_id: str, limit: int = 100
-    ) -> list[LedgerEntry]:
+    async def get_entries(self, market_id: str, limit: int = 100) -> list[LedgerEntry]:
         """Return ledger entries for a market in insertion order."""
         conn = await self._ensure_connection()
         rows = await conn.fetch_all(
@@ -90,9 +88,7 @@ class LedgerStore:
         )
         return row["cash_after"] if row else 0.0
 
-    async def get_position(
-        self, market_id: str
-    ) -> PositionRecord | None:
+    async def get_position(self, market_id: str) -> PositionRecord | None:
         """Return the stored position for a market, or None."""
         conn = await self._ensure_connection()
         row = await conn.fetch_one(
@@ -109,9 +105,7 @@ class LedgerStore:
             realized_pnl=row["realized_pnl"],
         )
 
-    async def update_position(
-        self, market_id: str, rec: PositionRecord
-    ) -> None:
+    async def update_position(self, market_id: str, rec: PositionRecord) -> None:
         """Upsert a position record (insert or replace by market_id)."""
         conn = await self._ensure_connection()
         await conn.execute(

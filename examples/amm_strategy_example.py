@@ -23,9 +23,9 @@ from datetime import datetime, timezone
 
 from polymind.core.intents import OrderIntent, OrderSide, StrategyIntent
 from polymind.execution import (
+    FillMode,
     FillModel,
     FillModelConfig,
-    FillMode,
     MarketSnapshot,
     PaperExecutor,
 )
@@ -111,8 +111,7 @@ def print_status(executor: PaperExecutor) -> None:
         print("-" * 60)
         for pos in executor.positions.values():
             print(
-                f"{pos.market_id:<20} {pos.outcome:<6} {pos.size:>8.2f} "
-                f"{pos.avg_entry:>10.6f}"
+                f"{pos.market_id:<20} {pos.outcome:<6} {pos.size:>8.2f} " f"{pos.avg_entry:>10.6f}"
             )
 
     if executor.fills:
@@ -270,8 +269,7 @@ async def example_concurrent_ticks(executor: PaperExecutor, tick_count: int = 3)
             bid_size=base_snapshot.bid_size,
             ask_price=base_snapshot.ask_price + offset * 0.01,
             ask_size=base_snapshot.ask_size,
-            mid_price=(base_snapshot.bid_price + base_snapshot.ask_price) / 2
-            + offset * 0.01,
+            mid_price=(base_snapshot.bid_price + base_snapshot.ask_price) / 2 + offset * 0.01,
             timestamp=datetime.now(timezone.utc),
         )
         return await executor.simulate_tick(snap)

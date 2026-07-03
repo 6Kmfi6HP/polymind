@@ -45,7 +45,4 @@ def rank_normalize(scores: dict[str, float]) -> dict[str, float]:
 
     sorted_items = sorted(scores.items(), key=lambda x: x[1])
     n = len(sorted_items)
-    return {
-        mid: rank / (n - 1) if n > 1 else 1.0
-        for rank, (mid, _) in enumerate(sorted_items)
-    }
+    return {mid: rank / (n - 1) if n > 1 else 1.0 for rank, (mid, _) in enumerate(sorted_items)}

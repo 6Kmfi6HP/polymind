@@ -42,9 +42,7 @@ class FactorExecutionBridge(ABC):
     """Converts a portfolio target into order intents for the executor."""
 
     @abstractmethod
-    async def to_order_intents(
-        self, target: PortfolioTarget
-    ) -> list[StrategyIntent]:
+    async def to_order_intents(self, target: PortfolioTarget) -> list[StrategyIntent]:
         """Convert a single PortfolioTarget into executable intents."""
         ...
 
@@ -60,15 +58,11 @@ class FactorRegistry:
         self._signals: dict[str, FactorSignalModel] = {}
         self._bridges: dict[str, FactorExecutionBridge] = {}
 
-    def register_signal(
-        self, name: str, model: FactorSignalModel
-    ) -> None:
+    def register_signal(self, name: str, model: FactorSignalModel) -> None:
         """Register a factor signal model."""
         self._signals[name] = model
 
-    def register_bridge(
-        self, name: str, bridge: FactorExecutionBridge
-    ) -> None:
+    def register_bridge(self, name: str, bridge: FactorExecutionBridge) -> None:
         """Register an execution bridge for a factor."""
         self._bridges[name] = bridge
 

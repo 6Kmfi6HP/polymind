@@ -5,7 +5,6 @@ Tests for Composite factor strategy.
 from __future__ import annotations
 
 from datetime import datetime
-from typing import Dict
 
 import pytest
 
@@ -19,7 +18,7 @@ class ConstSignal(FactorSignalModel):
         super().__init__(FactorMetadata(name=name))
         self._score = score
 
-    async def compute_scores(self, universe: UniverseSnapshot) -> Dict[str, float]:
+    async def compute_scores(self, universe: UniverseSnapshot) -> dict[str, float]:
         return {mid: self._score for mid in universe.markets}
 
 

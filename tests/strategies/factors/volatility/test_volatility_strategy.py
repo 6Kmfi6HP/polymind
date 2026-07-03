@@ -23,20 +23,24 @@ def _make_universe(features: list[dict]) -> UniverseSnapshot:
 class TestVolatilityFactor:
     @pytest.mark.asyncio
     async def test_high_vol_scores_higher(self):
-        u = _make_universe([
-            {"market_id": "m1", "volatility_24h": 0.5},
-            {"market_id": "m2", "volatility_24h": 0.1},
-        ])
+        u = _make_universe(
+            [
+                {"market_id": "m1", "volatility_24h": 0.5},
+                {"market_id": "m2", "volatility_24h": 0.1},
+            ]
+        )
         model = VolatilityFactor()
         scores = await model.compute_scores(u)
         assert scores["m1"] > scores["m2"]
 
     @pytest.mark.asyncio
     async def test_inverted(self):
-        u = _make_universe([
-            {"market_id": "m1", "volatility_24h": 0.5},
-            {"market_id": "m2", "volatility_24h": 0.1},
-        ])
+        u = _make_universe(
+            [
+                {"market_id": "m1", "volatility_24h": 0.5},
+                {"market_id": "m2", "volatility_24h": 0.1},
+            ]
+        )
         cfg = VolatilityConfig(invert=True)
         model = VolatilityFactor(cfg)
         scores = await model.compute_scores(u)
@@ -50,9 +54,11 @@ class TestVolatilityFactor:
 
     @pytest.mark.asyncio
     async def test_missing_vol_skipped(self):
-        u = _make_universe([
-            {"market_id": "m1", "mid_price": 0.5},
-        ])
+        u = _make_universe(
+            [
+                {"market_id": "m1", "mid_price": 0.5},
+            ]
+        )
         model = VolatilityFactor()
         scores = await model.compute_scores(u)
         assert scores == {}

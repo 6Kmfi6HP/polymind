@@ -44,9 +44,9 @@ def compute_ladder(
     for level in range(config.num_levels):
         # Linear interpolation between min and max spread
         if config.num_levels > 1:
-            spread_pct = config.min_spread + (
-                config.max_spread - config.min_spread
-            ) * (level / (config.num_levels - 1))
+            spread_pct = config.min_spread + (config.max_spread - config.min_spread) * (
+                level / (config.num_levels - 1)
+            )
         else:
             spread_pct = config.min_spread
 

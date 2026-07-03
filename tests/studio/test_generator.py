@@ -4,8 +4,6 @@ Tests for strategy generator (NL → typed config).
 
 from __future__ import annotations
 
-import pytest
-
 from polymind.studio.generator import (
     GeneratedConfig,
     GenerationError,
@@ -35,25 +33,19 @@ class TestStrategyTemplate:
 class TestStrategyGenerator:
     def test_amm_description(self):
         gen = StrategyGenerator()
-        result = gen.generate(
-            "Run AMM market making on BTC with 5 levels, min spread 1%"
-        )
+        result = gen.generate("Run AMM market making on BTC with 5 levels, min spread 1%")
         assert isinstance(result, GeneratedConfig)
         assert result.template == StrategyTemplate.AMM
         assert result.confidence > 0
 
     def test_bands_description(self):
         gen = StrategyGenerator()
-        result = gen.generate(
-            "Use bands strategy with margin bands at 2% and 5%"
-        )
+        result = gen.generate("Use bands strategy with margin bands at 2% and 5%")
         assert result.template == StrategyTemplate.BANDS
 
     def test_factor_momentum(self):
         gen = StrategyGenerator()
-        result = gen.generate(
-            "Run cross-sectional momentum factor with 7d lookback, top 10"
-        )
+        result = gen.generate("Run cross-sectional momentum factor with 7d lookback, top 10")
         assert result.template == StrategyTemplate.MOMENTUM
 
     def test_unknown_strategy(self):

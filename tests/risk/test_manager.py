@@ -4,9 +4,7 @@ Tests for RiskManager.
 
 from __future__ import annotations
 
-import pytest
-
-from polymind.risk.manager import RiskManager, TradeRecord
+from polymind.risk.manager import RiskManager
 
 
 class TestRiskManager:

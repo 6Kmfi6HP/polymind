@@ -14,12 +14,14 @@ from polymind.factors.registry import FactorMetadata, FactorSignalModel
 class CompositeConfig:
     """Configuration for composite factor."""
 
-    weights: dict[str, float] = field(default_factory=lambda: {
-        "momentum": 0.4,
-        "volatility": 0.2,
-        "sentiment": 0.2,
-        "fair_value": 0.2,
-    })
+    weights: dict[str, float] = field(
+        default_factory=lambda: {
+            "momentum": 0.4,
+            "volatility": 0.2,
+            "sentiment": 0.2,
+            "fair_value": 0.2,
+        }
+    )
     normalize: bool = True
 
 

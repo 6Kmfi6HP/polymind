@@ -26,9 +26,7 @@ class KillSwitch:
             If ``None``, file-based checks are skipped.
     """
 
-    def __init__(
-        self, env_var: str = "POLYMIND_KILL", file_path: str | None = None
-    ) -> None:
+    def __init__(self, env_var: str = "POLYMIND_KILL", file_path: str | None = None) -> None:
         self._env_var = env_var
         self._file_path = file_path
         self._triggered_flag = False

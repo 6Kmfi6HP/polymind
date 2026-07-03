@@ -122,7 +122,11 @@ class FillReconciler:
             if actual.fill_id == expected.fill_id:
                 match = actual
                 break
-            if expected.order_id and actual.order_id == expected.order_id and abs(actual.price - expected.price) < 0.0001:
+            if (
+                expected.order_id
+                and actual.order_id == expected.order_id
+                and abs(actual.price - expected.price) < 0.0001
+            ):
                 match = actual
                 break
 

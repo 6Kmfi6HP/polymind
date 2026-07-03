@@ -5,8 +5,6 @@ from __future__ import annotations
 from datetime import datetime
 from unittest.mock import patch
 
-import pytest
-
 from polymind.utils.preflight import (
     PreflightChecker,
     PreflightReport,
@@ -104,32 +102,24 @@ class TestCheckConfig:
 
 class TestCheckCredentials:
     def test_both_present_passes(self):
-        result = PreflightChecker.check_credentials(
-            has_api_key=True, has_private_key=True
-        )
+        result = PreflightChecker.check_credentials(has_api_key=True, has_private_key=True)
         assert result.passed is True
         assert result.severity == PreflightSeverity.PASS
 
     def test_both_missing_fails(self):
-        result = PreflightChecker.check_credentials(
-            has_api_key=False, has_private_key=False
-        )
+        result = PreflightChecker.check_credentials(has_api_key=False, has_private_key=False)
         assert result.passed is False
         assert result.severity == PreflightSeverity.FAIL
         assert "Both" in result.message
 
     def test_missing_api_key_warns(self):
-        result = PreflightChecker.check_credentials(
-            has_api_key=False, has_private_key=True
-        )
+        result = PreflightChecker.check_credentials(has_api_key=False, has_private_key=True)
         assert result.passed is False
         assert result.severity == PreflightSeverity.WARN
         assert "API key" in result.message
 
     def test_missing_private_key_warns(self):
-        result = PreflightChecker.check_credentials(
-            has_api_key=True, has_private_key=False
-        )
+        result = PreflightChecker.check_credentials(has_api_key=True, has_private_key=False)
         assert result.passed is False
         assert result.severity == PreflightSeverity.WARN
         assert "Private key" in result.message
@@ -163,7 +153,6 @@ class TestCheckConnectivity:
 
     def test_connection_exception(self):
         with patch("httpx.get", side_effect=Exception("Connection refused")):
-
             result = PreflightChecker.check_connectivity(
                 test_url="https://example.com", timeout=5.0
             )

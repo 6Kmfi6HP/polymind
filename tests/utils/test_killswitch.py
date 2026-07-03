@@ -4,10 +4,6 @@ Tests for polymind.utils.killswitch.
 
 from __future__ import annotations
 
-import os
-
-import pytest
-
 from polymind.utils.killswitch import KillSwitch
 
 

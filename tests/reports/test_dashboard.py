@@ -1,25 +1,31 @@
 """Test dashboard reporter."""
+
 from io import StringIO
 
 import pytest
 from rich.console import Console
 from rich.table import Table
 
-from polymind.risk.manager import RiskManager
 from polymind.risk.limits import LimitsConfig, LimitsManager
+from polymind.risk.manager import RiskManager
 
 
 @pytest.mark.asyncio
 async def test_generate_dashboard():
+    from polymind.reports.dashboard import generate_dashboard
     from polymind.storage.database import DatabaseConfig
     from polymind.storage.ledger import LedgerStore
-    from polymind.reports.dashboard import generate_dashboard
 
     store = LedgerStore(DatabaseConfig(path=":memory:"))
     risk_mgr = RiskManager()
-    limits_mgr = LimitsManager(LimitsConfig(
-        positions=[], order_rate=None, daily_loss=None, exposure=None,
-    ))
+    limits_mgr = LimitsManager(
+        LimitsConfig(
+            positions=[],
+            order_rate=None,
+            daily_loss=None,
+            exposure=None,
+        )
+    )
     tables = await generate_dashboard(store, risk_mgr, limits_mgr)
     assert len(tables) >= 3
     for t in tables:

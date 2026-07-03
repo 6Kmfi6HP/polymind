@@ -11,9 +11,11 @@ _registry: dict[str, type] = {}
 
 def register(name: str):
     """Decorator to register a strategy."""
+
     def decorator(cls):
         _registry[name] = cls
         return cls
+
     return decorator
 
 

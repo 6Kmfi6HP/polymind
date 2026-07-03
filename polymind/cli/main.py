@@ -8,7 +8,6 @@ Usage:
     polymind status
 """
 
-
 import click
 from rich.console import Console
 from rich.table import Table
@@ -40,7 +39,7 @@ def cli(ctx):
         console.print(BANNER)
         console.print()
         console.print("[bold]Usage:[/bold]")
-        console.print("  [green]polymind run \"your strategy\"[/green]    Run a strategy")
+        console.print('  [green]polymind run "your strategy"[/green]    Run a strategy')
         console.print("  [green]polymind strategies[/green]              List strategies")
         console.print("  [green]polymind status[/green]                  Check configuration")
         console.print("  [green]polymind setup[/green]                   Configure API keys")
@@ -77,11 +76,19 @@ def run(strategy_text, strategy_file, paper, dry_run, once, interval):
             with open(strategy_file) as f:
                 strategy_text = f.read()
         elif not strategy_text:
-            console.print("[yellow]No strategy provided. Use inline text or --strategy-file.[/yellow]")
+            console.print(
+                "[yellow]No strategy provided. Use inline text or --strategy-file.[/yellow]"
+            )
             return
 
         # Show what we're running
-        mode = "[yellow]DRY RUN[/yellow]" if dry_run else "[cyan]PAPER[/cyan]" if paper else "[red]LIVE[/red]"
+        mode = (
+            "[yellow]DRY RUN[/yellow]"
+            if dry_run
+            else "[cyan]PAPER[/cyan]"
+            if paper
+            else "[red]LIVE[/red]"
+        )
         console.print(f"  Strategy: {strategy_text[:60]}...")
         console.print(f"  Mode:     {mode}")
         console.print(f"  Interval: {interval}s")
@@ -140,7 +147,7 @@ def list_strategies():
 
     console.print(table)
     console.print()
-    console.print("[dim]Use [bold]polymind run \"<strategy description>\"[/bold] to execute.[/dim]")
+    console.print('[dim]Use [bold]polymind run "<strategy description>"[/bold] to execute.[/dim]')
     console.print()
 
 
@@ -166,7 +173,9 @@ def status():
     mode = "Safe (dry-run)" if config.dry_run else "[red]Live[/red]"
     console.print(f"[{'yellow' if config.dry_run else 'red'}]○[/] Mode: {mode}")
     console.print()
-    console.print("[dim]Run [bold]polymind setup[/bold] to configure API keys or create a .env file.[/dim]")
+    console.print(
+        "[dim]Run [bold]polymind setup[/bold] to configure API keys or create a .env file.[/dim]"
+    )
     console.print()
 
 
@@ -188,12 +197,14 @@ def setup():
     PRIVATE_KEY=0x...
     """
     from rich.panel import Panel
+
     console.print(Panel(env_template.strip(), border_style="dim"))
 
 
 def _run_async(coro):
     """Run an async coroutine synchronously in a new event loop."""
     import asyncio
+
     loop = asyncio.new_event_loop()
     asyncio.set_event_loop(loop)
     try:
@@ -212,16 +223,18 @@ def report():
 def dashboard():
     """Show combined operator dashboard."""
     try:
+        from polymind.reports.dashboard import display_dashboard, generate_dashboard
+        from polymind.risk.limits import LimitsConfig, LimitsManager
+        from polymind.risk.manager import RiskManager
         from polymind.storage.database import DatabaseConfig
         from polymind.storage.ledger import LedgerStore
-        from polymind.risk.manager import RiskManager
-        from polymind.risk.limits import LimitsConfig, LimitsManager
-        from polymind.reports.dashboard import generate_dashboard, display_dashboard
 
         config = load_config()
         ledger = LedgerStore(DatabaseConfig(path=getattr(config, "db_path", ":memory:")))
         risk_mgr = RiskManager()
-        limits_mgr = LimitsManager(LimitsConfig(positions=[], order_rate=None, daily_loss=None, exposure=None))
+        limits_mgr = LimitsManager(
+            LimitsConfig(positions=[], order_rate=None, daily_loss=None, exposure=None)
+        )
 
         tables = _run_async(generate_dashboard(ledger, risk_mgr, limits_mgr))
         display_dashboard(tables)
@@ -234,9 +247,9 @@ def positions():
     """Show position summary."""
     try:
         config = load_config()
+        from polymind.reports.positions import format_positions_table, get_position_report
         from polymind.storage.database import DatabaseConfig
         from polymind.storage.ledger import LedgerStore
-        from polymind.reports.positions import get_position_report, format_positions_table
 
         ledger = LedgerStore(DatabaseConfig(path=getattr(config, "db_path", ":memory:")))
         positions = _run_async(get_position_report(ledger))
@@ -250,9 +263,9 @@ def pnl():
     """Show P&L summary."""
     try:
         config = load_config()
+        from polymind.reports.pnl import format_pnl_table, get_pnl_report
         from polymind.storage.database import DatabaseConfig
         from polymind.storage.ledger import LedgerStore
-        from polymind.reports.pnl import get_pnl_report, format_pnl_table
 
         ledger = LedgerStore(DatabaseConfig(path=getattr(config, "db_path", ":memory:")))
         report = _run_async(get_pnl_report(ledger))
@@ -266,12 +279,14 @@ def pnl():
 def risk():
     """Show risk status."""
     try:
-        from polymind.risk.manager import RiskManager
+        from polymind.reports.risk import format_risk_table, get_risk_report
         from polymind.risk.limits import LimitsConfig, LimitsManager
-        from polymind.reports.risk import get_risk_report, format_risk_table
+        from polymind.risk.manager import RiskManager
 
         risk_mgr = RiskManager()
-        limits_mgr = LimitsManager(LimitsConfig(positions=[], order_rate=None, daily_loss=None, exposure=None))
+        limits_mgr = LimitsManager(
+            LimitsConfig(positions=[], order_rate=None, daily_loss=None, exposure=None)
+        )
         report = get_risk_report(risk_mgr, limits_mgr)
         console.print(format_risk_table(report))
     except Exception as e:

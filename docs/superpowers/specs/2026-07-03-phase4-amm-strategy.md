@@ -1,8 +1,8 @@
 # Phase 4 Official MM Port — AMM Strategy
 
-**Status:** Draft  
-**Date:** 2026-07-03  
-**ADR:** ADR 0002 (Strategies emit intents; executors place orders)  
+**Status:** Draft
+**Date:** 2026-07-03
+**ADR:** ADR 0002 (Strategies emit intents; executors place orders)
 **Reference:** pm-official-mm-keeper `strategies/amm.py`, `strategies/amm_strategy.py`
 
 ## 1. Overview
@@ -36,7 +36,7 @@ polymind/strategies/market_making/amm/
 ### 3.2 Sizing — position sizing
 
 - `AMMSizingConfig(min_order_size, max_order_size, total_exposure, concentration_pct)`
-- `distribute_size(total_size, levels)` → list of `(level_idx, size)` 
+- `distribute_size(total_size, levels)` → list of `(level_idx, size)`
 - `concentration_pct` controls how much size goes to inner vs outer levels
 
 ### 3.3 Strategy — AMM strategy

@@ -5,7 +5,6 @@ Tests for FactorPipeline.
 from __future__ import annotations
 
 from datetime import datetime
-from typing import List
 
 import pytest
 
@@ -31,7 +30,7 @@ def constant_score(u: UniverseSnapshot) -> ScoreResult:
     return ScoreResult(scores=scores, timestamp=u.timestamp)
 
 
-def single_target(scores: ScoreResult) -> List[PortfolioTarget]:
+def single_target(scores: ScoreResult) -> list[PortfolioTarget]:
     if not scores.scores:
         return []
     mid = next(iter(scores.scores))
@@ -124,6 +123,7 @@ class TestFactorPipeline:
     @pytest.mark.asyncio
     async def test_filter_removes_markets(self):
         """Filter that removes a market should prevent it from being scored."""
+
         def strict_filter(u: UniverseSnapshot) -> UniverseSnapshot:
             # Only keep '0xabc'
             u.markets = {k: v for k, v in u.markets.items() if k == "0xabc"}
@@ -138,8 +138,13 @@ class TestFactorPipeline:
             filter_fn=strict_filter,
             score_fn=scoring,
             portfolio_fn=lambda s: [
-                PortfolioTarget(market_id=mid, direction=PositionDirection.LONG,
-                                target_size=10.0, confidence=0.5, rank=i)
+                PortfolioTarget(
+                    market_id=mid,
+                    direction=PositionDirection.LONG,
+                    target_size=10.0,
+                    confidence=0.5,
+                    rank=i,
+                )
                 for i, mid in enumerate(s.scores)
             ],
         )

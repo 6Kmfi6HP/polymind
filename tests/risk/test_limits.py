@@ -136,7 +136,9 @@ class TestLimitsManager:
         assert mgr.check_exposure(800.0, 300.0) is False
 
     def test_check_exposure_exceeds_per_market_pct(self):
-        cfg = LimitsConfig(exposure=ExposureLimit(max_total_exposure=1000.0, max_per_market_pct=10.0))
+        cfg = LimitsConfig(
+            exposure=ExposureLimit(max_total_exposure=1000.0, max_per_market_pct=10.0)
+        )
         mgr = LimitsManager(cfg)
         assert mgr.check_exposure(0.0, 200.0) is False
 

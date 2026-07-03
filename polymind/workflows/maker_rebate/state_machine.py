@@ -114,7 +114,9 @@ class RebateStateMachine:
     def is_active(self) -> bool:
         """Check if the workflow is still active (not terminal/halted)."""
         return self.state not in (
-            RebateState.COMPLETED, RebateState.FAILED, RebateState.HALTED,
+            RebateState.COMPLETED,
+            RebateState.FAILED,
+            RebateState.HALTED,
         )
 
     def reset(self) -> None:

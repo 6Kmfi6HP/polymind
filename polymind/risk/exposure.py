@@ -60,9 +60,7 @@ class ExposureManager:
 
         return approved
 
-    def update_positions(
-        self, targets: list[PortfolioTarget]
-    ) -> None:
+    def update_positions(self, targets: list[PortfolioTarget]) -> None:
         """Update tracked positions from executed targets."""
         for t in targets:
             self._positions[t.market_id] = t.target_size

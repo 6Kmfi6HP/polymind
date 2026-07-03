@@ -35,7 +35,4 @@ def distribute_band_sizes(
     Returns:
         List of sizes, one per band (same order as config.bands).
     """
-    return [
-        sizing_config.exposure_per_band * band.weight
-        for band in config.bands
-    ]
+    return [sizing_config.exposure_per_band * band.weight for band in config.bands]

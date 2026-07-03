@@ -46,7 +46,7 @@ class TestComputeLadder:
         """Inner levels should be within min_spread, outer within max_spread."""
         cfg = AMMPricingConfig(min_spread=0.01, max_spread=0.05, num_levels=5)
         ladder = compute_ladder(target_price=1.0, config=cfg)
-        for side, price, _ in ladder:
+        for _side, price, _ in ladder:
             spread = abs(price - 1.0) / 1.0
             assert spread >= 0.005, f"Spread {spread} too tight"
             assert spread <= 0.06, f"Spread {spread} too wide"

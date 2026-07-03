@@ -5,8 +5,14 @@ from __future__ import annotations
 import pytest
 
 from polymind.agents.base import (
-    AgentRole, AgentConfig, AgentMessage, BaseAgent,
-    Observation, Decision, ActionResult, Reflection,
+    ActionResult,
+    AgentConfig,
+    AgentMessage,
+    AgentRole,
+    BaseAgent,
+    Decision,
+    Observation,
+    Reflection,
 )
 
 
@@ -63,10 +69,17 @@ class TestReflection:
 
 class TestConcreteAgent:
     class SimpleAgent(BaseAgent):
-        async def observe(self, ctx): return Observation(data=ctx)
-        async def decide(self, o): return Decision(action="hold")
-        async def act(self, d): return ActionResult(success=True)
-        async def reflect(self, r): return Reflection(insight="done")
+        async def observe(self, ctx):
+            return Observation(data=ctx)
+
+        async def decide(self, o):
+            return Decision(action="hold")
+
+        async def act(self, d):
+            return ActionResult(success=True)
+
+        async def reflect(self, r):
+            return Reflection(insight="done")
 
     @pytest.mark.asyncio
     async def test_observe_returns_observation(self) -> None:
@@ -78,9 +91,14 @@ class TestConcreteAgent:
     @pytest.mark.asyncio
     async def test_default_observe_returns_empty_dict(self) -> None:
         class DefaultObserveAgent(BaseAgent):
-            async def decide(self, o): return Decision(action="hold")
-            async def act(self, d): return ActionResult(success=True)
-            async def reflect(self, r): return Reflection(insight="done")
+            async def decide(self, o):
+                return Decision(action="hold")
+
+            async def act(self, d):
+                return ActionResult(success=True)
+
+            async def reflect(self, r):
+                return Reflection(insight="done")
 
         a = DefaultObserveAgent(AgentConfig(role=AgentRole.OBSERVER))
         o = await a.observe({"anything": 42})

@@ -39,7 +39,6 @@ class TestDistributeSize:
 
     def test_concentration_centers(self):
         """Higher concentration should put more size on inner levels."""
-        cfg = AMMSizingConfig(concentration_pct=0.8)
         sizes = distribute_size(100.0, 5, 0.8)
         assert len(sizes) == 5
         # Inner level (index 0) should be larger than outer (index 4)

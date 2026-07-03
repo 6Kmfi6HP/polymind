@@ -78,15 +78,11 @@ class ContractsGateway:
     async def __aexit__(self, *args: Any) -> None:
         await self.close()
 
-    async def split(
-        self, market_id: str, outcome: str, amount: float
-    ) -> SplitResult:
+    async def split(self, market_id: str, outcome: str, amount: float) -> SplitResult:
         """Split parent tokens into outcome A and B tokens."""
         raise NotImplementedError
 
-    async def merge(
-        self, market_id: str, outcome_a: str, outcome_b: str
-    ) -> MergeResult:
+    async def merge(self, market_id: str, outcome_a: str, outcome_b: str) -> MergeResult:
         """Merge outcome A and B tokens back into parent tokens."""
         raise NotImplementedError
 
@@ -94,15 +90,11 @@ class ContractsGateway:
         """Redeem winning tokens for USDC after resolution."""
         raise NotImplementedError
 
-    async def balance_of(
-        self, owner: str, token_id: str
-    ) -> float:
+    async def balance_of(self, owner: str, token_id: str) -> float:
         """Check ERC-1155 token balance for an owner."""
         raise NotImplementedError
 
-    async def approve(
-        self, token_address: str, spender: str, amount: float
-    ) -> bool:
+    async def approve(self, token_address: str, spender: str, amount: float) -> bool:
         """Approve a spender to transfer tokens on behalf of the owner."""
         raise NotImplementedError
 

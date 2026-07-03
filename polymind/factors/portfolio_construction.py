@@ -127,16 +127,13 @@ def construct_portfolio(
         return []
 
     # Filter by min_confidence (absolute score)
-    filtered = {
-        mid: sc for mid, sc in scores.items()
-        if abs(sc) >= config.min_confidence
-    }
+    filtered = {mid: sc for mid, sc in scores.items() if abs(sc) >= config.min_confidence}
     if not filtered:
         return []
 
     # Select top N by absolute score
     abs_sorted = sorted(filtered.items(), key=lambda x: abs(x[1]), reverse=True)
-    selected = dict(abs_sorted[:config.top_n])
+    selected = dict(abs_sorted[: config.top_n])
 
     # Compute sizes
     sizes = size_by_rank(selected, config)

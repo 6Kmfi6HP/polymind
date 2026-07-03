@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from datetime import datetime, timezone
+from datetime import datetime
 
 import pytest
 
@@ -94,27 +94,21 @@ class TestPriceStoreMemory:
         assert snaps[0].bid_price == 0.40
         assert snaps[1].bid_price == 0.41
 
-    async def test_read_snapshots_generator_yields_in_order(
-        self, store: PriceStore
-    ) -> None:
+    async def test_read_snapshots_generator_yields_in_order(self, store: PriceStore) -> None:
         ts = [
             "2026-01-15T12:00:00",
             "2026-01-15T12:01:00",
             "2026-01-15T12:02:00",
         ]
         for i, t in enumerate(ts):
-            await store.append_snapshot(
-                _snap("0xabc", t, bid=0.40 + i * 0.01, ask=0.60 + i * 0.01)
-            )
+            await store.append_snapshot(_snap("0xabc", t, bid=0.40 + i * 0.01, ask=0.60 + i * 0.01))
 
         prices = []
         async for snap in store.read_snapshots("0xabc"):
             prices.append(snap.bid_price)
         assert prices == pytest.approx([0.40, 0.41, 0.42])
 
-    async def test_get_market_ids_returns_unique_markets(
-        self, store: PriceStore
-    ) -> None:
+    async def test_get_market_ids_returns_unique_markets(self, store: PriceStore) -> None:
         await store.append_snapshot(_snap("m1", "2026-01-15T12:00:00"))
         await store.append_snapshot(_snap("m2", "2026-01-15T12:00:00"))
         await store.append_snapshot(_snap("m1", "2026-01-15T12:01:00"))
@@ -124,9 +118,7 @@ class TestPriceStoreMemory:
 
     async def test_count_snapshots(self, store: PriceStore) -> None:
         for i in range(5):
-            await store.append_snapshot(
-                _snap("0xabc", f"2026-01-15T12:{i:02d}:00")
-            )
+            await store.append_snapshot(_snap("0xabc", f"2026-01-15T12:{i:02d}:00"))
         assert await store.count_snapshots("0xabc") == 5
         assert await store.count_snapshots("nonexistent") == 0
 
@@ -186,13 +178,9 @@ class TestPriceStoreMemory:
             result.append(snap.timestamp)
         assert result == [datetime.fromisoformat("2026-01-15T12:01:00")]
 
-    async def test_read_snapshots_batch_respects_limit(
-        self, store: PriceStore
-    ) -> None:
+    async def test_read_snapshots_batch_respects_limit(self, store: PriceStore) -> None:
         for i in range(10):
-            await store.append_snapshot(
-                _snap("0xabc", f"2026-01-15T12:{i:02d}:00")
-            )
+            await store.append_snapshot(_snap("0xabc", f"2026-01-15T12:{i:02d}:00"))
         snaps = await store.read_snapshots_batch("0xabc", limit=3)
         assert len(snaps) == 3
 
@@ -223,9 +211,7 @@ class TestPriceStoreJsonl:
         assert snaps[0].bid_price == 0.40
         assert snaps[1].bid_price == 0.40
 
-    async def test_multiple_markets_separate_files(
-        self, store: PriceStore
-    ) -> None:
+    async def test_multiple_markets_separate_files(self, store: PriceStore) -> None:
         await store.append_snapshot(_snap("m1", "2026-01-15T12:00:00"))
         await store.append_snapshot(_snap("m2", "2026-01-15T12:00:00"))
         assert len(await store.read_snapshots_batch("m1")) == 1
@@ -239,7 +225,5 @@ class TestPriceStoreJsonl:
 
     async def test_count_snapshots_jsonl(self, store: PriceStore) -> None:
         for i in range(3):
-            await store.append_snapshot(
-                _snap("m1", f"2026-01-15T12:{i:02d}:00")
-            )
+            await store.append_snapshot(_snap("m1", f"2026-01-15T12:{i:02d}:00"))
         assert await store.count_snapshots("m1") == 3

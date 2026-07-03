@@ -90,7 +90,9 @@ class CopyTradeStateMachine:
 
     def is_active(self) -> bool:
         return self.state not in (
-            CopyTradeState.COMPLETED, CopyTradeState.FAILED, CopyTradeState.HALTED,
+            CopyTradeState.COMPLETED,
+            CopyTradeState.FAILED,
+            CopyTradeState.HALTED,
         )
 
     def reset(self) -> None:

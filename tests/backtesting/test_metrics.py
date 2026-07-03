@@ -4,9 +4,7 @@ Tests for performance metrics.
 
 from __future__ import annotations
 
-import pytest
-
-from polymind.backtesting.metrics import PerformanceMetrics, compute_metrics
+from polymind.backtesting.metrics import compute_metrics
 
 
 class TestComputeMetrics:

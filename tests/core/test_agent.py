@@ -23,6 +23,7 @@ class TestObservation:
 class TestBaseAgent:
     class _TestAgent(BaseAgent):
         """Concrete agent for testing."""
+
         def __init__(self):
             super().__init__(name="test_agent", loop_interval=1)
 

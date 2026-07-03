@@ -14,7 +14,7 @@ from __future__ import annotations
 
 import os
 
-from polymind.risk.drawdown import DrawdownConfig, DrawdownTracker, DrawdownState
+from polymind.risk.drawdown import DrawdownConfig, DrawdownState, DrawdownTracker
 from polymind.risk.limits import (
     DailyLossLimit,
     ExposureLimit,
@@ -148,57 +148,73 @@ def demo_drawdown() -> None:
     tracker = DrawdownTracker(config, initial_peak=10_000.0)
 
     # Snapshot of starting state
-    print(f"\n    Start:        equity=$10 000  "
-          f"state={tracker.get_state().name:8s}  "
-          f"dd={tracker.get_drawdown_pct():.1%}")
+    print(
+        f"\n    Start:        equity=$10 000  "
+        f"state={tracker.get_state().name:8s}  "
+        f"dd={tracker.get_drawdown_pct():.1%}"
+    )
 
     # Move 1: small dip — should stay NORMAL
     tracker.update(9_400.0)
-    print(f"    -6% dip:      equity=$9 400  "
-          f"state={tracker.get_state().name:8s}  "
-          f"dd={tracker.get_drawdown_pct():.1%}")
+    print(
+        f"    -6% dip:      equity=$9 400  "
+        f"state={tracker.get_state().name:8s}  "
+        f"dd={tracker.get_drawdown_pct():.1%}"
+    )
     assert tracker.get_state() == DrawdownState.NORMAL, "6% dip should be NORMAL"
 
     # Move 2: deeper — crosses warning_pct (10%)
     tracker.update(8_900.0)
-    print(f"    -11% drop:    equity=$8 900  "
-          f"state={tracker.get_state().name:8s}  "
-          f"dd={tracker.get_drawdown_pct():.1%}")
+    print(
+        f"    -11% drop:    equity=$8 900  "
+        f"state={tracker.get_state().name:8s}  "
+        f"dd={tracker.get_drawdown_pct():.1%}"
+    )
     assert tracker.get_state() == DrawdownState.WARNING, "11% drop should be WARNING"
 
     # Move 3: plunges past max_drawdown_pct (15%)
     tracker.update(8_400.0)
-    print(f"    -16% plunge:  equity=$8 400  "
-          f"state={tracker.get_state().name:8s}  "
-          f"dd={tracker.get_drawdown_pct():.1%}")
+    print(
+        f"    -16% plunge:  equity=$8 400  "
+        f"state={tracker.get_state().name:8s}  "
+        f"dd={tracker.get_drawdown_pct():.1%}"
+    )
     assert tracker.get_state() == DrawdownState.STOPPED, "16% drop should be STOPPED"
 
     # Move 4: partial bounce, still above max_drawdown_pct (15%) → stays STOPPED
     tracker.update(8_450.0)
-    print(f"    +0.6% bounce: equity=$8 450  "
-          f"state={tracker.get_state().name:8s}  "
-          f"dd={tracker.get_drawdown_pct():.1%}")
+    print(
+        f"    +0.6% bounce: equity=$8 450  "
+        f"state={tracker.get_state().name:8s}  "
+        f"dd={tracker.get_drawdown_pct():.1%}"
+    )
     assert tracker.get_state() == DrawdownState.STOPPED, "15.5% down → STOPPED"
 
     # Move 5: new peak → auto-resets to NORMAL, peak moves up
     tracker.update(10_500.0)
-    print(f"    new peak:     equity=$10 500 "
-          f"state={tracker.get_state().name:8s}  "
-          f"dd={tracker.get_drawdown_pct():.1%}")
+    print(
+        f"    new peak:     equity=$10 500 "
+        f"state={tracker.get_state().name:8s}  "
+        f"dd={tracker.get_drawdown_pct():.1%}"
+    )
     assert tracker.get_state() == DrawdownState.NORMAL, "New peak should be NORMAL"
     assert tracker.get_peak() == 10_500.0, "Peak should have updated"
 
     # Move 6: severe drawdown past STOPPED, then recovery below recovery_pct
-    tracker.update(8_000.0)   # dd = (10_500-8_000)/10_500 ≈ 23.8% → STOPPED
-    print(f"    -24% crash:   equity=$8 000  "
-          f"state={tracker.get_state().name:8s}  "
-          f"dd={tracker.get_drawdown_pct():.1%}")
+    tracker.update(8_000.0)  # dd = (10_500-8_000)/10_500 ≈ 23.8% → STOPPED
+    print(
+        f"    -24% crash:   equity=$8 000  "
+        f"state={tracker.get_state().name:8s}  "
+        f"dd={tracker.get_drawdown_pct():.1%}"
+    )
     assert tracker.get_state() == DrawdownState.STOPPED
 
     tracker.update(10_100.0)  # dd ≈ 3.8% ≤ recovery_pct → RECOVERY
-    print(f"    recovers:     equity=$10 100 "
-          f"state={tracker.get_state().name:8s}  "
-          f"dd={tracker.get_drawdown_pct():.1%}")
+    print(
+        f"    recovers:     equity=$10 100 "
+        f"state={tracker.get_state().name:8s}  "
+        f"dd={tracker.get_drawdown_pct():.1%}"
+    )
     assert tracker.get_state() == DrawdownState.RECOVERY, "Should be RECOVERY"
 
     print("  ✅ DrawdownTracker OK\n")
@@ -228,7 +244,7 @@ def demo_limits() -> None:
         daily_loss=DailyLossLimit(max_loss_amount=500.0, max_loss_pct=5.0),
         exposure=ExposureLimit(
             max_total_exposure=2000.0,
-            max_per_market_pct=25.0,   # 25% of total in a single market
+            max_per_market_pct=25.0,  # 25% of total in a single market
         ),
     )
     lm = LimitsManager(config)
@@ -251,19 +267,21 @@ def demo_limits() -> None:
     print("\n  Daily loss checks (max_loss=500):")
     # PnL is the new trade result; additional_loss = max(0, -pnl)
     for current_loss, pnl, expected in [
-        (100.0, -50.0, True),     # total loss = 150, within limit
-        (0.0, -500.0, True),      # total loss = 500, exactly at limit
-        (0.0, -500.01, False),    # total loss = 500.01, exceeded
+        (100.0, -50.0, True),  # total loss = 150, within limit
+        (0.0, -500.0, True),  # total loss = 500, exactly at limit
+        (0.0, -500.01, False),  # total loss = 500.01, exceeded
     ]:
         actual = lm.check_daily_loss(current_loss, pnl)
         status = "OK" if actual == expected else "FAIL"
-        print(f"    loss={current_loss:<4} pnl={pnl:<6} → {actual}  (expect {expected})  [{status}]")
+        print(
+            f"    loss={current_loss:<4} pnl={pnl:<6} → {actual}  (expect {expected})  [{status}]"
+        )
         assert actual == expected, f"Loss {current_loss} pnl {pnl}: expected {expected}"
 
     print("\n  Exposure checks (max total=2000, max per-market=25%):")
     for current, new, expected in [
-        (0.0, 500.0, True),       # 500 ≤ 2000,  25% ≤ 25%
-        (0.0, 501.0, False),      # 25.05% > 25%
+        (0.0, 500.0, True),  # 500 ≤ 2000,  25% ≤ 25%
+        (0.0, 501.0, False),  # 25.05% > 25%
         (1_800.0, 300.0, False),  # 2100 > 2000
     ]:
         actual = lm.check_exposure(current, new)

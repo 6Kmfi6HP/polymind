@@ -23,10 +23,12 @@ def _make_universe(features: list[dict]) -> UniverseSnapshot:
 class TestSentimentFactor:
     @pytest.mark.asyncio
     async def test_from_additional(self):
-        u = _make_universe([
-            {"market_id": "m1", "additional": {"sentiment": 0.8}},
-            {"market_id": "m2", "additional": {"sentiment": -0.3}},
-        ])
+        u = _make_universe(
+            [
+                {"market_id": "m1", "additional": {"sentiment": 0.8}},
+                {"market_id": "m2", "additional": {"sentiment": -0.3}},
+            ]
+        )
         model = SentimentFactor()
         scores = await model.compute_scores(u)
         assert scores["m1"] == 0.8
@@ -34,9 +36,11 @@ class TestSentimentFactor:
 
     @pytest.mark.asyncio
     async def test_no_sentiment_skipped(self):
-        u = _make_universe([
-            {"market_id": "m1", "mid_price": 0.5},
-        ])
+        u = _make_universe(
+            [
+                {"market_id": "m1", "mid_price": 0.5},
+            ]
+        )
         model = SentimentFactor()
         scores = await model.compute_scores(u)
         assert scores == {}

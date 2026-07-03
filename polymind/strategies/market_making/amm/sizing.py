@@ -51,8 +51,10 @@ def distribute_size(
     else:
         # Linear decay: outer level gets (1 - concentration_pct) fraction of inner
         decay = 1.0 - concentration_pct
-        weights = [1.0 - (i / (num_levels - 1)) * (1.0 - decay) if num_levels > 1 else 1.0
-                   for i in range(num_levels)]
+        weights = [
+            1.0 - (i / (num_levels - 1)) * (1.0 - decay) if num_levels > 1 else 1.0
+            for i in range(num_levels)
+        ]
         weights = [max(w, 0.0) for w in weights]
 
     total_weight = sum(weights)

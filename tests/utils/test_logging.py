@@ -4,13 +4,10 @@ Tests for polymind.utils.logging.
 
 from __future__ import annotations
 
-import logging
 import json
-import re
+import logging
 
-import pytest
-
-from polymind.utils.logging import LogConfig, setup_logging, get_logger
+from polymind.utils.logging import LogConfig, get_logger, setup_logging
 
 
 class TestLogConfig:
@@ -81,16 +78,14 @@ class TestSetupLogging:
         assert record["name"] == "test_json"
 
     def test_text_format_with_custom_format_str(self):
-        logger = setup_logging(
-            LogConfig(name="test_fmt", format_str="%(levelname)s:%(message)s")
-        )
+        logger = setup_logging(LogConfig(name="test_fmt", format_str="%(levelname)s:%(message)s"))
         handler = logger.handlers[0]
         assert isinstance(handler, logging.StreamHandler)
         assert handler.formatter._fmt == "%(levelname)s:%(message)s"
 
     def test_log_file_creates_file(self):
-        import tempfile
         import os
+        import tempfile
 
         with tempfile.NamedTemporaryFile(suffix=".log", delete=False) as f:
             log_path = f.name

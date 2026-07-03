@@ -5,11 +5,10 @@ Tests for RiskDecision, RiskGate, and RiskContext.
 from __future__ import annotations
 
 from datetime import datetime, timezone
-from typing import Any, Dict
 
 import pytest
 
-from polymind.core.intents import OrderIntent, OrderSide, StrategyIntent
+from polymind.core.intents import StrategyIntent
 from polymind.core.risk import RiskContext, RiskDecision, RiskGate
 
 
@@ -117,6 +116,7 @@ class TestRiskGate:
 
 class AllowAllGate(RiskGate):
     """Test gate that always approves."""
+
     name = "AllowAllGate"
 
     async def evaluate(self, intent: StrategyIntent, context: RiskContext) -> RiskDecision:
@@ -129,6 +129,7 @@ class AllowAllGate(RiskGate):
 
 class RejectAllGate(RiskGate):
     """Test gate that always rejects."""
+
     name = "RejectAllGate"
 
     async def evaluate(self, intent: StrategyIntent, context: RiskContext) -> RiskDecision:

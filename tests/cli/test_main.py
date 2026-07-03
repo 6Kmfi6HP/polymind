@@ -4,7 +4,6 @@ Tests for CLI commands.
 
 from __future__ import annotations
 
-import pytest
 from click.testing import CliRunner
 
 from polymind.cli.main import cli

@@ -22,7 +22,9 @@ class TestExposureManager:
         assert len(approved) == 0
 
     def test_total_exposure_limit(self):
-        mgr = ExposureManager(ExposureConfig(max_exposure_per_market=100.0, max_exposure_total=150.0))
+        mgr = ExposureManager(
+            ExposureConfig(max_exposure_per_market=100.0, max_exposure_total=150.0)
+        )
         t1 = PortfolioTarget("0xabc", PositionDirection.LONG, 100.0, 0.8, 1)
         t2 = PortfolioTarget("0xdef", PositionDirection.LONG, 100.0, 0.8, 2)
         approved = mgr.validate_targets([t1, t2])

@@ -18,6 +18,7 @@ CONFIG_FILE = CONFIG_DIR / "config.yaml"
 @dataclass
 class RiskLimits:
     """Risk management limits."""
+
     max_position_size: float = 50.0
     max_total_exposure: float = 500.0
     max_daily_loss: float = 100.0
@@ -27,6 +28,7 @@ class RiskLimits:
 @dataclass
 class Config:
     """Main configuration."""
+
     # AI
     anthropic_api_key: str | None = None
     openai_api_key: str | None = None

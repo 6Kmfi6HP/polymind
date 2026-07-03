@@ -124,15 +124,11 @@ class DataLoader:
             async for dp in self._load_duckdb(config):
                 yield dp
 
-    async def load_snapshots_batch(
-        self, config: BacktestDataConfig
-    ) -> list[MarketDataPoint]:
+    async def load_snapshots_batch(self, config: BacktestDataConfig) -> list[MarketDataPoint]:
         """Load all matching snapshots into a list."""
         return [dp async for dp in self.load_snapshots(config)]
 
-    async def get_market_ids(
-        self, config: BacktestDataConfig
-    ) -> list[str]:
+    async def get_market_ids(self, config: BacktestDataConfig) -> list[str]:
         """Return the distinct market IDs available in the data source."""
         ids: set[str] = set()
         async for dp in self.load_snapshots(config):
@@ -171,9 +167,7 @@ class DataLoader:
                 if self._matches(dp, config):
                     yield dp
 
-    async def _load_csv(
-        self, config: BacktestDataConfig
-    ) -> AsyncGenerator[MarketDataPoint, None]:
+    async def _load_csv(self, config: BacktestDataConfig) -> AsyncGenerator[MarketDataPoint, None]:
         """Load data points from a CSV file.
 
         Expected columns: ``market_id``, ``timestamp``, ``bid_price``,
@@ -204,11 +198,7 @@ class DataLoader:
                 "FROM market_data"
             ).fetchall()
             for row in results:
-                ts = (
-                    datetime.fromisoformat(str(row[1]))
-                    if isinstance(row[1], str)
-                    else row[1]
-                )
+                ts = datetime.fromisoformat(str(row[1])) if isinstance(row[1], str) else row[1]
                 dp = MarketDataPoint(
                     market_id=str(row[0]),
                     timestamp=ts,

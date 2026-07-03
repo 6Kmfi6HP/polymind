@@ -4,8 +4,6 @@ Tests for factor registry and base contracts.
 
 from __future__ import annotations
 
-from typing import Dict
-
 import pytest
 
 from polymind.core.portfolio import PortfolioTarget
@@ -21,7 +19,7 @@ from polymind.factors.registry import (
 class ConstantSignal(FactorSignalModel):
     """Test signal that returns constant scores."""
 
-    async def compute_scores(self, universe: UniverseSnapshot) -> Dict[str, float]:
+    async def compute_scores(self, universe: UniverseSnapshot) -> dict[str, float]:
         return {mid: 0.5 for mid in universe.markets}
 
 
@@ -80,12 +78,8 @@ class TestFactorRegistry:
 
     def test_list_signals(self):
         registry = FactorRegistry()
-        registry.register_signal(
-            "a", ConstantSignal(FactorMetadata(name="a"))
-        )
-        registry.register_signal(
-            "b", ConstantSignal(FactorMetadata(name="b"))
-        )
+        registry.register_signal("a", ConstantSignal(FactorMetadata(name="a")))
+        registry.register_signal("b", ConstantSignal(FactorMetadata(name="b")))
         signals = registry.list_signals()
         assert "a" in signals
         assert "b" in signals
@@ -97,8 +91,6 @@ class TestFactorRegistry:
 
     def test_remove_signal(self):
         registry = FactorRegistry()
-        registry.register_signal(
-            "x", ConstantSignal(FactorMetadata(name="x"))
-        )
+        registry.register_signal("x", ConstantSignal(FactorMetadata(name="x")))
         registry.remove_signal("x")
         assert registry.get_signal("x") is None

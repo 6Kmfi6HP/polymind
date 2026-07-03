@@ -18,10 +18,10 @@ from polymind.polymarket.data_api import (
     VolumeInfo,
 )
 
-
 # ---------------------------------------------------------------------------
 # Configuration
 # ---------------------------------------------------------------------------
+
 
 class TestDataAPIConfig:
     def test_defaults(self) -> None:
@@ -47,6 +47,7 @@ class TestDataAPIConfig:
 # ---------------------------------------------------------------------------
 # Domain type construction
 # ---------------------------------------------------------------------------
+
 
 class TestMarketDetail:
     def test_construction(self) -> None:
@@ -137,6 +138,7 @@ class TestVolumeInfo:
 # ---------------------------------------------------------------------------
 # PolymarketDataAPI — real logic with mocked HTTP
 # ---------------------------------------------------------------------------
+
 
 def _api() -> PolymarketDataAPI:
     """Build a test API instance with a minimal config."""
@@ -403,9 +405,11 @@ class TestPolymarketDataAPI:
         session = MagicMock()
         session.request = MagicMock(return_value=resp)
 
-        with patch.object(api, "_get_session", AsyncMock(return_value=session)):
-            with pytest.raises(aiohttp.ClientResponseError) as exc_info:
-                await api.get_market("0xmissing")
+        with (
+            patch.object(api, "_get_session", AsyncMock(return_value=session)),
+            pytest.raises(aiohttp.ClientResponseError) as exc_info,
+        ):
+            await api.get_market("0xmissing")
         assert exc_info.value.status == 404
         await api.close()
 
@@ -417,9 +421,11 @@ class TestPolymarketDataAPI:
         session = MagicMock()
         session.request = MagicMock(side_effect=asyncio.TimeoutError("Request timed out"))
 
-        with patch.object(api, "_get_session", AsyncMock(return_value=session)):
-            with pytest.raises(asyncio.TimeoutError):
-                await api.get_market("0xslow")
+        with (
+            patch.object(api, "_get_session", AsyncMock(return_value=session)),
+            pytest.raises(asyncio.TimeoutError),
+        ):
+            await api.get_market("0xslow")
         await api.close()
 
     @pytest.mark.asyncio
@@ -442,9 +448,11 @@ class TestPolymarketDataAPI:
         session = MagicMock()
         session.request = MagicMock(return_value=resp)
 
-        with patch.object(api, "_get_session", AsyncMock(return_value=session)):
-            with pytest.raises(aiohttp.ClientResponseError) as exc_info:
-                await api.get_market("0xsecret")
+        with (
+            patch.object(api, "_get_session", AsyncMock(return_value=session)),
+            pytest.raises(aiohttp.ClientResponseError) as exc_info,
+        ):
+            await api.get_market("0xsecret")
         assert exc_info.value.status == 403
         await api.close()
 

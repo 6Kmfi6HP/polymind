@@ -62,9 +62,7 @@ class HedgeOverlay:
 
         return targets
 
-    def compute_net_exposure(
-        self, targets: list[PortfolioTarget]
-    ) -> float:
+    def compute_net_exposure(self, targets: list[PortfolioTarget]) -> float:
         """Compute net directional exposure across all targets."""
         net = 0.0
         for t in targets:

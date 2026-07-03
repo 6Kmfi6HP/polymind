@@ -36,11 +36,13 @@ class TestMomentumConfig:
 class TestMomentumFactor:
     @pytest.mark.asyncio
     async def test_compute_scores(self):
-        u = _make_universe([
-            {"market_id": "m1", "momentum_24h": 0.05},
-            {"market_id": "m2", "momentum_24h": -0.03},
-            {"market_id": "m3", "momentum_24h": 0.01},
-        ])
+        u = _make_universe(
+            [
+                {"market_id": "m1", "momentum_24h": 0.05},
+                {"market_id": "m2", "momentum_24h": -0.03},
+                {"market_id": "m3", "momentum_24h": 0.01},
+            ]
+        )
         model = MomentumFactor()
         scores = await model.compute_scores(u)
         assert scores["m1"] == 0.05
@@ -49,9 +51,11 @@ class TestMomentumFactor:
 
     @pytest.mark.asyncio
     async def test_lookback_7d(self):
-        u = _make_universe([
-            {"market_id": "m1", "momentum_7d": 0.15},
-        ])
+        u = _make_universe(
+            [
+                {"market_id": "m1", "momentum_7d": 0.15},
+            ]
+        )
         cfg = MomentumConfig(lookback="7d")
         model = MomentumFactor(cfg)
         scores = await model.compute_scores(u)
@@ -73,13 +77,15 @@ class TestMomentumFactor:
     @pytest.mark.asyncio
     async def test_full_pipeline_integration(self):
         """End-to-end: scores → rank → portfolio targets."""
-        u = _make_universe([
-            {"market_id": "m1", "momentum_24h": 0.10},
-            {"market_id": "m2", "momentum_24h": 0.05},
-            {"market_id": "m3", "momentum_24h": -0.02},
-            {"market_id": "m4", "momentum_24h": -0.08},
-            {"market_id": "m5", "momentum_24h": 0.01},
-        ])
+        u = _make_universe(
+            [
+                {"market_id": "m1", "momentum_24h": 0.10},
+                {"market_id": "m2", "momentum_24h": 0.05},
+                {"market_id": "m3", "momentum_24h": -0.02},
+                {"market_id": "m4", "momentum_24h": -0.08},
+                {"market_id": "m5", "momentum_24h": 0.01},
+            ]
+        )
         model = MomentumFactor(MomentumConfig(top_n=3))
         scores = await model.compute_scores(u)
         ranked = rank_normalize(scores)

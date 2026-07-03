@@ -1,4 +1,5 @@
 """AI agent abstractions."""
+
 from polymind.agents.base import (
     ActionResult,
     AgentConfig,
@@ -10,4 +11,13 @@ from polymind.agents.base import (
     Reflection,
 )
 
-__all__ = ["AgentRole", "AgentConfig", "AgentMessage", "BaseAgent", "Observation", "Decision", "ActionResult", "Reflection"]
+__all__ = [
+    "AgentRole",
+    "AgentConfig",
+    "AgentMessage",
+    "BaseAgent",
+    "Observation",
+    "Decision",
+    "ActionResult",
+    "Reflection",
+]

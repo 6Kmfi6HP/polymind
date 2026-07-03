@@ -6,8 +6,6 @@ from __future__ import annotations
 
 from datetime import datetime
 
-import pytest
-
 from polymind.factors.filters import (
     FilterConfig,
     apply_all_filters,
@@ -19,9 +17,7 @@ from polymind.factors.filters import (
 from polymind.factors.pipeline import MarketFeatures, UniverseSnapshot
 
 
-def _make_universe(
-    markets: list[tuple[str, float, float, float, float]]
-) -> UniverseSnapshot:
+def _make_universe(markets: list[tuple[str, float, float, float, float]]) -> UniverseSnapshot:
     """Helper: create universe from list of (market_id, mid, spread_bps, vol_24h, vol_24h_pct)."""
     features = {}
     for mid, mid_price, spread_bps, vol_24h, vol_24h_pct in markets:
@@ -90,13 +86,15 @@ class TestFilterByPrice:
 
 class TestApplyAllFilters:
     def test_removes_all_bad_markets(self):
-        u = _make_universe([
-            ("good", 0.5, 50.0, 50000, 0.1),
-            ("wide_spread", 0.5, 200.0, 50000, 0.1),
-            ("low_volume", 0.5, 50.0, 100, 0.1),
-            ("high_vol", 0.5, 50.0, 50000, 0.8),
-            ("low_price", 0.005, 50.0, 50000, 0.1),
-        ])
+        u = _make_universe(
+            [
+                ("good", 0.5, 50.0, 50000, 0.1),
+                ("wide_spread", 0.5, 200.0, 50000, 0.1),
+                ("low_volume", 0.5, 50.0, 100, 0.1),
+                ("high_vol", 0.5, 50.0, 50000, 0.8),
+                ("low_price", 0.005, 50.0, 50000, 0.1),
+            ]
+        )
         cfg = FilterConfig()
         result = apply_all_filters(u, cfg)
         assert "good" in result.markets

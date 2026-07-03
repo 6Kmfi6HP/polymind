@@ -76,9 +76,7 @@ class BacktestEngine:
 
         for snap in snapshots:
             targets = await self.pipeline.run(snap)
-            pnl = self._process_targets(
-                snap, targets, positions, entry_prices, capital, result
-            )
+            pnl = self._process_targets(snap, targets, positions, entry_prices, capital, result)
             capital += pnl
             result.portfolio_values.append(capital)
 
@@ -88,14 +86,9 @@ class BacktestEngine:
         )
         if result.pnl_series:
             mean_pnl = sum(result.pnl_series) / len(result.pnl_series)
-            var_pnl = (
-                sum((x - mean_pnl) ** 2 for x in result.pnl_series)
-                / len(result.pnl_series)
-            )
-            std_pnl = var_pnl ** 0.5
-            result.sharpe_ratio = (
-                (mean_pnl / std_pnl) * (252 ** 0.5) if std_pnl > 0 else 0.0
-            )
+            var_pnl = sum((x - mean_pnl) ** 2 for x in result.pnl_series) / len(result.pnl_series)
+            std_pnl = var_pnl**0.5
+            result.sharpe_ratio = (mean_pnl / std_pnl) * (252**0.5) if std_pnl > 0 else 0.0
 
         return result
 
@@ -119,11 +112,13 @@ class BacktestEngine:
         for mid in list(positions.keys()):
             if mid not in target_mids and positions[mid] != 0:
                 total_pnl += self._close_position(mid, snap, positions, entry_prices, result)
-                result.trades.append({
-                    "market_id": mid,
-                    "action": "close",
-                    "timestamp": snap.timestamp.isoformat(),
-                })
+                result.trades.append(
+                    {
+                        "market_id": mid,
+                        "action": "close",
+                        "timestamp": snap.timestamp.isoformat(),
+                    }
+                )
 
         # Open / adjust target positions
         for t in targets:
@@ -134,14 +129,16 @@ class BacktestEngine:
                 total_pnl -= cost
                 positions[t.market_id] = t.target_size
                 entry_prices[t.market_id] = price
-                result.trades.append({
-                    "market_id": t.market_id,
-                    "action": "open" if positions.get(t.market_id, 0.0) == 0 else "adjust",
-                    "direction": t.direction.name,
-                    "size": t.target_size,
-                    "price": price,
-                    "timestamp": snap.timestamp.isoformat(),
-                })
+                result.trades.append(
+                    {
+                        "market_id": t.market_id,
+                        "action": "open" if positions.get(t.market_id, 0.0) == 0 else "adjust",
+                        "direction": t.direction.name,
+                        "size": t.target_size,
+                        "price": price,
+                        "timestamp": snap.timestamp.isoformat(),
+                    }
+                )
 
         result.pnl_series.append(total_pnl)
         return total_pnl
@@ -172,9 +169,7 @@ class BacktestEngine:
         return pnl
 
     @staticmethod
-    def _execution_price(
-        target: PortfolioTarget, snap: UniverseSnapshot
-    ) -> float:
+    def _execution_price(target: PortfolioTarget, snap: UniverseSnapshot) -> float:
         """Determine execution price for a target."""
         mf = snap.markets.get(target.market_id)
         if mf is None:

@@ -23,7 +23,6 @@ from polymind.factors.portfolio_construction import PortfolioConfig, construct_p
 from polymind.factors.scoring import momentum_score, rank_normalize
 from polymind.storage.price_store import PriceSnapshot, PriceStore
 
-
 # =========================================================================
 # Scenario 1: Full factor pipeline flow
 # =========================================================================

@@ -28,9 +28,7 @@ def filter_by_spread(
 ) -> UniverseSnapshot:
     """Remove markets with spread wider than max_spread_bps."""
     filtered = {
-        mid: mf
-        for mid, mf in universe.markets.items()
-        if mf.spread_bps <= config.max_spread_bps
+        mid: mf for mid, mf in universe.markets.items() if mf.spread_bps <= config.max_spread_bps
     }
     universe.markets = filtered
     return universe
@@ -42,9 +40,7 @@ def filter_by_volume(
 ) -> UniverseSnapshot:
     """Remove markets with 24h volume below min_volume_24h."""
     filtered = {
-        mid: mf
-        for mid, mf in universe.markets.items()
-        if mf.volume_24h >= config.min_volume_24h
+        mid: mf for mid, mf in universe.markets.items() if mf.volume_24h >= config.min_volume_24h
     }
     universe.markets = filtered
     return universe
@@ -70,9 +66,7 @@ def filter_by_price(
 ) -> UniverseSnapshot:
     """Remove markets with mid price below min_mid_price."""
     filtered = {
-        mid: mf
-        for mid, mf in universe.markets.items()
-        if mf.mid_price >= config.min_mid_price
+        mid: mf for mid, mf in universe.markets.items() if mf.mid_price >= config.min_mid_price
     }
     universe.markets = filtered
     return universe

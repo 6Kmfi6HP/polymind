@@ -1,7 +1,7 @@
 # Phase 4 Official MM Port — Bands Strategy
 
-**Status:** Draft  
-**Date:** 2026-07-03  
+**Status:** Draft
+**Date:** 2026-07-03
 **Reference:** pm-official-mm-keeper `strategies/bands.py`, `strategies/bands_strategy.py`
 
 ## 1. Overview

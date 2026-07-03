@@ -58,8 +58,7 @@ class ClassicMMStrategy(BaseMMStrategy):
         orders: list[OrderIntent] = []
         for level in range(self.mm_config.num_levels):
             price = bid_price * (
-                1.0 + self.mm_config.spread_pct
-                + level * self.mm_config.level_spacing_pct
+                1.0 + self.mm_config.spread_pct + level * self.mm_config.level_spacing_pct
             )
             orders.append(
                 OrderIntent(

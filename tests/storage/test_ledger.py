@@ -64,9 +64,7 @@ class TestAppend:
 
 
 class TestGetEntries:
-    async def test_get_entries_returns_empty_when_none(
-        self, store: LedgerStore
-    ) -> None:
+    async def test_get_entries_returns_empty_when_none(self, store: LedgerStore) -> None:
         entries = await store.get_entries("nonexistent")
         assert entries == []
 
@@ -103,15 +101,11 @@ class TestGetPnl:
 
 
 class TestGetCashBalance:
-    async def test_get_cash_balance_zero_when_empty(
-        self, store: LedgerStore
-    ) -> None:
+    async def test_get_cash_balance_zero_when_empty(self, store: LedgerStore) -> None:
         bal = await store.get_cash_balance()
         assert bal == 0.0
 
-    async def test_get_cash_balance_from_last_entry(
-        self, store: LedgerStore
-    ) -> None:
+    async def test_get_cash_balance_from_last_entry(self, store: LedgerStore) -> None:
         await store.append(
             LedgerEntry(
                 entry_id="e1",
@@ -143,9 +137,7 @@ class TestGetCashBalance:
 
 
 class TestPosition:
-    async def test_get_position_returns_none_when_missing(
-        self, store: LedgerStore
-    ) -> None:
+    async def test_get_position_returns_none_when_missing(self, store: LedgerStore) -> None:
         pos = await store.get_position("0xabc")
         assert pos is None
 
@@ -189,9 +181,7 @@ class TestPosition:
         assert pos.avg_entry == 0.60
         assert pos.realized_pnl == 10.0
 
-    async def test_update_position_different_markets(
-        self, store: LedgerStore
-    ) -> None:
+    async def test_update_position_different_markets(self, store: LedgerStore) -> None:
         rec_a = PositionRecord(
             market_id="m1", outcome="YES", size=5.0, avg_entry=0.5, realized_pnl=0.0
         )

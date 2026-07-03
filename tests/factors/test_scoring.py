@@ -20,25 +20,31 @@ def _make_universe(features: list[dict]) -> UniverseSnapshot:
 
 class TestMomentumScore:
     def test_momentum_4h(self):
-        u = _make_universe([
-            {"market_id": "m1", "momentum_4h": 0.02},
-            {"market_id": "m2", "momentum_4h": -0.01},
-        ])
+        u = _make_universe(
+            [
+                {"market_id": "m1", "momentum_4h": 0.02},
+                {"market_id": "m2", "momentum_4h": -0.01},
+            ]
+        )
         scores = momentum_score(u, lookback="4h")
         assert scores["m1"] == 0.02
         assert scores["m2"] == -0.01
 
     def test_momentum_7d(self):
-        u = _make_universe([
-            {"market_id": "m1", "momentum_7d": 0.15},
-        ])
+        u = _make_universe(
+            [
+                {"market_id": "m1", "momentum_7d": 0.15},
+            ]
+        )
         scores = momentum_score(u, lookback="7d")
         assert scores["m1"] == 0.15
 
     def test_missing_momentum_skipped(self):
-        u = _make_universe([
-            {"market_id": "m1", "momentum_24h": None},
-        ])
+        u = _make_universe(
+            [
+                {"market_id": "m1", "momentum_24h": None},
+            ]
+        )
         scores = momentum_score(u, lookback="24h")
         assert scores == {}
 

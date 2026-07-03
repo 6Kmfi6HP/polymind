@@ -4,8 +4,6 @@ Tests for polymind.utils.secrets.
 
 from __future__ import annotations
 
-import os
-
 import pytest
 
 from polymind.utils.secrets import SecretNotFound, SecretsManager, mask

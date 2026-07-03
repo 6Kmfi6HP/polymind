@@ -20,6 +20,7 @@ def __getattr__(name):
     if name in lazy:
         mod, cls = lazy[name]
         from importlib import import_module
+
         return getattr(import_module(mod), cls)
     raise AttributeError(f"module 'polymind' has no attribute '{name}'")
 

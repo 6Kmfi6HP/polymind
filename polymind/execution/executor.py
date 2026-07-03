@@ -130,9 +130,7 @@ class PaperExecutor(IntentExecutor):
 
         # Collect open order IDs to avoid mutation during iteration
         open_ids = [
-            oid_str
-            for oid_str, record in self.orders.items()
-            if record.status == OrderStatus.OPEN
+            oid_str for oid_str, record in self.orders.items() if record.status == OrderStatus.OPEN
         ]
 
         for oid_str in open_ids:
@@ -154,9 +152,7 @@ class PaperExecutor(IntentExecutor):
 
     def get_open_order_count(self) -> int:
         """Return number of currently open orders."""
-        return sum(
-            1 for record in self.orders.values() if record.status == OrderStatus.OPEN
-        )
+        return sum(1 for record in self.orders.values() if record.status == OrderStatus.OPEN)
 
     async def shutdown(self) -> None:
         """Release executor resources and clear state."""
@@ -234,10 +230,7 @@ class PaperExecutor(IntentExecutor):
         else:
             # Cancel all open orders for this market
             for record in self.orders.values():
-                if (
-                    record.intent.market_id == market
-                    and record.status == OrderStatus.OPEN
-                ):
+                if record.intent.market_id == market and record.status == OrderStatus.OPEN:
                     record.status = OrderStatus.CANCELLED
                     results[market]["cancelled"] += 1
 
@@ -275,7 +268,9 @@ class PaperExecutor(IntentExecutor):
         # Update position
         pos_key = record.intent.market_id
         current_pos = self.positions.get(pos_key)
-        size_delta = fill_result.fill_size if record.intent.side.value == "BUY" else -fill_result.fill_size
+        size_delta = (
+            fill_result.fill_size if record.intent.side.value == "BUY" else -fill_result.fill_size
+        )
 
         if current_pos is None:
             self.positions[pos_key] = PositionRecord(
@@ -306,9 +301,8 @@ class PaperExecutor(IntentExecutor):
             elif old_size * new_size > 0:
                 # Same direction, blend avg entry
                 current_pos.avg_entry = (
-                    (old_size * current_pos.avg_entry + size_delta * fill_result.fill_price)
-                    / new_size
-                )
+                    old_size * current_pos.avg_entry + size_delta * fill_result.fill_price
+                ) / new_size
                 current_pos.size = new_size
             else:
                 # Flips or reduces — position is now new direction
@@ -323,14 +317,16 @@ class PaperExecutor(IntentExecutor):
             timestamp=fill_result.timestamp,
             market_id=record.intent.market_id,
             description=(
-                f"{record.intent.side.value} {fill_result.fill_size} "
-                f"@ {fill_result.fill_price}"
+                f"{record.intent.side.value} {fill_result.fill_size} " f"@ {fill_result.fill_price}"
             ),
             delta_cash=cash_delta,
             delta_position=size_delta,
-            position_after=self.positions.get(pos_key, PositionRecord(
-                market_id=pos_key, outcome="", size=0.0, avg_entry=0.0, realized_pnl=0.0
-            )).size,
+            position_after=self.positions.get(
+                pos_key,
+                PositionRecord(
+                    market_id=pos_key, outcome="", size=0.0, avg_entry=0.0, realized_pnl=0.0
+                ),
+            ).size,
             cash_after=self.cash,
             fill_ref=fill_id,
         )
