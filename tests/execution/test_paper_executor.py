@@ -350,7 +350,7 @@ class TestPaperExecutorSimulateTick:
     @pytest.mark.asyncio
     async def test_simulate_tick_with_fills(self):
         """Tick should fill orders that cross the spread after a price move."""
-        cfg = FillModelConfig(mode=FillMode.PASSIVE)
+        cfg = FillModelConfig(mode=FillMode.PASSIVE, queue_position_pct=0.0)
         model = FillModel(cfg)
         ex = PaperExecutor(fill_model=model)
 
