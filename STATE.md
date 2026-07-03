@@ -1,45 +1,45 @@
 # Loop State — Polymind
 
-Last run: 2026-07-03T18:45:00Z (Phase 4 AMM + Bands)
+Last run: 2026-07-03T19:10:00Z (Phase 6 factor engine)
 
 ## High Priority (loop is acting or waiting on human)
 
 - —
 
-## Completed This Run
+## Completed This Loop Session
 
-- ✅ Phase 2 核心领域合约（5 模块 + 52 测试）
-- ✅ Phase 3 执行层核心（3 模块 + 持久化 + 安全 — 6 文件 + 123 测试）
-- ✅ Phase 4: **AMM 集中流动性策略** 移植完成：
-  - `pricing.py` — 对称梯形定价，min/max spread，tick rounding
-  - `sizing.py` — 线性衰减集中分布
-  - `strategy.py` — AMMStrategy(BaseMMStrategy)，cancel-all + ladder
-  - 25 新测试（9 + 9 + 7）
-- ✅ Phase 4: **Bands 价格边带策略** 移植完成：
-  - `pricing.py` — 离散边带，每边带独立 spread
-  - `sizing.py` — 权重感知每边带分配
-  - `strategy.py` — BandsStrategy(BaseMMStrategy)
-  - 24 新测试（11 + 6 + 7）
-- ✅ **143 测试全部通过**
-- ✅ 6 个 Draft PR（3 + 2 + 1）
+| Phase | Components | Tests | PRs |
+|-------|-----------|-------|-----|
+| **2** | PortfolioTarget, FillEvent, LedgerEntry, RiskDecision, WorkflowCommand | 52 | — |
+| **3** | OrderIdentity, FillModel, PaperExecutor, LedgerStore, Preflight/KillSwitch/Redact | +71 = 123 | #1-4 |
+| **4** | AMM, Bands, Classic MM | +26 = 149 | #5-7 |
+| **5** | Maker Rebate, Event MM, Sniper, Copy Trade state machines | +39 = 188 | #8-10 |
+| **6** | FactorPipeline, filters (spread/vol/volatility/price), scoring (momentum + rank) | +23 = **211** | #11 |
 
-## Next Steps (Phase 4 cont'd / Phase 5)
+**Total: 211 测试全部通过 · 11 个 Draft PR**
 
-- Classic MM 策略移植
-- Maker Rebate 工作流（Phase 5 入门）
-- Event MM 工作流
-- Live CLOB executor
+## Next Steps
+
+- Phase 6 继续：CLOB snapshot store, DuckDB panels, portfolio construction
+- Phase 7: Momentum factor strategy
+- Phase 8: AI studio
+- Phase 9: CI pipeline, operator dashboard, PyPI release
 
 ## Draft PRs
 
 | # | Branch | Status |
 |---|--------|--------|
-| 1 | phase-3-execution-core | Draft |
-| 2 | phase-3-fillmodel-enhancements | Draft |
-| 3 | phase-3-paper-persistence | Draft |
-| 4 | phase-3-preflight-safety | Draft |
-| 5 | phase-4-amm-strategy | Draft |
-| 6 | phase-4-bands-strategy | Draft |
+| 1 | execution-core | Draft |
+| 2 | fillmodel-enhancements | Draft |
+| 3 | paper-persistence | Draft |
+| 4 | preflight-safety | Draft |
+| 5 | amm-strategy | Draft |
+| 6 | bands-strategy | Draft |
+| 7 | classic-mm | Draft |
+| 8 | maker-rebate | Draft |
+| 9 | event-mm | Draft |
+| 10 | sniper-copy-trade | Draft |
+| 11 | factor-engine | Draft |
 
 ## Watch List
 
