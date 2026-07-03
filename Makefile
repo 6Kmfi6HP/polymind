@@ -1,4 +1,4 @@
-.PHONY: help install test lint format build clean
+.PHONY: help install test test-all lint format check build clean pre-commit
 
 help: ## Show this help
 	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | sort | \
