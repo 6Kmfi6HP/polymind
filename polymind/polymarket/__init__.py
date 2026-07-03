@@ -31,7 +31,7 @@ from polymind.polymarket.signer import (
     Signer,
     WalletCredentials,
 )
-from polymind.polymarket.metrics import AdapterMetrics, Counter, Histogram
+from polymind.polymarket.metrics import AdapterMetrics, Counter, Histogram, MetricsSummary
 
 __all__ = [
     "PolymarketClient",
@@ -60,4 +60,5 @@ __all__ = [
     "AdapterMetrics",
     "Counter",
     "Histogram",
+    "MetricsSummary",
 ]
