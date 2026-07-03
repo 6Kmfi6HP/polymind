@@ -5,29 +5,29 @@
 
 ## Executive Summary
 
-Polymind merges five Polymarket trading projects into a unified AI-native
-market-making and cross-sectional factor framework. Users describe strategies
+Polymind merges **eight existing Polymarket projects** into a unified AI-native
+market-making and cross-sectional factor framework. Four are market-making bots,
+four are factor research and backtesting frameworks. Users describe strategies
 in natural language; the framework assembles, tunes, and executes them from
 modular components.
 
-### Merged Projects
+### Merged Projects — Market-Making Bots
 
-| Project | Type | Key Contribution |
-|---------|------|------------------|
-| probablyprofit-ai-framework | AI agent framework | observe-decide-act loop, multi-LLM, risk mgmt, backtesting |
-| pm-official-mm-keeper | Official MM keeper | AMM concentrated liquidity, Bands strategy |
-| warproxxx-mm-bot | Community MM bot | Event-driven MM, triple-layer risk, position merging |
-| pm-terminal-all-in-one | Trading terminal | Maker rebate arbitrage, sniper, copy trade, ghost fill |
-| polymarket-cross-sectional-momentum | Factor research | Cross-sectional momentum, CLOB-native data pipeline, paper OMS |
+| Project | Source | Key Contribution |
+|---------|--------|------------------|
+| probablyprofit-ai-framework | `randomness11/probablyprofit` | observe-decide-act loop, multi-LLM, risk mgmt, backtesting |
+| pm-official-mm-keeper | `Polymarket/poly-market-maker` | AMM concentrated liquidity, Bands strategy |
+| warproxxx-mm-bot | `warproxxx/poly-maker` | Event-driven MM, triple-layer risk, position merging |
+| pm-terminal-all-in-one | `direkturcrypto/polymarket-terminal` | Maker rebate arbitrage, sniper, copy trade, ghost fill |
 
-### Incoming Reference Projects
+### Merged Projects — Factor Research & Backtesting
 
-| Project | Domain | Insight |
-|---------|--------|---------|
-| `recallnet/polymarket-cross-sectional-momentum` | Cross-sectional momentum on Polymarket | Backtest validated momentum signal (6.19 Sharpe) but midpoint prices untradeable; CLOB spread kills edge |
-| `oscarc17/Polymarket-Edge-Research` | Factor research framework | DuckDB panels, walk-forward backtest, execution-aware sim |
-| `evan-kolberg/prediction-market-backtesting` | Backtest engine | NautilusTrader integration, PMXT, passive order modeling |
-| `chiantsii/polymarket-quant` | State-based alpha | orderbook state → fair value → edge extraction pipeline |
+| Project | Source | Key Contribution |
+|---------|--------|------------------|
+| polymarket-cross-sectional-momentum | `recallnet/polymarket-cross-sectional-momentum` | Cross-sectional momentum pipeline, JSONL price store, paper OMS, momentum decay analysis |
+| Polymarket-Edge-Research | `oscarc17/Polymarket-Edge-Research` | DuckDB factor panels, walk-forward backtest, execution-aware simulation |
+| prediction-market-backtesting | `evan-kolberg/prediction-market-backtesting` | NautilusTrader backtest engine, passive order modeling, slippage models, queue position |
+| polymarket-quant | `chiantsii/polymarket-quant` | Orderbook state → fair value → edge extraction, micro-price, cross-book consistency |
 
 ---
 
@@ -216,17 +216,18 @@ polymind/
 │   │   │   └── classic_mm/     # Split USDC → limit sell (pm-terminal)
 │   │   │
 │   │   └── factors/            # Cross-sectional factor strategies
-│   │       ├── momentum/       # Momentum factor (from reference project)
+│   │       ├── momentum/       # Momentum factor (from polymarket-cross-sectional-momentum)
 │   │       ├── volatility/     # Volatility factor
 │   │       ├── volume/         # Volume factor
 │   │       ├── sentiment/      # Sentiment factor
-│   │       ├── composite/      # Multi-factor composite
+│   │       ├── composite/      # Multi-factor composite (from Edge-Research)
 │   │       └── hedge/          # Market-neutral hedge construction
 │   │
-│   ├── factors/                # Factor engine
+│   ├── factors/                # Factor engine (from cs-momentum + polymarket-quant)
 │   │   ├── __init__.py
-│   │   ├── pipeline.py         # Collect → score → rank → select pipeline
-│   │   ├── registry.py         # Factor registration & composition
+│   │   ├── pipeline.py         # Collect → score → rank → select (from cs-momentum)
+│   │   ├── registry.py         # Factor registration & composition (from Edge-Research)
+│   │   └── features.py         # Feature library: micro-price, spread, depth (from polymarket-quant)
 │   │   ├── backtest.py         # Factor-specific backtest (walk-forward)
 │   │   └── execution.py        # Hybrid MM execution (limit order entry)
 │   │
@@ -252,9 +253,12 @@ polymind/
 │   │   └── drawdown.py
 │   │
 │   ├── backtesting/            # Backtesting engine
-│   │   ├── engine.py           # Portfolio backtest
-│   │   ├── factor_bt.py        # Cross-sectional factor backtest
+│   │   ├── engine.py           # Portfolio backtest (NautilusTrader from prediction-market-backtesting)
+│   │   ├── factor_bt.py        # Cross-sectional factor backtest (walk-forward from Edge-Research)
 │   │   ├── data.py             # Data generation / loading
+│   │   └── metrics.py          # Performance metrics
+│   │
+│   ├── polymarket/             # Polymarket integration (from probablyprofit + l2-collector)
 │   │   └── metrics.py          # Performance metrics
 │   │
 │   ├── studio/                 # AI strategy studio
@@ -354,16 +358,20 @@ polymind/
 ## Design Decisions
 
 ### Why Python for everything
-Single-language stack that `pip install` covers. All strategies share the
-risk/agent/core infrastructure. The reference factor project is TypeScript
-but its logic (collect → score → rank → execute) is straightforward to port.
+Single-language stack that `pip install` covers. The eight merged projects span
+Python (probablyprofit, pm-official-mm-keeper, warproxxx-mm-bot) and TypeScript
+(pm-terminal, polymarket-cross-sectional-momentum, polymarket-quant). TypeScript
+projects are ported to Python for a unified codebase. The core logic (CLOB
+trading, factor computation, pipeline orchestration) is algorithmic — language
+is a packaging detail, not a semantic constraint.
 
 ### Factor strategies use MM execution
-**Critical lesson from the reference project**: midpoint-based backtesting
-systematically overstates returns. CLOB bid-ask spread (2–10%) can exceed
-the factor signal. Polymind factor strategies enter/exit via **limit orders**
-that earn the spread, not market orders that pay it. This makes factor
-strategies inherently hybrid — directional factor signal with MM execution.
+**Critical lesson from recallnet/polymarket-cross-sectional-momentum**:
+midpoint-based backtesting systematically overstates returns. CLOB bid-ask
+spread (2–10%) can exceed the factor signal. Polymind factor strategies
+enter/exit via **limit orders** that earn the spread, not market orders that
+pay it. This makes factor strategies inherently hybrid — directional factor
+signal with MM execution.
 
 ### Factor pipeline is real-time, not batch
 The reference project collected snapshots on a timer and ran scoring on each
@@ -380,31 +388,52 @@ source of truth for fill confirmation.
 
 ## Reference Project Learnings
 
+The factor research projects merged into Polymind come with critical learnings
+that shape the framework's design. These are not just academic references — they
+are battle-tested implementations whose successes and failures directly inform
+Polymind's architecture.
+
 ### `recallnet/polymarket-cross-sectional-momentum`
 
-| Aspect | Finding | Our Response |
-|--------|---------|--------------|
-| Momentum signal | Real (6.19 Sharpe backtest) | Keep momentum factor, but... |
-| Execution cost | 2–10% spread kills edge | Use limit orders, earn spread |
-| Midpoint prices | Untradeable reference price | Backtest against CLOB bid/ask only |
-| Hold period | Short holds amplify cost | Hybrid: hold for signal, earn spread on entry/exit |
-| CLOB data pipeline | Worked correctly | Reuse collector + JSONL store pattern |
+| Aspect | Finding | Polymind Response |
+|--------|---------|------------------|
+| Momentum signal | Real (6.19 Sharpe backtest) | Implement momentum factor with multiple lookbacks |
+| Execution cost | 2–10% spread kills edge | Factor strategies use **limit orders** (earn spread, not pay it) |
+| Midpoint prices | Untradeable reference price | Backtest against CLOB bid/ask only; never Gamma midpoint |
+| Hold period | Short holds amplify cost | Hold periods configurable per factor (1h–21d) |
+| CLOB data pipeline | Collector + JSONL store worked correctly | Reuse `collect → appendSnapshot → readSnapshots` pattern |
+| Data pipeline design | Collect mid/bid/ask per token as JSONL | Adopt the same JSONL snapshot store in `storage/price_store.py` |
+| Paper trading scaffold | Dedup, budget enforcement, fill tracking | Integrate into backtesting engine |
+| **−13.6% live PnL** | **18 trades, 11% hit rate** | **Hybrid factor-MM: directional signal + market-making execution** |
 
 ### `oscarc17/Polymarket-Edge-Research`
 
-| Aspect | Insight |
-|--------|---------|
-| DuckDB panels | Use for large-scale factor research |
-| Walk-forward backtest | Prevent overfitting in factor selection |
-| Execution-aware simulation | Model slippage, not midpoint |
+| Aspect | Insight | Polymind Response |
+|--------|---------|------------------|
+| DuckDB panels | Structured factor research data model | Adopt for large-scale factor analysis |
+| Walk-forward backtest | Prevents overfitting in factor selection | `backtesting/factor_bt.py` with walk-forward support |
+| Execution-aware simulation | Model slippage and spread, not midpoint | Execution model that uses CLOB bid/ask |
+| Time-series feature panels | Structured feature engineering for factors | Factor computation pipeline with windowed features |
+| Gamma/CLOB/Data API integration | Multiple data source ingestion | Unified data layer in `polymarket/data_api.py` |
+
+### `evan-kolberg/prediction-market-backtesting`
+
+| Aspect | Insight | Polymind Response |
+|--------|---------|------------------|
+| NautilusTrader integration | Professional-grade backtesting engine | Adapter layer in `backtesting/engine.py` |
+| Passive order modeling | Queue position, fill probability, latency | Order execution model for limit orders |
+| Slippage models | Realistic cost estimation | Backtest metrics with configurable slippage |
+| Multi-market runner | Portfolio-level backtesting | Factor strategy portfolio backtest |
+| PMXT custom instruments | Polymarket-specific instrument definition | Token-aware order management |
 
 ### `chiantsii/polymarket-quant`
 
-| Aspect | Insight |
-|--------|---------|
-| State → fair value → edge | Factor construction from orderbook state |
-| Micro-price | Better reference price than midpoint |
-| Cross-book consistency | Detect anomalous pricing across related markets |
+| Aspect | Insight | Polymind Response |
+|--------|---------|------------------|
+| State → fair value → edge | Structured feature extraction from orderbook | Factor construction methodology |
+| Micro-price | Better reference price than midpoint | Use as alternative to simple mid in factor computation |
+| Cross-book consistency | Detect anomalous pricing across related markets | Composite factor with cross-market validation |
+| Quote/spread/micro-price features | Rich feature set for alpha research | Factor feature library |
 
 ---
 

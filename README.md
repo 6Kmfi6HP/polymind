@@ -35,17 +35,25 @@ def calculate_order_size(midpoint, balance, volatility):
 "Cross-sectional momentum on all active markets, lookback 24h, top decile, 4h hold"
 ```
 
-Polymind merges **four existing Polymarket trading projects** into one unified framework, plus incorporates learnings from **five reference research projects** on cross-sectional factor trading:
+Polymind merges **eight existing Polymarket projects** into one unified framework — four market-making bots and four factor research frameworks:
+
+### Market-Making Bots
 
 | Project | Source | Key Contribution |
 |---------|--------|------------------|
-| probablyprofit-ai-framework | AI agent framework | observe-decide-act loop, multi-LLM, risk mgmt, backtesting |
-| pm-official-mm-keeper | Polymarket official | AMM concentrated liquidity strategy, Bands strategy |
-| poly-maker (warproxxx) | Community | Event-driven MM, triple-layer risk, position merging |
-| pm-terminal (direkturcrypto) | Community | Maker rebate arbitrage, sniper, copy trade, ghost fill detection |
-| polymarket-cross-sectional-momentum | Factor research | Cross-sectional momentum pipeline, CLOB-native data, paper OMS |
-| Polymarket-Edge-Research (oscarc17) | Factor research | DuckDB panels, walk-forward backtest, execution-aware sim |
-| prediction-market-backtesting (evan-kolberg) | Backtest engine | NautilusTrader integration, passive order modeling |
+| probablyprofit-ai-framework | `randomness11/probablyprofit` | observe-decide-act loop, multi-LLM, risk mgmt, backtesting |
+| pm-official-mm-keeper | `Polymarket/poly-market-maker` | AMM concentrated liquidity, Bands strategy |
+| poly-maker (warproxxx) | `warproxxx/poly-maker` | Event-driven MM, triple-layer risk, position merging |
+| pm-terminal (direkturcrypto) | `direkturcrypto/polymarket-terminal` | Maker rebate, sniper, copy trade, ghost fill detection |
+
+### Factor Research & Backtesting
+
+| Project | Source | Key Contribution |
+|---------|--------|------------------|
+| polymarket-cross-sectional-momentum | `recallnet/polymarket-cross-sectional-momentum` | Cross-sectional momentum pipeline, JSONL price store, paper OMS |
+| Polymarket-Edge-Research | `oscarc17/Polymarket-Edge-Research` | DuckDB factor panels, walk-forward backtest, execution-aware simulation |
+| prediction-market-backtesting | `evan-kolberg/prediction-market-backtesting` | NautilusTrader backtest engine, passive order modeling, slippage models |
+| polymarket-quant | `chiantsii/polymarket-quant` | Orderbook state → fair value → edge extraction pipeline |
 
 ---
 
@@ -273,11 +281,13 @@ MIT License — see [LICENSE](LICENSE) for details.
 Built from:
 - [probablyprofit](https://github.com/randomness11/probablyprofit) by @ankitkr0
 - [poly-market-maker](https://github.com/Polymarket/poly-market-maker) by Polymarket
-- [poly-maker](https://github.com/warproxxx/warproxxx-mm-bot) by warproxxx
-- [pm-terminal](https://github.com/direkturcrypto/pm-terminal-all-in-one) by direkturcrypto
+- [poly-maker](https://github.com/warproxxx/poly-maker) by warproxxx
+- [pm-terminal](https://github.com/direkturcrypto/polymarket-terminal) by direkturcrypto
 - [polymarket-cross-sectional-momentum](https://github.com/recallnet/polymarket-cross-sectional-momentum) by recallnet
 - [Polymarket-Edge-Research](https://github.com/oscarc17/Polymarket-Edge-Research) by oscarc17
 - [prediction-market-backtesting](https://github.com/evan-kolberg/prediction-market-backtesting) by evan-kolberg
+- [polymarket-quant](https://github.com/chiantsii/polymarket-quant) by chiantsii
+- [polymarket-l2-collector](https://github.com/Caiooooo/polymarket-l2-collector) by Caiooooo
 
 ---
 
