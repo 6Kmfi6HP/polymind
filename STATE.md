@@ -4,8 +4,7 @@ Last run: 2026-07-03T17:16:00Z (local triage)
 
 ## High Priority (loop is acting or waiting on human)
 
-- **Loop 基础设施就绪但未提交** — `.claude/`、`.codex/`、`LOOP.md`、`STATE.md`、`loop-*.md`、`skills/` 等 8 个文件处于 untracked 状态。当务之急是决定是否将 loop 配置文件纳入版本控制（建议提交，技能定义是工程资产）。
-- **测试文件已删除** — 4 个 contract 测试文件已从工作树中删除，但 git 仍追踪其删除状态（`D tests/`）。需要 commit 或 reset。
+- —
 
 ## Watch List
 
