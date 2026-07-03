@@ -43,3 +43,6 @@ coverage.xml
 # Type checking
 .mypy_cache/
 .types/
+
+# Other tools (not used in this project)
+.codex/
