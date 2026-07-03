@@ -127,7 +127,7 @@ class IntelligenceAgent(BaseAgent):
     async def reflect(self, outcome: ActionResult) -> Reflection:
         """Reflect on the outcome and produce an insight."""
         if outcome.success:
-            insight = f"Action completed successfully: " f"{outcome.data.get('action', 'unknown')}"
+            insight = f"Action completed successfully: {outcome.data.get('action', 'unknown')}"
             suggested_improvement: str | None = None
         else:
             insight = f"Action failed: {outcome.error or 'unknown error'}"
