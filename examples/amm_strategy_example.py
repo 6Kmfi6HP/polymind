@@ -110,9 +110,7 @@ def print_status(executor: PaperExecutor) -> None:
         print(f"{'Market':<20} {'Outcome':<6} {'Size':>8} {'Avg Entry':>10}")
         print("-" * 60)
         for pos in executor.positions.values():
-            print(
-                f"{pos.market_id:<20} {pos.outcome:<6} {pos.size:>8.2f} " f"{pos.avg_entry:>10.6f}"
-            )
+            print(f"{pos.market_id:<20} {pos.outcome:<6} {pos.size:>8.2f} {pos.avg_entry:>10.6f}")
 
     if executor.fills:
         print(f"\n{'FILLS':^60}")
@@ -120,8 +118,7 @@ def print_status(executor: PaperExecutor) -> None:
         print("-" * 60)
         for f in executor.fills[-6:]:  # show last 6 fills
             print(
-                f"{f.fill_id:<14} {f.side.value:<6} {f.price:>10.6f} "
-                f"{f.size:>8.2f} {f.fee:>8.4f}"
+                f"{f.fill_id:<14} {f.side.value:<6} {f.price:>10.6f} {f.size:>8.2f} {f.fee:>8.4f}"
             )
 
     if executor.orders:

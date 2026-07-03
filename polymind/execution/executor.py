@@ -317,7 +317,7 @@ class PaperExecutor(IntentExecutor):
             timestamp=fill_result.timestamp,
             market_id=record.intent.market_id,
             description=(
-                f"{record.intent.side.value} {fill_result.fill_size} " f"@ {fill_result.fill_price}"
+                f"{record.intent.side.value} {fill_result.fill_size} @ {fill_result.fill_price}"
             ),
             delta_cash=cash_delta,
             delta_position=size_delta,

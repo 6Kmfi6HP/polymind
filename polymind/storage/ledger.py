@@ -74,8 +74,7 @@ class LedgerStore:
         """Return the net P&L for a market (sum of delta_cash)."""
         conn = await self._ensure_connection()
         row = await conn.fetch_one(
-            "SELECT COALESCE(SUM(delta_cash), 0.0) AS pnl "
-            "FROM ledger_entries WHERE market_id = ?",
+            "SELECT COALESCE(SUM(delta_cash), 0.0) AS pnl FROM ledger_entries WHERE market_id = ?",
             (market_id,),
         )
         return row["pnl"] if row else 0.0
