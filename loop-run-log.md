@@ -48,3 +48,6 @@ Append one entry per run. Prune entries older than 30 days.
 
 2026-07-04T00:42:00Z — dev-loop — fix-proposed — Phase 10-11: Operations Dashboard + PyPI Release Readiness.
 {"run_id":"2026-07-04T00:42:00Z","pattern":"dev-loop","duration_s":5400,"items_found":12,"actions_taken":12,"escalations":1,"tokens_estimate":450000,"outcome":"fix-proposed","note":"Phase 10: 运营仪表盘 (reports package: positions/P&L/risk/dashboard, CLI report commands, 14 tests). Phase 11: PyPI 发布准备 (Makefile, pre-commit, build verification, CHANGELOG). 831测试全通过. Draft PR #18 创建. integration-tests 分支推送完成."}
+
+2026-07-04T00:55:00Z — dev-loop — fix-proposed — Phase 12 Agent Providers 完成. 916 tests.
+{"run_id":"2026-07-04T00:55:00Z","pattern":"dev-loop","duration_s":1800,"items_found":5,"actions_taken":5,"escalations":0,"tokens_estimate":250000,"outcome":"fix-proposed","note":"Phase 12 Agent Providers: AnthropicAgent, OpenAIAgent, GeminiAgent, EnsembleAgent, IntelligenceAgent. 85 new tests, 916 total. integration-tests推送完成. Draft PR #18更新."}
