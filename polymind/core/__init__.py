@@ -14,6 +14,7 @@ from polymind.core.fills import FillEvent, FillSource
 from polymind.core.intents import IntentExecutor, StrategyIntent
 from polymind.core.ledger import EntryType, LedgerEntry
 from polymind.core.portfolio import PortfolioTarget, PositionDirection
+from polymind.core.risk import RiskContext, RiskDecision, RiskGate
 from polymind.core.strategy import BaseMMStrategy
 
 __all__ = [
@@ -27,5 +28,8 @@ __all__ = [
     "LedgerEntry",
     "PortfolioTarget",
     "PositionDirection",
+    "RiskContext",
+    "RiskDecision",
+    "RiskGate",
     "StrategyIntent",
 ]
