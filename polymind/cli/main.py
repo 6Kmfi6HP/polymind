@@ -69,46 +69,49 @@ def run(strategy_text, strategy_file, paper, dry_run, once, interval):
 
         polymind run -s my_strategy.txt --live
     """
-    console.print(BANNER)
+    try:
+        console.print(BANNER)
 
-    # Determine strategy text
-    if strategy_file:
-        with open(strategy_file) as f:
-            strategy_text = f.read()
-    elif not strategy_text:
-        console.print("[yellow]No strategy provided. Use inline text or --strategy-file.[/yellow]")
-        return
+        # Determine strategy text
+        if strategy_file:
+            with open(strategy_file) as f:
+                strategy_text = f.read()
+        elif not strategy_text:
+            console.print("[yellow]No strategy provided. Use inline text or --strategy-file.[/yellow]")
+            return
 
-    # Show what we're running
-    mode = "[yellow]DRY RUN[/yellow]" if dry_run else "[cyan]PAPER[/cyan]" if paper else "[red]LIVE[/red]"
-    console.print(f"  Strategy: {strategy_text[:60]}...")
-    console.print(f"  Mode:     {mode}")
-    console.print(f"  Interval: {interval}s")
-    console.print()
+        # Show what we're running
+        mode = "[yellow]DRY RUN[/yellow]" if dry_run else "[cyan]PAPER[/cyan]" if paper else "[red]LIVE[/red]"
+        console.print(f"  Strategy: {strategy_text[:60]}...")
+        console.print(f"  Mode:     {mode}")
+        console.print(f"  Interval: {interval}s")
+        console.print()
 
-    # Wire up strategy execution
-    strategy_text = strategy_text or ""
-    from polymind.studio.generator import StrategyGenerator
+        # Wire up strategy execution
+        strategy_text = strategy_text or ""
+        from polymind.studio.generator import StrategyGenerator
 
-    gen = StrategyGenerator()
-    config = gen.generate(strategy_text)
-    console.print(f"  Strategy: [bold]{config.strategy_name}[/bold] ({config.template.name})")
-    console.print(f"  Confidence: {config.confidence:.0%}")
-    console.print()
+        gen = StrategyGenerator()
+        config = gen.generate(strategy_text)
+        console.print(f"  Strategy: [bold]{config.strategy_name}[/bold] ({config.template.name})")
+        console.print(f"  Confidence: {config.confidence:.0%}")
+        console.print()
 
-    if config.params:
-        console.print("[bold]Parameters:[/bold]")
-        for key, val in config.params.items():
-            console.print(f"  {key}: {val}")
+        if config.params:
+            console.print("[bold]Parameters:[/bold]")
+            for key, val in config.params.items():
+                console.print(f"  {key}: {val}")
 
-    if dry_run or once:
-        console.print("[dim]Dry-run mode — no orders placed.[/dim]")
-    else:
-        run_mode = "paper" if paper else "live"
-        console.print(f"[yellow]→ Would execute in {run_mode} mode (v0.2 runtime)[/yellow]")
+        if dry_run or once:
+            console.print("[dim]Dry-run mode — no orders placed.[/dim]")
+        else:
+            run_mode = "paper" if paper else "live"
+            console.print(f"[yellow]→ Would execute in {run_mode} mode (v0.2 runtime)[/yellow]")
 
-    console.print("[green]✓[/green] Strategy parsed and validated.")
-    console.print()
+        console.print("[green]✓[/green] Strategy parsed and validated.")
+        console.print()
+    except Exception as e:
+        console.print(f"[red]Error: {e}[/red]")
 
 
 @cli.command(name="strategies")
@@ -188,6 +191,17 @@ def setup():
     console.print(Panel(env_template.strip(), border_style="dim"))
 
 
+def _run_async(coro):
+    """Run an async coroutine synchronously in a new event loop."""
+    import asyncio
+    loop = asyncio.new_event_loop()
+    asyncio.set_event_loop(loop)
+    try:
+        return loop.run_until_complete(coro)
+    finally:
+        loop.close()
+
+
 @cli.group()
 def report():
     """Generate operator reports."""
@@ -197,74 +211,71 @@ def report():
 @report.command()
 def dashboard():
     """Show combined operator dashboard."""
-    from polymind.storage.database import DatabaseConfig
-    from polymind.storage.ledger import LedgerStore
-    from polymind.risk.manager import RiskManager
-    from polymind.risk.limits import LimitsConfig, LimitsManager
-    from polymind.reports.dashboard import generate_dashboard, display_dashboard
+    try:
+        from polymind.storage.database import DatabaseConfig
+        from polymind.storage.ledger import LedgerStore
+        from polymind.risk.manager import RiskManager
+        from polymind.risk.limits import LimitsConfig, LimitsManager
+        from polymind.reports.dashboard import generate_dashboard, display_dashboard
 
-    import asyncio
-    loop = asyncio.new_event_loop()
-    asyncio.set_event_loop(loop)
+        config = load_config()
+        ledger = LedgerStore(DatabaseConfig(path=getattr(config, "db_path", ":memory:")))
+        risk_mgr = RiskManager()
+        limits_mgr = LimitsManager(LimitsConfig(positions=[], order_rate=None, daily_loss=None, exposure=None))
 
-    config = load_config()
-    ledger = LedgerStore(DatabaseConfig(path=getattr(config, "db_path", ":memory:")))
-    risk_mgr = RiskManager()
-    limits_mgr = LimitsManager(LimitsConfig(positions=[], order_rate=None, daily_loss=None, exposure=None))
-
-    tables = loop.run_until_complete(generate_dashboard(ledger, risk_mgr, limits_mgr))
-    display_dashboard(tables)
-    loop.close()
+        tables = _run_async(generate_dashboard(ledger, risk_mgr, limits_mgr))
+        display_dashboard(tables)
+    except Exception as e:
+        console.print(f"[red]Error: {e}[/red]")
 
 
 @report.command()
 def positions():
     """Show position summary."""
-    import asyncio
-    loop = asyncio.new_event_loop()
-    asyncio.set_event_loop(loop)
+    try:
+        config = load_config()
+        from polymind.storage.database import DatabaseConfig
+        from polymind.storage.ledger import LedgerStore
+        from polymind.reports.positions import get_position_report, format_positions_table
 
-    config = load_config()
-    from polymind.storage.database import DatabaseConfig
-    from polymind.storage.ledger import LedgerStore
-    from polymind.reports.positions import get_position_report, format_positions_table
-
-    ledger = LedgerStore(DatabaseConfig(path=getattr(config, "db_path", ":memory:")))
-    positions = loop.run_until_complete(get_position_report(ledger))
-    console.print(format_positions_table(positions))
-    loop.close()
+        ledger = LedgerStore(DatabaseConfig(path=getattr(config, "db_path", ":memory:")))
+        positions = _run_async(get_position_report(ledger))
+        console.print(format_positions_table(positions))
+    except Exception as e:
+        console.print(f"[red]Error: {e}[/red]")
 
 
 @report.command()
 def pnl():
     """Show P&L summary."""
-    import asyncio
-    loop = asyncio.new_event_loop()
-    asyncio.set_event_loop(loop)
+    try:
+        config = load_config()
+        from polymind.storage.database import DatabaseConfig
+        from polymind.storage.ledger import LedgerStore
+        from polymind.reports.pnl import get_pnl_report, format_pnl_table
 
-    config = load_config()
-    from polymind.storage.database import DatabaseConfig
-    from polymind.storage.ledger import LedgerStore
-    from polymind.reports.pnl import get_pnl_report, format_pnl_table
-
-    ledger = LedgerStore(DatabaseConfig(path=getattr(config, "db_path", ":memory:")))
-    report = loop.run_until_complete(get_pnl_report(ledger))
-    cash = loop.run_until_complete(ledger.get_cash_balance())
-    console.print(format_pnl_table(report, cash))
-    loop.close()
+        ledger = LedgerStore(DatabaseConfig(path=getattr(config, "db_path", ":memory:")))
+        report = _run_async(get_pnl_report(ledger))
+        cash = _run_async(ledger.get_cash_balance())
+        console.print(format_pnl_table(report, cash))
+    except Exception as e:
+        console.print(f"[red]Error: {e}[/red]")
 
 
 @report.command()
 def risk():
     """Show risk status."""
-    from polymind.risk.manager import RiskManager
-    from polymind.risk.limits import LimitsConfig, LimitsManager
-    from polymind.reports.risk import get_risk_report, format_risk_table
+    try:
+        from polymind.risk.manager import RiskManager
+        from polymind.risk.limits import LimitsConfig, LimitsManager
+        from polymind.reports.risk import get_risk_report, format_risk_table
 
-    risk_mgr = RiskManager()
-    limits_mgr = LimitsManager(LimitsConfig(positions=[], order_rate=None, daily_loss=None, exposure=None))
-    report = get_risk_report(risk_mgr, limits_mgr)
-    console.print(format_risk_table(report))
+        risk_mgr = RiskManager()
+        limits_mgr = LimitsManager(LimitsConfig(positions=[], order_rate=None, daily_loss=None, exposure=None))
+        report = get_risk_report(risk_mgr, limits_mgr)
+        console.print(format_risk_table(report))
+    except Exception as e:
+        console.print(f"[red]Error: {e}[/red]")
 
 
 def main():
