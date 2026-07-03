@@ -1,6 +1,6 @@
 # Loop State — Polymind
 
-Last run: 2026-07-03T17:57:00Z (Phase 3 execution core)
+Last run: 2026-07-03T18:15:00Z (Phase 3 execution complete)
 
 ## High Priority (loop is acting or waiting on human)
 
@@ -13,18 +13,33 @@ Last run: 2026-07-03T17:57:00Z (Phase 3 execution core)
   - `OrderIdentity` — 冻结 dataclass，确定性身份，hashable，dict-key，canonical string
   - `FillModel` / `MarketSnapshot` / `FillModelConfig` — 被动/吃单填充模拟，滑点/费率/价格交叉检测
   - `PaperExecutor` — 内存沙箱，实现 `IntentExecutor`，订单放置/去重/取消，FillEvent + LedgerEntry 记录，现金/仓位跟踪
-- ✅ 3 个新模块 + 3 个测试文件 + 94 测试全部通过
+- ✅ Phase 3 FillModel 增强：
+  - 部分填充（ask_size/bid_size 深度限制）
+  - 队列位置概率模型
+  - 到期（expiry）检查
+- ✅ Phase 3 持久化：`LedgerStore` — SQLite 后备的 append-only 存储
+- ✅ Phase 3 安全：`PreflightChecker` / `KillSwitch` / `LogRedaction`
+- ✅ 11 个新模块 + 6 个新测试文件 + **123 测试全部通过**
 - ✅ 设计文档 `docs/superpowers/specs/2026-07-03-phase3-execution-core-design.md`
 - ✅ 实现计划 `docs/superpowers/plans/2026-07-03-phase3-execution-core.md`
-- ✅ 每步 TDD + 独立 commit
+- ✅ 4 个 Draft PR 等待 review
 
-## Next Steps (Phase 3 cont'd / Phase 4)
+## Next Steps (Phase 4: Official MM port / Phase 5: Terminal workflows)
 
-- PaperExecutor 持久化存储（SQLite/duckdb 后端）
 - Live CLOB executor（Polymarket SDK 封装）
 - Post-only/taker 执行策略细化
 - WebSocket 唤醒 + CLOB 交叉检查 + on-chain 对账
-- 预检（preflight）和安全机制
+- Phase 4: AMM/Bands 纯数学移植
+- Phase 5: Maker Rebate / Event MM / Sniper / Copy Trade 工作流
+
+## Draft PRs Created
+
+| PR | Branch | Status |
+|----|--------|--------|
+| [#1](https://github.com/6Kmfi6HP/polymind/pull/1) | phase-3-execution-core | Draft |
+| [#2](https://github.com/6Kmfi6HP/polymind/pull/2) | phase-3-fillmodel-enhancements | Draft |
+| [#3](https://github.com/6Kmfi6HP/polymind/pull/3) | phase-3-paper-persistence | Draft |
+| [#4](https://github.com/6Kmfi6HP/polymind/pull/4) | phase-3-preflight-safety | Draft |
 
 ## Watch List
 
