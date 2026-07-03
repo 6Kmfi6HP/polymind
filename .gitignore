@@ -46,3 +46,6 @@ coverage.xml
 
 # Other tools (not used in this project)
 .codex/
+
+# Docs site (mkdocs output)
+site/
