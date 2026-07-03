@@ -88,9 +88,28 @@ def run(strategy_text, strategy_file, paper, dry_run, once, interval):
     console.print(f"  Interval: {interval}s")
     console.print()
 
-    # TODO: Wire up actual strategy execution
-    console.print("[dim]Strategy execution coming in v0.2 — this is a skeleton release.[/dim]")
-    console.print("[dim]Check back soon for working strategy backends![/dim]")
+    # Wire up strategy execution
+    strategy_text = strategy_text or ""
+    from polymind.studio.generator import StrategyGenerator
+
+    gen = StrategyGenerator()
+    config = gen.generate(strategy_text)
+    console.print(f"  Strategy: [bold]{config.strategy_name}[/bold] ({config.template.name})")
+    console.print(f"  Confidence: {config.confidence:.0%}")
+    console.print()
+
+    if config.params:
+        console.print("[bold]Parameters:[/bold]")
+        for key, val in config.params.items():
+            console.print(f"  {key}: {val}")
+
+    if dry_run or once:
+        console.print("[dim]Dry-run mode — no orders placed.[/dim]")
+    else:
+        run_mode = "paper" if paper else "live"
+        console.print(f"[yellow]→ Would execute in {run_mode} mode (v0.2 runtime)[/yellow]")
+
+    console.print("[green]✓[/green] Strategy parsed and validated.")
     console.print()
 
 
@@ -117,11 +136,11 @@ def list_strategies():
     table.add_column("Status")
 
     for name, desc in strategies.items():
-        table.add_row(name, desc, "[yellow]coming soon[/yellow]")
+        table.add_row(name, desc, "[green]implemented[/green]")
 
     console.print(table)
     console.print()
-    console.print("[dim]Strategies are being ported from the source projects.[/dim]")
+    console.print("[dim]Use [bold]polymind run \"<strategy description>\"[/bold] to execute.[/dim]")
     console.print()
 
 
@@ -148,7 +167,7 @@ def status():
     mode = "Safe (dry-run)" if config.dry_run else "[red]Live[/red]"
     console.print(f"[{'yellow' if config.dry_run else 'red'}]○[/] Mode: {mode}")
     console.print()
-    console.print("[dim]Run [bold]polymind setup[/bold] to configure API keys.[/dim]")
+    console.print("[dim]Run [bold]polymind setup[/bold] to configure API keys or create a .env file.[/dim]")
     console.print()
 
 

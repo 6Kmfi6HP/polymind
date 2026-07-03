@@ -30,5 +30,17 @@ class TestCLI:
     def test_version(self):
         runner = CliRunner()
         result = runner.invoke(cli, ["--version"])
-        # CLI may or may not have --version, both are fine
         assert result.exit_code in (0, 2)
+
+    def test_run_with_strategy_text(self):
+        runner = CliRunner()
+        result = runner.invoke(cli, ["run", "AMM market making with 5 levels"])
+        assert result.exit_code == 0
+        assert "Strategy" in result.output
+        assert "AMM" in result.output or "amm" in result.output.lower()
+
+    def test_run_without_strategy(self):
+        runner = CliRunner()
+        result = runner.invoke(cli, ["run"])
+        assert result.exit_code == 0
+        assert "No strategy provided" in result.output
