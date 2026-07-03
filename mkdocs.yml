@@ -1,0 +1,49 @@
+site_name: Polymind
+site_description: AI-Native Market Making for Polymarket
+site_url: https://polymind.readthedocs.io/
+repo_url: https://github.com/
+edit_uri: ""
+
+theme:
+  name: material
+  features:
+    - navigation.tabs
+    - navigation.sections
+    - toc.integrate
+  palette:
+    - scheme: default
+      primary: indigo
+      accent: indigo
+      toggle:
+        icon: material/toggle-switch-off-outline
+        name: Switch to dark mode
+    - scheme: slate
+      primary: indigo
+      accent: indigo
+      toggle:
+        icon: material/toggle-switch
+        name: Switch to light mode
+
+markdown_extensions:
+  - admonition
+  - codehilite
+  - pymdownx.superfences
+  - pymdownx.tabbed
+  - toc:
+      permalink: true
+
+nav:
+  - Home: index.md
+  - Architecture: architecture.md
+  - API Reference:
+    - Core: api/core.md
+    - Execution: api/execution.md
+    - Strategies: api/strategies.md
+    - Polymarket: api/polymarket.md
+  - Guides:
+    - Getting Started: guides/getting-started.md
+
+extra:
+  social:
+    - icon: fontawesome/brands/github
+      link: https://github.com/
