@@ -100,9 +100,10 @@ dev = [
 ]
 
 [project.urls]
-Homepage = "https://github.com/"
-Documentation = "https://github.com/#readme"
-Repository = "https://github.com/"
+Homepage = "https://github.com/6Kmfi6HP/polymind"
+Documentation = "https://github.com/6Kmfi6HP/polymind#readme"
+Repository = "https://github.com/6Kmfi6HP/polymind"
+Issues = "https://github.com/6Kmfi6HP/polymind/issues"
 
 [project.scripts]
 polymind = "polymind.cli.main:main"
