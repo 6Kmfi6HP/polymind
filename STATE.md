@@ -1,6 +1,6 @@
 # Loop State — Polymind
 
-Last run: 2026-07-03T18:15:00Z (Phase 3 execution complete)
+Last run: 2026-07-03T18:45:00Z (Phase 4 AMM + Bands)
 
 ## High Priority (loop is acting or waiting on human)
 
@@ -8,38 +8,38 @@ Last run: 2026-07-03T18:15:00Z (Phase 3 execution complete)
 
 ## Completed This Run
 
-- ✅ Phase 2 核心领域合约全部冻结（5 个模块 + 52 测试）
-- ✅ Phase 3 执行层核心组件全部实现：
-  - `OrderIdentity` — 冻结 dataclass，确定性身份，hashable，dict-key，canonical string
-  - `FillModel` / `MarketSnapshot` / `FillModelConfig` — 被动/吃单填充模拟，滑点/费率/价格交叉检测
-  - `PaperExecutor` — 内存沙箱，实现 `IntentExecutor`，订单放置/去重/取消，FillEvent + LedgerEntry 记录，现金/仓位跟踪
-- ✅ Phase 3 FillModel 增强：
-  - 部分填充（ask_size/bid_size 深度限制）
-  - 队列位置概率模型
-  - 到期（expiry）检查
-- ✅ Phase 3 持久化：`LedgerStore` — SQLite 后备的 append-only 存储
-- ✅ Phase 3 安全：`PreflightChecker` / `KillSwitch` / `LogRedaction`
-- ✅ 11 个新模块 + 6 个新测试文件 + **123 测试全部通过**
-- ✅ 设计文档 `docs/superpowers/specs/2026-07-03-phase3-execution-core-design.md`
-- ✅ 实现计划 `docs/superpowers/plans/2026-07-03-phase3-execution-core.md`
-- ✅ 4 个 Draft PR 等待 review
+- ✅ Phase 2 核心领域合约（5 模块 + 52 测试）
+- ✅ Phase 3 执行层核心（3 模块 + 持久化 + 安全 — 6 文件 + 123 测试）
+- ✅ Phase 4: **AMM 集中流动性策略** 移植完成：
+  - `pricing.py` — 对称梯形定价，min/max spread，tick rounding
+  - `sizing.py` — 线性衰减集中分布
+  - `strategy.py` — AMMStrategy(BaseMMStrategy)，cancel-all + ladder
+  - 25 新测试（9 + 9 + 7）
+- ✅ Phase 4: **Bands 价格边带策略** 移植完成：
+  - `pricing.py` — 离散边带，每边带独立 spread
+  - `sizing.py` — 权重感知每边带分配
+  - `strategy.py` — BandsStrategy(BaseMMStrategy)
+  - 24 新测试（11 + 6 + 7）
+- ✅ **143 测试全部通过**
+- ✅ 6 个 Draft PR（3 + 2 + 1）
 
-## Next Steps (Phase 4: Official MM port / Phase 5: Terminal workflows)
+## Next Steps (Phase 4 cont'd / Phase 5)
 
-- Live CLOB executor（Polymarket SDK 封装）
-- Post-only/taker 执行策略细化
-- WebSocket 唤醒 + CLOB 交叉检查 + on-chain 对账
-- Phase 4: AMM/Bands 纯数学移植
-- Phase 5: Maker Rebate / Event MM / Sniper / Copy Trade 工作流
+- Classic MM 策略移植
+- Maker Rebate 工作流（Phase 5 入门）
+- Event MM 工作流
+- Live CLOB executor
 
-## Draft PRs Created
+## Draft PRs
 
-| PR | Branch | Status |
-|----|--------|--------|
-| [#1](https://github.com/6Kmfi6HP/polymind/pull/1) | phase-3-execution-core | Draft |
-| [#2](https://github.com/6Kmfi6HP/polymind/pull/2) | phase-3-fillmodel-enhancements | Draft |
-| [#3](https://github.com/6Kmfi6HP/polymind/pull/3) | phase-3-paper-persistence | Draft |
-| [#4](https://github.com/6Kmfi6HP/polymind/pull/4) | phase-3-preflight-safety | Draft |
+| # | Branch | Status |
+|---|--------|--------|
+| 1 | phase-3-execution-core | Draft |
+| 2 | phase-3-fillmodel-enhancements | Draft |
+| 3 | phase-3-paper-persistence | Draft |
+| 4 | phase-3-preflight-safety | Draft |
+| 5 | phase-4-amm-strategy | Draft |
+| 6 | phase-4-bands-strategy | Draft |
 
 ## Watch List
 
