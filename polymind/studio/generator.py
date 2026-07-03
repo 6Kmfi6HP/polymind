@@ -1,0 +1,210 @@
+"""
+Strategy generator — natural language to typed strategy configuration.
+
+Uses keyword matching (Phase 8 MVP) to map NL descriptions to strategy
+templates with extracted parameters. Future versions will use LLM-based
+intent parsing.
+"""
+
+from __future__ import annotations
+
+import re
+from dataclasses import dataclass, field
+from enum import Enum
+from typing import Any, Dict, List, Optional
+
+
+class StrategyTemplate(Enum):
+    """Known strategy templates that can be generated."""
+
+    AMM = "amm"
+    BANDS = "bands"
+    CLASSIC_MM = "classic_mm"
+    MOMENTUM = "momentum"
+    CUSTOM = "custom"
+
+    @property
+    def required_params(self) -> List[str]:
+        return _TEMPLATE_PARAMS[self]["required"]
+
+    @property
+    def defaults(self) -> Dict[str, Any]:
+        return _TEMPLATE_PARAMS[self]["defaults"]
+
+
+_TEMPLATE_PARAMS = {
+    StrategyTemplate.AMM: {
+        "required": ["min_spread", "num_levels"],
+        "defaults": {"min_spread": 0.01, "max_spread": 0.05, "num_levels": 5, "tick_size": 0.001},
+    },
+    StrategyTemplate.BANDS: {
+        "required": ["band_spreads"],
+        "defaults": {"band_spreads": [0.015, 0.03, 0.05], "exposure_per_band": 20.0},
+    },
+    StrategyTemplate.CLASSIC_MM: {
+        "required": ["spread_pct"],
+        "defaults": {"spread_pct": 0.02, "order_size": 10.0, "num_levels": 3},
+    },
+    StrategyTemplate.MOMENTUM: {
+        "required": ["lookback"],
+        "defaults": {"lookback": "24h", "top_n": 5, "total_exposure": 500.0},
+    },
+    StrategyTemplate.CUSTOM: {
+        "required": [],
+        "defaults": {},
+    },
+}
+
+
+@dataclass
+class GeneratedConfig:
+    """Output of the NL → strategy config generation."""
+
+    template: StrategyTemplate
+    strategy_name: str
+    params: Dict[str, Any] = field(default_factory=dict)
+    confidence: float = 0.0
+    validated: bool = True
+    raw_description: str = ""
+
+    def to_summary(self) -> str:
+        """Return a human-readable summary."""
+        return (
+            f"Generated '{self.strategy_name}' "
+            f"({self.template.name}) "
+            f"confidence={self.confidence:.0%}"
+        )
+
+
+class GenerationError(Exception):
+    """Raised when strategy generation fails."""
+
+
+class StrategyGenerator:
+    """Maps natural language descriptions to strategy configurations.
+
+    Keyword-based matching for Phase 8 MVP.
+    """
+
+    def __init__(self):
+        self._patterns = [
+            (re.compile(r"\bamm\b", re.I), self._match_amm),
+            (re.compile(r"\bbands?\b", re.I), self._match_bands),
+            (re.compile(r"\bclassic\b.*\bmm\b", re.I), self._match_classic_mm),
+            (re.compile(r"\bmomentum\b", re.I), self._match_momentum),
+            (re.compile(r"\bfactor\b", re.I), self._match_momentum),
+        ]
+
+    def generate(self, description: str) -> GeneratedConfig:
+        """Parse a NL description and return a GeneratedConfig."""
+        best_match: Optional[GeneratedConfig] = None
+        best_conf = 0.0
+
+        for pattern, matcher in self._patterns:
+            if pattern.search(description):
+                result = matcher(description)
+                if result.confidence > best_conf:
+                    best_match = result
+                    best_conf = result.confidence
+
+        if best_match is None:
+            return GeneratedConfig(
+                template=StrategyTemplate.CUSTOM,
+                strategy_name="custom_strategy",
+                confidence=0.2,
+                raw_description=description,
+            )
+
+        best_match.raw_description = description
+        return best_match
+
+    def _match_amm(self, description: str) -> GeneratedConfig:
+        params = dict(StrategyTemplate.AMM.defaults)
+        name_parts = ["amm"]
+
+        # Extract num_levels
+        levels = _extract_int(description, r"(\d+)\s*levels?", 5)
+        params["num_levels"] = max(1, levels)
+        name_parts.append(f"l{levels}")
+
+        # Extract min_spread
+        spread = _extract_pct(description, r"(\d+(?:\.\d+)?)\s*%", 1.0)
+        params["min_spread"] = max(0.001, spread / 100.0)
+        params["max_spread"] = params["min_spread"] * 5
+        name_parts.append(f"s{int(spread)}")
+
+        return GeneratedConfig(
+            template=StrategyTemplate.AMM,
+            strategy_name="_".join(name_parts),
+            params=params,
+            confidence=0.9,
+        )
+
+    def _match_bands(self, description: str) -> GeneratedConfig:
+        params = dict(StrategyTemplate.BANDS.defaults)
+        name_parts = ["bands"]
+
+        # Extract percentages
+        pcts = re.findall(r"(\d+(?:\.\d+)?)\s*%", description)
+        if pcts:
+            spreads = [float(p) / 100.0 for p in pcts]
+            params["band_spreads"] = spreads
+            name_parts.append(f"b{len(spreads)}")
+
+        return GeneratedConfig(
+            template=StrategyTemplate.BANDS,
+            strategy_name="_".join(name_parts),
+            params=params,
+            confidence=0.85,
+        )
+
+    def _match_classic_mm(self, description: str) -> GeneratedConfig:
+        params = dict(StrategyTemplate.CLASSIC_MM.defaults)
+        spread = _extract_pct(description, r"(\d+(?:\.\d+)?)\s*%", 2.0)
+        params["spread_pct"] = spread / 100.0
+        return GeneratedConfig(
+            template=StrategyTemplate.CLASSIC_MM,
+            strategy_name="classic_mm",
+            params=params,
+            confidence=0.85,
+        )
+
+    def _match_momentum(self, description: str) -> GeneratedConfig:
+        params = dict(StrategyTemplate.MOMENTUM.defaults)
+        name_parts = ["momentum"]
+
+        if "7d" in description or "7 day" in description:
+            params["lookback"] = "7d"
+            name_parts.append("7d")
+        elif "4h" in description or "4 hour" in description:
+            params["lookback"] = "4h"
+            name_parts.append("4h")
+        elif "24h" in description or "24 hour" in description:
+            params["lookback"] = "24h"
+            name_parts.append("24h")
+
+        top_n = _extract_int(description, r"top\s*(\d+)", 5)
+        params["top_n"] = top_n
+
+        return GeneratedConfig(
+            template=StrategyTemplate.MOMENTUM,
+            strategy_name="_".join(name_parts),
+            params=params,
+            confidence=0.9,
+        )
+
+
+def _extract_int(text: str, pattern: str, default: int) -> int:
+    """Extract an integer from text using a regex pattern."""
+    m = re.search(pattern, text, re.I)
+    if m:
+        return int(m.group(1))
+    return default
+
+
+def _extract_pct(text: str, pattern: str, default: float) -> float:
+    """Extract a percentage value from text."""
+    m = re.search(pattern, text)
+    if m:
+        return float(m.group(1))
+    return default
