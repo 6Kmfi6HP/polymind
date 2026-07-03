@@ -91,6 +91,7 @@ class StrategyGenerator:
             (re.compile(r"\bamm\b", re.I), self._match_amm),
             (re.compile(r"\bbands?\b", re.I), self._match_bands),
             (re.compile(r"\bclassic\b.*\bmm\b", re.I), self._match_classic_mm),
+            (re.compile(r"\bmaker\b.*\brebate\b|\brebate\b", re.I), self._match_maker_rebate),
             (re.compile(r"\bmomentum\b", re.I), self._match_momentum),
             (re.compile(r"\bfactor\b", re.I), self._match_momentum),
         ]
@@ -156,6 +157,15 @@ class StrategyGenerator:
             strategy_name="_".join(name_parts),
             params=params,
             confidence=0.85,
+        )
+
+    def _match_maker_rebate(self, description: str) -> GeneratedConfig:
+        params = {"pair_strategy": "maker_rebate"}
+        return GeneratedConfig(
+            template=StrategyTemplate.CUSTOM,
+            strategy_name="maker_rebate",
+            params=params,
+            confidence=0.8,
         )
 
     def _match_classic_mm(self, description: str) -> GeneratedConfig:
