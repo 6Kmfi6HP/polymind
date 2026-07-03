@@ -1,7 +1,11 @@
 # Polymind Architecture & Roadmap
 
-**Status:** Active
+**Status:** Target architecture, not implementation status
 **Date:** 2026-07-03
+
+This document describes the target architecture and roadmap gates. It is not a
+claim that all modules or strategies are implemented. Current implementation
+status belongs in `README.md` and `docs/architecture/current-state.md`.
 
 ## Executive Summary
 
@@ -94,9 +98,11 @@ modular components.
 
 ## Cross-Sectional Factor Framework
 
-This is the major architectural addition beyond the original four projects.
-The factor framework enables ranking ALL markets by a numeric signal (factor),
-then systematically trading the top/bottom deciles.
+This is the major architectural addition beyond the original market-making
+projects. The factor framework ranks markets by numeric signals, then sends
+selected positions through the same passive execution and reconciliation gates
+used by market-making workflows. A factor signal is not considered tradable
+until its execution model passes the reality gate below.
 
 ### Factor Pipeline
 
@@ -125,14 +131,14 @@ then systematically trading the top/bottom deciles.
 
 ### Factor Types
 
-| Factor | Signal | Source | Lookback | Use Case |
-|--------|--------|--------|----------|----------|
-| **Momentum** | Mid-price % change | CLOB midpoint | 4h / 24h / 7d / 21d | Trend following |
-| **Volatility** | Std dev of log returns | CLOB midpoint | 4h / 24h / 7d | Regime filter |
-| **Volume** | 24h trading volume | Gamma API | 24h | Liquidity filter |
+| Factor | Signal input | Execution/backtest source | Lookback | Use Case |
+|--------|--------------|---------------------------|----------|----------|
+| **Momentum** | CLOB bid/ask-derived reference price; midpoint allowed only as signal input | Executable bid/ask or passive-fill model | 4h / 24h / 7d / 21d | Trend following |
+| **Volatility** | CLOB bid/ask-derived returns | Executable bid/ask or passive-fill model | 4h / 24h / 7d | Regime filter |
+| **Volume** | Gamma/Data API volume plus CLOB liquidity checks | CLOB depth and spread filters | 24h | Liquidity filter |
 | **Spread** | Bid-ask spread | CLOB book | Real-time | Execution cost filter |
-| **Sentiment** | Social media signal | Twitter/Reddit API | Varies | Contrarian/momentum |
-| **Composite** | Weighted combination | Multiple sources | Varies | Multi-factor |
+| **Sentiment** | External social/news signal | CLOB bid/ask execution model | Varies | Contrarian/momentum |
+| **Composite** | Weighted combination | Executable-price simulation | Varies | Multi-factor |
 
 ### Factor Strategy Interface
 
@@ -178,15 +184,16 @@ The `recallnet/polymarket-cross-sectional-momentum` project demonstrated that:
 3. **Midpoint prices are untradeable** — backtesting against Gamma midpoint
    prices systemically overstates returns
 
-**Polymind's approach**: Factor strategies use **market-making execution**, not
-market orders. Entry/exit via limit orders that earn the spread. This means
-factor strategies in Polymind are hybrid — they have a directional factor
-signal but use MM-style execution to avoid paying the spread that killed the
-reference strategy.
+**Polymind's approach**: Factor strategies use passive market-making style
+execution, not market orders. Entry/exit must be modeled as resting limit
+orders or another documented passive-fill mechanism. Gamma midpoint and CLOB
+midpoint can inform a signal, but they must never be used as assumed fill
+prices. This makes factor strategies hybrid: directional factor signal with
+market-making execution.
 
 ---
 
-## Directory Layout
+## Target Directory Layout
 
 ```
 polymind/
@@ -225,19 +232,20 @@ polymind/
 │   │
 │   ├── factors/                # Factor engine (from cs-momentum + polymarket-quant)
 │   │   ├── __init__.py
-│   │   ├── pipeline.py         # Collect → score → rank → select (from cs-momentum)
-│   │   ├── registry.py         # Factor registration & composition (from Edge-Research)
-│   │   └── features.py         # Feature library: micro-price, spread, depth (from polymarket-quant)
-│   │   ├── backtest.py         # Factor-specific backtest (walk-forward)
-│   │   └── execution.py        # Hybrid MM execution (limit order entry)
+│   │   ├── pipeline.py         # Collect → score → rank → select
+│   │   ├── registry.py         # Factor registration & composition
+│   │   ├── features.py         # Micro-price, spread, depth feature library
+│   │   ├── backtest.py         # Walk-forward executable-price factor backtest
+│   │   └── execution.py        # Hybrid MM execution bridge
 │   │
-│   ├── polymarket/             # Polymarket integration
-│   │   ├── client.py           # CLOB API client
-│   │   ├── order_manager.py    # Order lifecycle
-│   │   ├── websocket.py        # Real-time WS data
-│   │   ├── data_api.py         # Gamma API + historical data
-│   │   ├── contracts.py        # Smart contract ABI + calls
-│   │   └── signer.py           # Transaction signing
+│   ├── polymarket/             # Polymarket integration adapters
+│   │   ├── client.py           # CLOB SDK adapter
+│   │   ├── order_manager.py    # Order lifecycle and reconciliation
+│   │   ├── websocket.py        # Market/user WebSocket adapters
+│   │   ├── data_api.py         # Gamma/Data API metadata and history
+│   │   ├── contracts.py        # Split/merge/redeem gateway
+│   │   ├── signer.py           # Transaction signing and auth
+│   │   └── metrics.py          # Venue adapter metrics
 │   │
 │   ├── agents/                 # AI providers
 │   │   ├── base.py
@@ -253,12 +261,9 @@ polymind/
 │   │   └── drawdown.py
 │   │
 │   ├── backtesting/            # Backtesting engine
-│   │   ├── engine.py           # Portfolio backtest (NautilusTrader from prediction-market-backtesting)
-│   │   ├── factor_bt.py        # Cross-sectional factor backtest (walk-forward from Edge-Research)
-│   │   ├── data.py             # Data generation / loading
-│   │   └── metrics.py          # Performance metrics
-│   │
-│   ├── polymarket/             # Polymarket integration (from probablyprofit + l2-collector)
+│   │   ├── engine.py           # Portfolio backtest
+│   │   ├── factor_bt.py        # Cross-sectional factor backtest
+│   │   ├── data.py             # Data loading/replay
 │   │   └── metrics.py          # Performance metrics
 │   │
 │   ├── studio/                 # AI strategy studio
@@ -300,58 +305,76 @@ polymind/
 
 ---
 
-## Roadmap (Vibe-Flow)
+## Roadmap Gates
 
-### Phase: Skeleton
-- Project scaffold: pyproject.toml, CLI entry point, README, LICENSE
-- Core agent loop from probablyprofit
-- Polymarket CLOB client + config
-- Factor strategy base class + pipeline skeleton
-- Git init + GitHub push
+### Phase 0: Documentation truth alignment
+- Public README distinguishes implemented, planned, and research-blocked work.
+- Current-state and target-state architecture docs are separated.
+- Superseded specs are marked explicitly.
+- Reference project docs record what to copy and what not to copy.
 
-### Phase: Port MM strategies
-- AMM + Bands (Python → Python, copy+refactor)
-- Event MM (Python → Python, port from warproxxx)
-- Maker Rebate (Node.js → Python, core pricing + merge logic)
-- Sniper (Node.js → Python, tiered order placement)
-- Copy Trade (Node.js → Python, WS watcher)
-- Classic MM (Node.js → Python, split-sell)
+### Phase 1: Polymarket adapter validation
+- Validate the current SDK path before strategy implementation.
+- Prefer `py-clob-client-v2` / unified SDK semantics over archived clients.
+- Document public, L1, L2, builder, and user-channel auth separately.
+- Document asset ID vs condition ID usage for market and user WebSocket channels.
+- Document heartbeat behavior and reconnect/reconciliation requirements.
 
-### Phase: Factor engine
-- Price snapshot collector (CLOB bid/ask/mid → JSONL)
-- Factor computation pipeline (momentum, volatility, volume)
-- Cross-sectional ranking + decile selection
-- MM-style execution (limit order entry, earn spread not pay it)
-- Holding period management + reversal stop
-- Factor backtest with walk-forward
+### Phase 2: Architecture spine
+- Strategies produce order intents or expected-order deltas.
+- Executors own CLOB transport, retries, cancellations, and order state mutation.
+- Wallet/chain adapters own split, merge, redeem, approvals, and on-chain balance reads.
+- Risk gates sit between strategy decisions and execution.
+- Storage ports cover snapshots, positions, paper ledger, dedupe sets, and recovery state.
 
-### Phase: Factor strategies
-- Momentum factor (4h/24h/7d/21d lookbacks)
-- Volatility factor (regime filter + standalone)
-- Volume factor (liquidity-driven)
-- Composite multi-factor
-- Market-neutral hedge (long top decile, short bottom decile)
-- Factor autopsy — learn from reference's −13.6% and build better
+### Phase 3: Official MM port
+- Port AMM and Bands pure math first.
+- Preserve snapshot to expected-orders to executor boundary.
+- Carry over strategy invariant tests: ladder symmetry, band overlap checks, cancel/replace semantics.
+- Keep binary complement assumptions scoped to official-keeper adapters or strategy packages.
 
-### Phase: Unify & test
-- Common strategy interface for all MM + factor strategies
-- Consistent risk layer
-- Integration tests with CLOB sandbox
-- WebSocket fill detection refactor
-- Factor-specific metrics (decile spread, hit rate, Sharpe per factor)
+### Phase 4: Terminal and event workflows
+- Model Maker Rebate, Event MM, Sniper, Copy Trade, and Classic MM as separate bounded workflows.
+- Each workflow needs a state-machine document before implementation.
+- Fill detection uses WebSocket events as wake-up signals and on-chain balances as reconciliation truth.
+- Per-market or per-asset serialization is required before placing/canceling live orders.
 
-### Phase: AI studio
-- Natural language → strategy config (both MM and factor)
-- AI factor discovery — let LLM propose new factor definitions
-- Auto-optimizer for factor parameters (lookback, decile, hold)
-- Strategy explainer: AI reads on-chain performance, suggests tweaks
+### Phase 5: Factor engine
+- Build CLOB-native snapshot store before factor strategies.
+- Implement executable-price backtesting before live/paper factor promotion.
+- Include spread, depth, tick size, fees, latency, order type, and partial-fill assumptions.
+- Persist paper fills and positions in a restart-safe ledger.
+- Reject midpoint-only backtests as evidence for tradability.
 
-### Phase: Polish
+### Phase 6: Factor strategies
+- Momentum, volatility, volume, sentiment, composite, and hedge strategies start only after Phase 5 gates pass.
+- Each factor report separates signal evidence from execution evidence.
+- Each promoted factor includes paper OMS results and failure analysis.
+
+### Phase 7: AI studio
+- Natural language maps to typed strategy configuration only.
+- LLM output never bypasses schema validation, risk checks, preflight checks, or strategy implementation status.
+- AI factor discovery proposes research candidates; it does not directly promote live strategies.
+
+### Phase 8: Polish
 - Documentation site
-- CI pipeline (lint + test + security + factor regression)
+- CI pipeline for docs, lint, tests, security scan, and factor regression
 - PyPI release
 - Strategy templates gallery
-- Multi-platform: Kalshi, Limitless venues
+- Multi-platform research: Kalshi, Limitless venues
+
+---
+
+## Execution Reality Gate
+
+Any roadmap item that claims tradable edge must show:
+
+1. Data source: CLOB bid/ask snapshots or full order book, not Gamma midpoint alone.
+2. Execution source: passive limit-order model, actual paper fills, or documented taker-cost model.
+3. Cost model: spread, fees, tick size, depth, latency, and partial fills.
+4. Reconciliation: user-channel events checked against on-chain balances where applicable.
+5. Restart safety: fills, positions, dedupe markers, and open intents persisted outside process memory.
+6. Promotion rule: backtest success alone cannot promote a strategy to live trading.
 
 ---
 
@@ -388,10 +411,18 @@ source of truth for fill confirmation.
 
 ## Reference Project Learnings
 
-The factor research projects merged into Polymind come with critical learnings
-that shape the framework's design. These are not just academic references — they
-are battle-tested implementations whose successes and failures directly inform
-Polymind's architecture.
+The reference projects are evidence sources, not codebases to merge blindly.
+Each one contributes either a pattern to copy, a failure mode to avoid, or both.
+
+| Project | Copy | Do not copy blindly |
+|---------|------|---------------------|
+| `probablyprofit-ai-framework` | Composition-root CLI, agent loop, risk/storage/backtesting boundaries | Hidden singleton dependencies or over-broad public facade |
+| `pm-official-mm-keeper` | Snapshot to expected-orders to executor split; AMM/Bands invariants | Positional config unpacking or universal order identity based only on price/side/token |
+| `warproxxx-mm-bot` | Event-driven shell, explicit merge/cooldown/risk concepts | Global mutable state, monolithic `trading.py`, business logic in WebSocket callbacks |
+| `pm-terminal-all-in-one` | Workflow-specific state machines, ghost-fill recovery, on-chain reconciliation | Shared mutable config and JSON state embedded in services |
+| `polymarket-cross-sectional-momentum` | CLOB snapshot store, scanner shape, paper scaffold, postmortem discipline | Midpoint-only backtests, market-order factor execution, static cost haircuts |
+
+Detailed evidence belongs in `docs/references/`.
 
 ### `recallnet/polymarket-cross-sectional-momentum`
 

@@ -1,4 +1,4 @@
-# 🧠 Polymind
+# Polymind
 
 <div align="center">
 
@@ -14,7 +14,7 @@
 
 ---
 
-## 🔥 Why Polymind?
+## Why Polymind?
 
 Polymarkets need liquidity. Existing trading bots require you to hand-code complex strategies — AMM math, spread calculations, position sizing, factor ranking, risk management. Polymind changes that.
 
@@ -57,7 +57,7 @@ Polymind merges **eight existing Polymarket projects** into one unified framewor
 
 ---
 
-## 🏗️ Architecture
+## Architecture
 
 ```
 ┌──────────────────────────────────────────────────────────┐
@@ -108,163 +108,158 @@ Polymind merges **eight existing Polymarket projects** into one unified framewor
 
 ---
 
-## 🎯 Available Strategies
+## Strategy Roadmap
+
+The strategies below are the roadmap catalog, not an implementation-status list.
+Current repository state is a skeleton: package structure, CLI shell, core base
+types, and reference-project research. Strategy execution backends are planned
+work unless a row is explicitly marked `implemented`.
 
 ### Market Making (Bid-Ask)
 
-| Strategy | Source | Description |
-|----------|--------|-------------|
-| **AMM** 📊 | Official Keeper | Simulates Uniswap V3 concentrated liquidity with CPMM-sized order ladders |
-| **Bands** 🎯 | Official Keeper | Places orders in concentric price margin bands around midpoint |
-| **Maker Rebate** 💰 | pm-terminal | Buys both YES+NO at combined <$1.00, merges for profit + maker rebate |
-| **Event MM** ⚡ | Poly-Maker | WebSocket-driven real-time MM with stop-loss / volatility / reverse-position risk |
-| **Sniper** 🎯 | pm-terminal | Deep discount GTC orders on 5-minute markets to catch panic dumps |
-| **Copy Trade** 👥 | pm-terminal | Mirrors target wallet trades in real-time via WebSocket |
-| **Classic MM** 🔄 | pm-terminal | Split USDC → equal Y+N, limit sell at profit target, adaptive cut-loss |
+| Strategy | Source | Status | Documentation contract |
+|----------|--------|--------|------------------------|
+| **AMM** | Official Keeper | planned port | Port pure concentrated-liquidity math first; executor integration second. |
+| **Bands** | Official Keeper | planned port | Preserve snapshot to expected-orders boundary and band invariant tests. |
+| **Maker Rebate** | pm-terminal | planned workflow | Dedicated state machine for paired YES/NO fills, ghost-fill recovery, merge/sell remainder. |
+| **Event MM** | Poly-Maker | planned workflow | Event adapter produces normalized events; core emits order/merge/cooldown intents. |
+| **Sniper** | pm-terminal | planned workflow | Dedicated scheduler/session service and token-mapping registry. |
+| **Copy Trade** | pm-terminal | planned workflow | Separate ingestion, dedupe, position repository, execution, and redemption ports. |
+| **Classic MM** | pm-terminal | planned workflow | Split/limit-sell logic with explicit cut-loss and reconciliation states. |
 
 ### Cross-Sectional Factor (Signal-Driven)
 
-| Strategy | Source | Description |
-|----------|--------|-------------|
-| **Momentum** 📈 | polymarket-cs-momentum | Rank all markets by trailing price change, long top decile, hold and exit |
-| **Volatility** 🌊 | polymarket-cs-momentum | Trade volatility regimes — go short when vol spikes, long when vol compresses |
-| **Volume** 💧 | polymarket-cs-momentum | Focus on liquidity-driven signals, avoid illiquid markets |
-| **Sentiment** 🗣️ | polymarket-cs-momentum | Social media / news sentiment as cross-sectional ranking signal |
-| **Composite** 🧬 | polymarket-cs-momentum | Multi-factor weighted composite (momentum + volume + sentiment) |
-| **Hedge** 🛡️ | polymarket-cs-momentum | Long top decile, short bottom decile — market-neutral |
+| Strategy | Source | Status | Documentation contract |
+|----------|--------|--------|------------------------|
+| **Momentum** | polymarket-cs-momentum | blocked on factor engine | Signal observed in backtest; executable edge unproven until bid/ask simulation and paper OMS pass. |
+| **Volatility** | polymarket-cs-momentum | planned research | Requires CLOB snapshot store and spread/depth filters. |
+| **Volume** | polymarket-cs-momentum | planned research | Liquidity filter only; not an execution signal by itself. |
+| **Sentiment** | polymarket-cs-momentum | planned research | External data must remain outside the execution core. |
+| **Composite** | Edge Research | planned research | Requires walk-forward factor panel and execution-aware simulation. |
+| **Hedge** | polymarket-cs-momentum | planned research | Requires borrow/short/paired-position semantics to be explicit per venue. |
 
-> **Critical insight from reference research**: Factor signals are real (6.19 Sharpe
-> backtested momentum), but **midpoint prices are untradeable**. CLOB bid-ask spread
-> (2–10%) can exceed the factor signal. Polymind factor strategies use
-> **market-making execution** — enter/exit via limit orders that earn the spread,
-> not market orders that pay it. Hybrid factor-MM. See [`docs/architecture.md`](docs/architecture.md).
+> **Critical insight from reference research**: Factor signals can look real in
+> midpoint-based backtests, but midpoint prices are not executable. The reference
+> momentum strategy showed 6.19 Sharpe in backtest and then −13.6% live paper PnL
+> because CLOB bid-ask spread consumed the edge. Polymind factor strategies must
+> pass an execution-reality gate: CLOB bid/ask snapshots, spread/depth filters,
+> passive limit-order assumptions, and a restart-safe paper OMS ledger. See
+> [`docs/architecture.md`](docs/architecture.md).
 
 ---
 
-## 🚀 Quick Start
+## Quick Start
 
 ```bash
-# Install
-pip install polymind
+# Install the local skeleton from the repository root
+pip install -e .
 
-# AI-powered — describe your strategy in English
-polymind run "Maker rebate on BTC 15-min options, 5 shares per side, total cap 0.97"
-
-# Or use a pre-built strategy by name
-polymind run --strategy amm --market <condition-id> --config config.yaml
-
-# List available strategies
-polymind strategies
-
-# Paper trade (virtual portfolio)
-polymind run --strategy bands --paper --capital 10000
-
-# Full docs
+# Inspect the CLI shell
 polymind --help
+
+# List roadmap strategies and their implementation status
+polymind strategies
 ```
 
-### One-liner examples
+### Planned CLI shape
+
+The commands below document the intended user experience. They must not be
+treated as live-trading readiness until the matching strategy row is marked
+`implemented` and its safety gates are documented as passing.
 
 ```bash
-# Conservative: AMM with 100 USDC budget
+# Planned: conservative AMM with 100 USDC budget
 polymind run "AMM market making, 100 USDC budget, depth 0.05, spread 0.02"
 
-# Aggressive: snipe panic dumps
-polymind run "Snipe BTC 5-min options, max 20 shares total, 3 tiers"
-
-# Arbitrage: maker rebate
+# Planned: maker rebate workflow
 polymind run "Maker rebate on ETH 15m, 10 shares, combined cap 0.96"
 
-# Copy trade
+# Planned: copy trade workflow
 polymind run --copy-trader 0x1234...abcd --sizing 0.1
 
-# Factor: cross-sectional momentum
+# Planned: factor momentum, blocked on executable-price factor engine
 polymind run "Cross-sectional momentum on all markets, lookback 24h, top decile by volume"
-
-# Factor: multi-factor composite
-polymind run "Composite factor: momentum 0.5 + volume 0.3 + sentiment 0.2, top 10 markets"
-
-# Factor: market-neutral hedge
-polymind run "Factor hedge, long top decile short bottom decile, equal weight 10 each"
-
-# Risk-on: event-driven with tight stop-loss
-polymind run "Event-driven MM, aggressive sizing, stop loss at 5%, volatility threshold 150%"
 ```
 
 ---
 
-## 📋 Roadmap
+## Roadmap
 
+```text
+Phase 0 · Documentation truth alignment  current   README/status/spec/reference docs match implementation reality
+Phase 1 · Polymarket adapter validation  planned   SDK v2/unified SDK spike, auth-level split, WebSocket ID semantics
+Phase 2 · Architecture spine             planned   strategy intent boundary, risk gate, order executor, storage ports
+Phase 3 · Official MM port               planned   AMM/Bands pure math, order-delta adapter, invariant tests
+Phase 4 · Terminal/Event workflows       planned   Maker rebate, sniper, copy trade, event MM state machines
+Phase 5 · Factor engine                  planned   CLOB snapshot store, executable-price backtest, paper OMS ledger
+Phase 6 · Factor strategies              planned   momentum, volatility, volume, composite, hedge after execution gate
+Phase 7 · AI Studio                      planned   NL to typed config after strategy schemas stabilize
+Phase 8 · Polish                         planned   docs site, CI, PyPI, strategy gallery
 ```
-Phase · Skeleton          ▰▰▰▰▰▰▰▰░░░░  Project scaffold, CLI, core loop, CLOB client
-Phase · Port MM           ░░░░░░░░░░░░  Port 7 MM strategies to unified Python interface
-Phase · Factor Engine     ░░░░░░░░░░░░  Snapshot collector, factor computation, ranking pipeline
-Phase · Factor Strategies ░░░░░░░░░░░░  Momentum, volatility, volume, sentiment, composite, hedge
-Phase · Unify & Test      ░░░░░░░░░░░░  Common risk layer, integration tests, WS refactor
-Phase · AI Studio         ░░░░░░░░░░░░  NL → strategy config, factor discovery, auto-optimizer
-Phase · Polish            ░░░░░░░░░░░░  Docs, CI, PyPI, strategy templates gallery
-```
 
-This is a **vibe-coded** project — no fixed timelines, just iterative improvement based on what's interesting and useful.
+### Execution reality gate for factor work
 
-### What's been learned so far
+Before any factor strategy is promoted from research to implementation:
 
-The reference project (`recallnet/polymarket-cross-sectional-momentum`) taught us
-a critical lesson that shapes everything: **midpoint prices are not tradeable.**
-A backtested 6.19 Sharpe momentum signal turned into −13.6% live PnL because
-CLOB bid-ask spread (2–10%) consumed the entire edge. Polymind's answer: factor
-strategies use **market-making execution** — enter via limit orders, earn the
-spread, never pay it. Factor signal + MM execution = hybrid alpha.
-
+- Backtests must use executable CLOB bid/ask data or a documented passive-fill model.
+- Gamma midpoint or CLOB midpoint may be used as a signal input, but never as an assumed fill price.
+- Spread, depth, tick size, fees, and order type must be modeled explicitly.
+- FOK/FAK marketable orders are not the default for factor entry/exit.
+- Paper runs must persist fills and positions in a restart-safe ledger.
+- Live promotion requires reconciliation against user-channel events and on-chain balances.
 ---
 
-## 📦 Project Structure
+## Project Structure
 
-```
+Target layout. Many packages are currently placeholders until their roadmap
+phase is reached.
+
+```text
 polymind/
 ├── pyproject.toml          # Project config & dependencies
-├── README.md               # This file
+├── README.md               # Public-facing roadmap and status
 ├── LICENSE                 # MIT
 │
 ├── polymind/               # Main package
 │   ├── core/               # Agent loop, config, strategy base class
-│   ├── strategies/         # Strategy implementations
-│   │   ├── market_making/  # MM strategies (7 types)
-│   │   └── factors/        # Factor strategies (6 types)
-│   ├── factors/            # Factor engine (pipeline, registry, backtest)
-│   ├── polymarket/         # CLOB API, WebSocket, Gamma API, contracts
-│   ├── agents/             # AI providers (Claude, GPT, Gemini)
-│   ├── risk/               # Risk management
-│   ├── backtesting/        # Backtest engine (portfolio + factor)
-│   ├── studio/             # AI strategy studio
-│   ├── storage/            # Database + price snapshot store
-│   ├── alerts/             # Telegram notifications
-│   └── utils/              # Logging, secrets, killswitch
+│   ├── strategies/         # Strategy implementations by bounded context
+│   │   ├── market_making/  # MM strategy families
+│   │   └── factors/        # Factor strategy families after factor gate
+│   ├── factors/            # Factor engine: snapshots, scoring, ranking, execution bridge
+│   ├── polymarket/         # CLOB, Data API, WebSocket, contracts adapters
+│   ├── agents/             # AI providers
+│   ├── risk/               # Limits, drawdown, sizing, kill-switch policy
+│   ├── backtesting/        # Executable-price simulation and metrics
+│   ├── studio/             # NL to typed strategy config
+│   ├── storage/            # Database, repositories, price snapshot store, paper ledger
+│   ├── alerts/             # Notifications
+│   └── utils/              # Logging, secrets, preflight helpers
 │
-├── cli/                    # Command-line interface
-├── docs/                   # Documentation + reference project learnings
-└── tests/                  # Tests
+├── cli/                    # Composition root for CLI wiring
+├── docs/                   # Architecture decisions and reference evidence
+└── tests/                  # Contract, strategy invariant, and integration tests
 ```
 
 ---
 
-## 🛡️ Safety First
+## Safety Requirements
 
-Polymind inherits probablyprofit's safety engineering:
+These are inherited safety requirements from the reference projects, not a claim
+that every item is already implemented.
 
-- **Kill Switch** — Emergency stop via file, signal (USR1), or HTTP API
-- **Preflight Checks** — Validates API keys, wallet, database before trading
-- **Live Confirmation** — `--confirm-live` flag + interactive "YES" required for real money
-- **Log Redaction** — API keys, private keys, and secrets are never written to logs
-- **Secure Credentials** — Encryption via keyring/cryptography, no plaintext storage
-- **Paper Trading** — Full simulation mode with virtual portfolio
-- **Position Limits** — Max exposure, daily loss, Kelly criterion sizing
+- **Kill Switch** — Emergency stop via file, signal, or API before live trading is enabled.
+- **Preflight Checks** — Validate API keys, wallet, balances, allowances, database, and venue restrictions.
+- **Live Confirmation** — Require explicit live-mode confirmation before real orders.
+- **Log Redaction** — Never write API keys, private keys, passphrases, signatures, or full auth headers to logs.
+- **Secure Credentials** — Keep private keys and CLOB API credentials outside strategy code.
+- **Paper Trading** — Use a restart-safe ledger before live promotion.
+- **Position Limits** — Enforce per-market, portfolio, drawdown, daily-loss, and strategy-specific limits.
 
 ---
 
-## 🤝 Contributing
+## Contributing
 
-Contributions are welcome! This project is built from merging four community projects — the spirit is collaborative.
+Contributions are welcome. This project is built from market-making bots and factor-research references; the spirit is collaborative.
 
 - **Report bugs**: Open a GitHub Issue
 - **Submit strategies**: PR with a new strategy plugin
@@ -274,7 +269,7 @@ See [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines.
 
 ---
 
-## 📜 License
+## License
 
 MIT License — see [LICENSE](LICENSE) for details.
 
