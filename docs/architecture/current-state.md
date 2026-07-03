@@ -14,6 +14,12 @@ This file records repository state separately from the target architecture in
 - Placeholder package directories for strategies, factors, backtesting, storage,
   agents, alerts, studio, utilities, risk, and Polymarket adapters.
 - Reference documentation for the cross-sectional momentum failure.
+- **Phase 2 domain contracts (frozen):**
+  - `PortfolioTarget` / `PositionDirection` — factor strategy portfolio output
+  - `FillEvent` / `FillSource` — unified fill representation
+  - `LedgerEntry` / `EntryType` — append-only P&L ledger entry
+  - `RiskDecision` / `RiskGate` / `RiskContext` — composable risk gate contracts
+  - `WorkflowCommand` / `CommandType` — workflow lifecycle and pair-management commands
 
 ## Not yet implemented
 
