@@ -188,6 +188,85 @@ def setup():
     console.print(Panel(env_template.strip(), border_style="dim"))
 
 
+@cli.group()
+def report():
+    """Generate operator reports."""
+    pass
+
+
+@report.command()
+def dashboard():
+    """Show combined operator dashboard."""
+    from polymind.storage.database import DatabaseConfig
+    from polymind.storage.ledger import LedgerStore
+    from polymind.risk.manager import RiskManager
+    from polymind.risk.limits import LimitsConfig, LimitsManager
+    from polymind.reports.dashboard import generate_dashboard, display_dashboard
+
+    import asyncio
+    loop = asyncio.new_event_loop()
+    asyncio.set_event_loop(loop)
+
+    config = load_config()
+    ledger = LedgerStore(DatabaseConfig(path=getattr(config, "db_path", ":memory:")))
+    risk_mgr = RiskManager()
+    limits_mgr = LimitsManager(LimitsConfig(positions=[], order_rate=None, daily_loss=None, exposure=None))
+
+    tables = loop.run_until_complete(generate_dashboard(ledger, risk_mgr, limits_mgr))
+    display_dashboard(tables)
+    loop.close()
+
+
+@report.command()
+def positions():
+    """Show position summary."""
+    import asyncio
+    loop = asyncio.new_event_loop()
+    asyncio.set_event_loop(loop)
+
+    config = load_config()
+    from polymind.storage.database import DatabaseConfig
+    from polymind.storage.ledger import LedgerStore
+    from polymind.reports.positions import get_position_report, format_positions_table
+
+    ledger = LedgerStore(DatabaseConfig(path=getattr(config, "db_path", ":memory:")))
+    positions = loop.run_until_complete(get_position_report(ledger))
+    console.print(format_positions_table(positions))
+    loop.close()
+
+
+@report.command()
+def pnl():
+    """Show P&L summary."""
+    import asyncio
+    loop = asyncio.new_event_loop()
+    asyncio.set_event_loop(loop)
+
+    config = load_config()
+    from polymind.storage.database import DatabaseConfig
+    from polymind.storage.ledger import LedgerStore
+    from polymind.reports.pnl import get_pnl_report, format_pnl_table
+
+    ledger = LedgerStore(DatabaseConfig(path=getattr(config, "db_path", ":memory:")))
+    report = loop.run_until_complete(get_pnl_report(ledger))
+    cash = loop.run_until_complete(ledger.get_cash_balance())
+    console.print(format_pnl_table(report, cash))
+    loop.close()
+
+
+@report.command()
+def risk():
+    """Show risk status."""
+    from polymind.risk.manager import RiskManager
+    from polymind.risk.limits import LimitsConfig, LimitsManager
+    from polymind.reports.risk import get_risk_report, format_risk_table
+
+    risk_mgr = RiskManager()
+    limits_mgr = LimitsManager(LimitsConfig(positions=[], order_rate=None, daily_loss=None, exposure=None))
+    report = get_risk_report(risk_mgr, limits_mgr)
+    console.print(format_risk_table(report))
+
+
 def main():
     """Entry point."""
     cli()
