@@ -9,7 +9,7 @@ description = "AI-native market making for Polymarket. Write strategies in Engli
 authors = [{name = "Polymind Contributors"}]
 readme = "README.md"
 requires-python = ">=3.10"
-license = {text = "MIT"}
+license = "MIT"
 keywords = [
     "polymarket",
     "prediction-markets",
@@ -24,7 +24,6 @@ classifiers = [
     "Environment :: Console",
     "Intended Audience :: Developers",
     "Intended Audience :: Financial and Insurance Industry",
-    "License :: OSI Approved :: MIT License",
     "Operating System :: OS Independent",
     "Programming Language :: Python :: 3",
     "Programming Language :: Python :: 3.10",
