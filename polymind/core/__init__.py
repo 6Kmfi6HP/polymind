@@ -16,10 +16,12 @@ from polymind.core.ledger import EntryType, LedgerEntry
 from polymind.core.portfolio import PortfolioTarget, PositionDirection
 from polymind.core.risk import RiskContext, RiskDecision, RiskGate
 from polymind.core.strategy import BaseMMStrategy
+from polymind.core.workflows import CommandType, WorkflowCommand
 
 __all__ = [
     "BaseAgent",
     "BaseMMStrategy",
+    "CommandType",
     "Config",
     "EntryType",
     "FillEvent",
@@ -32,4 +34,5 @@ __all__ = [
     "RiskDecision",
     "RiskGate",
     "StrategyIntent",
+    "WorkflowCommand",
 ]
