@@ -36,3 +36,15 @@ Append one entry per run. Prune entries older than 30 days.
 
 2026-07-03T23:50:00Z — dev-loop — fix-proposed — PriceStore JSONL 完成. 架构 100% 完整. 760 tests.
 {"run_id":"2026-07-03T23:50:00Z","pattern":"dev-loop","duration_s":1200,"items_found":1,"actions_taken":1,"escalations":0,"tokens_estimate":50000,"outcome":"fix-proposed","note":"最后一个模块 PriceStore 完成. 架构所有61个模块完整实现. 760测试通过. phase-9-price-store分支."}
+
+2026-07-03T23:55:00Z — dev-loop — fix-proposed — 集成测试 + CI pipeline 完成. 778 tests.
+{"run_id":"2026-07-03T23:55:00Z","pattern":"dev-loop","duration_s":1800,"items_found":3,"actions_taken":3,"escalations":0,"tokens_estimate":150000,"outcome":"fix-proposed","note":"集成测试(18) + CI pipeline (GitHub Actions ruff/pytest/bandit) + README更新. 778测试全通过. phase-9-ci-pipeline分支."}
+
+2026-07-03T23:58:00Z — dev-loop — fix-proposed — 文档站点 mkdocs 搭建中. 778 tests.
+{"run_id":"2026-07-03T23:58:00Z","pattern":"dev-loop","duration_s":180,"items_found":1,"actions_taken":1,"escalations":0,"tokens_estimate":30000,"outcome":"fix-proposed","note":"文档站点 mkdocs 后台搭建中. 778 测试通过."}
+
+2026-07-04T00:05:00Z — dev-loop — fix-proposed — 策略模板示例 + 完整项目完成. 786 tests.
+{"run_id":"2026-07-04T00:05:00Z","pattern":"dev-loop","duration_s":600,"items_found":3,"actions_taken":3,"escalations":0,"tokens_estimate":50000,"outcome":"fix-proposed","note":"策略模板示例 (AMM ladder / Factor bridge / Safety). mkdocs 文档站点. 786测试全通过. phase-9-ci-pipeline推送完成。"}
+
+2026-07-04T00:42:00Z — dev-loop — fix-proposed — Phase 10-11: Operations Dashboard + PyPI Release Readiness.
+{"run_id":"2026-07-04T00:42:00Z","pattern":"dev-loop","duration_s":5400,"items_found":12,"actions_taken":12,"escalations":1,"tokens_estimate":450000,"outcome":"fix-proposed","note":"Phase 10: 运营仪表盘 (reports package: positions/P&L/risk/dashboard, CLI report commands, 14 tests). Phase 11: PyPI 发布准备 (Makefile, pre-commit, build verification, CHANGELOG). 831测试全通过. Draft PR #18 创建. integration-tests 分支推送完成."}
