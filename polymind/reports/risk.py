@@ -1,4 +1,5 @@
 """Risk status report."""
+
 from __future__ import annotations
 
 from dataclasses import dataclass
@@ -21,7 +22,7 @@ class RiskReport:
 
 
 def get_risk_report(risk_mgr: RiskManager, limits_mgr: LimitsManager) -> RiskReport:
-    """Build a risk status report from RiskManager and LimitsManager."""
+    """Build a risk status report."""
     drawdown_pct = 0.0
     if risk_mgr.peak_capital > 0:
         drawdown_pct = (1 - risk_mgr.current_capital / risk_mgr.peak_capital) * 100

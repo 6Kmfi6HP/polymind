@@ -1,4 +1,5 @@
 """Position summary report."""
+
 from __future__ import annotations
 
 from rich.table import Table
@@ -9,12 +10,9 @@ from polymind.storage.ledger import LedgerStore
 
 async def get_position_report(ledger: LedgerStore) -> list[PositionRecord]:
     """Fetch all positions from the ledger store."""
-    # We query each known position — LedgerStore stores them individually
-    # For now, we query known entries
-    await ledger._ensure_connection()
-    conn = ledger._conn
-    assert conn is not None
-    rows = await conn.fetch_all(
+    conn = await ledger._ensure_connection()
+    assert ledger._conn is not None
+    rows = await ledger._conn.fetch_all(
         "SELECT * FROM positions ORDER BY market_id"
     )
     return [
@@ -39,7 +37,11 @@ def format_positions_table(positions: list[PositionRecord]) -> Table:
     table.add_column("Realized P&L", justify="right")
 
     for p in positions:
-        pnl_str = f"[green]+${p.realized_pnl:.2f}[/green]" if p.realized_pnl >= 0 else f"[red]-${abs(p.realized_pnl):.2f}[/red]"
+        pnl_str = (
+            f"[green]+${p.realized_pnl:.2f}[/green]"
+            if p.realized_pnl >= 0
+            else f"[red]-${abs(p.realized_pnl):.2f}[/red]"
+        )
         table.add_row(
             p.market_id[:10] + "...",
             p.outcome or "N/A",

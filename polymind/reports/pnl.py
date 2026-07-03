@@ -1,4 +1,5 @@
 """P&L summary report."""
+
 from __future__ import annotations
 
 from rich.table import Table
@@ -8,13 +9,11 @@ from polymind.storage.ledger import LedgerStore
 
 async def get_pnl_report(ledger: LedgerStore) -> list[dict]:
     """Fetch per-market P&L from the ledger store."""
-    await ledger._ensure_connection()
+    conn = await ledger._ensure_connection()
     assert ledger._conn is not None
     rows = await ledger._conn.fetch_all(
         "SELECT market_id, COALESCE(SUM(delta_cash), 0.0) AS realized_pnl "
-        "FROM ledger_entries "
-        "GROUP BY market_id "
-        "ORDER BY realized_pnl DESC"
+        "FROM ledger_entries GROUP BY market_id ORDER BY realized_pnl DESC"
     )
     return [
         {"market_id": row["market_id"], "realized_pnl": row["realized_pnl"]}
