@@ -1,0 +1,138 @@
+[build-system]
+requires = ["setuptools>=65.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "polymind"
+version = "0.1.0"
+description = "AI-native market making for Polymarket. Write strategies in English, let AI execute them."
+authors = [{name = "Polymind Contributors"}]
+readme = "README.md"
+requires-python = ">=3.10"
+license = {text = "MIT"}
+keywords = [
+    "polymarket",
+    "prediction-markets",
+    "market-making",
+    "trading-bot",
+    "ai",
+    "llm",
+    "automated-trading",
+]
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Environment :: Console",
+    "Intended Audience :: Developers",
+    "Intended Audience :: Financial and Insurance Industry",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Topic :: Office/Business :: Financial :: Investment",
+    "Topic :: Scientific/Engineering :: Artificial Intelligence",
+]
+
+dependencies = [
+    # CLI & UX
+    "click>=8.1.0",
+    "rich>=13.0.0",
+    # HTTP & async
+    "httpx>=0.27.0",
+    "aiohttp>=3.9.0",
+    # Data
+    "pydantic>=2.0.0",
+    "pydantic-settings>=2.0.0",
+    # Config
+    "pyyaml>=6.0",
+    "python-dotenv>=1.0.0",
+    # Logging
+    "loguru>=0.7.0",
+    # Resilience
+    "tenacity>=8.2.0",
+    # Polymarket
+    "eth-account>=0.11.0",
+    "web3>=6.0.0",
+    "py-clob-client>=0.20.0",
+    "websockets>=12.0",
+]
+
+[project.optional-dependencies]
+# AI Providers
+openai = ["openai>=1.0.0"]
+anthropic = ["anthropic>=0.39.0"]
+google = ["google-genai>=1.0.0"]
+
+ai = [
+    "openai>=1.0.0",
+    "anthropic>=0.39.0",
+    "google-genai>=1.0.0",
+]
+
+# Data & backtesting
+data = ["pandas>=2.0.0", "numpy>=1.24.0"]
+
+# Database persistence
+db = [
+    "sqlmodel>=0.0.14",
+    "alembic>=1.12.0",
+    "aiosqlite>=0.19.0",
+    "greenlet>=3.0.0",
+]
+
+# Full install
+full = [
+    "polymind[ai,data,db]",
+]
+
+# Development
+dev = [
+    "pytest>=7.4.0",
+    "pytest-asyncio>=0.21.0",
+    "pytest-cov>=4.1.0",
+    "black>=23.0.0",
+    "isort>=5.12.0",
+    "ruff>=0.1.0",
+    "mypy>=1.5.0",
+    "pre-commit>=3.7.0",
+]
+
+[project.urls]
+Homepage = "https://github.com/"
+Documentation = "https://github.com/#readme"
+Repository = "https://github.com/"
+
+[project.scripts]
+polymind = "polymind.cli.main:main"
+pm = "polymind.cli.main:main"
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["polymind*"]
+exclude = ["tests*", "scripts*"]
+
+[tool.black]
+line-length = 100
+target-version = ['py310']
+
+[tool.isort]
+profile = "black"
+line_length = 100
+
+[tool.ruff]
+line-length = 100
+target-version = "py310"
+
+[tool.ruff.lint]
+select = ["E", "W", "F", "I", "B", "C4", "UP", "ARG", "SIM"]
+ignore = ["E501", "B008", "C901", "ARG001"]
+
+[tool.ruff.lint.per-file-ignores]
+"tests/*" = ["ARG", "S101"]
+"__init__.py" = ["F401"]
+
+[tool.pytest.ini_options]
+asyncio_mode = "auto"
+testpaths = ["tests"]
+timeout = 30
