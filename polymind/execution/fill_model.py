@@ -8,8 +8,9 @@ fill at executable price).
 
 from __future__ import annotations
 
+import random
 from dataclasses import dataclass, field
-from datetime import datetime
+from datetime import datetime, timezone
 from enum import Enum, auto
 from typing import Optional
 
@@ -65,6 +66,8 @@ class FillModel:
 
     In PASSIVE mode, fill depends on price crossing the spread and queue
     position.  In TAKER mode, fill is immediate at the executable price.
+
+    Both modes respect order expiration and available liquidity depth.
     """
 
     def __init__(self, config: FillModelConfig):
@@ -76,6 +79,17 @@ class FillModel:
         snapshot: MarketSnapshot,
     ) -> FillResult:
         """Return a FillResult based on the current snapshot."""
+        # Check expiry first
+        if self._is_expired(intent, snapshot):
+            return FillResult(
+                filled=False,
+                fill_price=0.0,
+                fill_size=0.0,
+                fee=0.0,
+                remaining_size=intent.size,
+                timestamp=snapshot.timestamp,
+            )
+
         if self.config.mode == FillMode.TAKER:
             return self._simulate_taker(intent, snapshot)
         return self._simulate_passive(intent, snapshot)
@@ -95,21 +109,44 @@ class FillModel:
                 return base_price * (1.0 - slippage_factor)
         return base_price
 
+    def _is_expired(self, intent: OrderIntent, snapshot: MarketSnapshot) -> bool:
+        """Check if the order has expired before the snapshot timestamp."""
+        if intent.expiration is None:
+            return False
+        exp = intent.expiration
+        snap_ts = snapshot.timestamp
+        # Handle mixed naive/aware datetimes gracefully
+        if exp.tzinfo is not None and snap_ts.tzinfo is None:
+            snap_ts = snap_ts.replace(tzinfo=timezone.utc)
+        elif snap_ts.tzinfo is not None and exp.tzinfo is None:
+            exp = exp.replace(tzinfo=timezone.utc)
+        return exp <= snap_ts
+
     def _simulate_taker(
         self,
         intent: OrderIntent,
         snapshot: MarketSnapshot,
     ) -> FillResult:
-        """Simulate an immediate taker fill at the executable price."""
+        """Simulate an immediate taker fill at the executable price.
+
+        Fill size is limited by the available liquidity at the touch
+        (bid_size for sells, ask_size for buys).
+        """
         fill_price = self.estimate_execution_price(intent.side, snapshot)
+
+        # Limit fill size by available liquidity depth
+        available = snapshot.ask_size if intent.side == OrderSide.BUY else snapshot.bid_size
+        fill_size = min(intent.size, available)
+        remaining = intent.size - fill_size
+
         fee_rate = self.config.taker_fee_rate
-        fee = intent.size * fill_price * fee_rate
+        fee = fill_size * fill_price * fee_rate
         return FillResult(
-            filled=True,
+            filled=fill_size > 0,
             fill_price=fill_price,
-            fill_size=intent.size,
+            fill_size=fill_size,
             fee=fee,
-            remaining_size=0.0,
+            remaining_size=remaining,
             timestamp=snapshot.timestamp,
         )
 
@@ -118,7 +155,7 @@ class FillModel:
         intent: OrderIntent,
         snapshot: MarketSnapshot,
     ) -> FillResult:
-        """Simulate a passive fill based on price crossing."""
+        """Simulate a passive fill based on price crossing and queue position."""
         crossed = self._price_crossed(intent, snapshot)
         if not crossed:
             return FillResult(
@@ -129,6 +166,21 @@ class FillModel:
                 remaining_size=intent.size,
                 timestamp=snapshot.timestamp,
             )
+
+        # Queue position check: if deep in queue, may not fill immediately
+        if self.config.queue_position_pct > 0.0:
+            # Higher queue_position_pct = less likely to fill this tick
+            fill_probability = 1.0 - self.config.queue_position_pct
+            if fill_probability < random.random():
+                return FillResult(
+                    filled=False,
+                    fill_price=0.0,
+                    fill_size=0.0,
+                    fee=0.0,
+                    remaining_size=intent.size,
+                    timestamp=snapshot.timestamp,
+                )
+
         fill_price = intent.price
         fee_rate = self.config.maker_fee_rate
         fee = intent.size * fill_price * fee_rate
