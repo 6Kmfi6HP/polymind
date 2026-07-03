@@ -30,8 +30,9 @@ not produce enough drift to overcome the spread.
 
 1. **Midpoint prices are untradeable.** Never backtest factor strategies against
    Gamma midpoint prices — use CLOB bid/ask as reference.
-2. **Factor + MM hybrid.** Factor strategies in Polymind must use limit order
-   execution (earn the spread) not market orders (pay the spread).
+2. **Factor + execution-aware bridge.** Factor strategies in Polymind must use
+   executable bid/ask models or passive limit-order models with explicit queue,
+   latency, partial-fill, timeout, cancel, and adverse-selection assumptions.
 3. **Short holds amplify cost.** 4–6 round-trips/day at 5% cost = 20–30% daily.
 4. **YES tokens are spread-heavy.** Polymarket allocates most liquidity to NO
    (where prices are near $1.00). YES books are thin.
