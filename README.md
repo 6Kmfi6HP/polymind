@@ -16,7 +16,7 @@
 
 ## 🔥 Why Polymind?
 
-Polymarkets need liquidity. Existing market-making bots require you to hand-code complex strategies — AMM math, spread calculations, position sizing, risk management. Polymind changes that.
+Polymarkets need liquidity. Existing trading bots require you to hand-code complex strategies — AMM math, spread calculations, position sizing, factor ranking, risk management. Polymind changes that.
 
 **Instead of writing code, you write strategy:**
 
@@ -30,9 +30,12 @@ def calculate_order_size(midpoint, balance, volatility):
 ```
 # Polymind approach — one sentence
 "Run concentrated liquidity MM on this market, 200 USDC budget, 0.1 depth"
+
+# Or factor-based:
+"Cross-sectional momentum on all active markets, lookback 24h, top decile, 4h hold"
 ```
 
-Polymind merges **four existing Polymarket trading projects** into one unified framework:
+Polymind merges **four existing Polymarket trading projects** into one unified framework, plus incorporates learnings from **five reference research projects** on cross-sectional factor trading:
 
 | Project | Source | Key Contribution |
 |---------|--------|------------------|
@@ -40,58 +43,66 @@ Polymind merges **four existing Polymarket trading projects** into one unified f
 | pm-official-mm-keeper | Polymarket official | AMM concentrated liquidity strategy, Bands strategy |
 | poly-maker (warproxxx) | Community | Event-driven MM, triple-layer risk, position merging |
 | pm-terminal (direkturcrypto) | Community | Maker rebate arbitrage, sniper, copy trade, ghost fill detection |
+| polymarket-cross-sectional-momentum | Factor research | Cross-sectional momentum pipeline, CLOB-native data, paper OMS |
+| Polymarket-Edge-Research (oscarc17) | Factor research | DuckDB panels, walk-forward backtest, execution-aware sim |
+| prediction-market-backtesting (evan-kolberg) | Backtest engine | NautilusTrader integration, passive order modeling |
 
 ---
 
 ## 🏗️ Architecture
 
 ```
-┌────────────────────────────────────────────────────────┐
-│                    YOUR STRATEGY                        │
-│  "Run maker-rebate on BTC 15m, $0.97 cap, 10 shares"   │
-└────────────────────────────────────────────────────────┘
+┌──────────────────────────────────────────────────────────┐
+│                      YOUR STRATEGY                        │
+│  "Cross-sectional momentum, lookback 7d, top decile, 4h" │
+│  "Run maker-rebate on BTC 15m, $0.97 cap, 10 shares"     │
+└──────────────────────────────────────────────────────────┘
                             │
                             ▼
-┌────────────────────────────────────────────────────────┐
-│                    STRATEGY ENGINE                      │
-│                                                        │
-│  ┌────────────┐  ┌──────────────┐  ┌──────────────┐  │
-│  │ NL Parser  │  │   Strategy   │  │  Optimizer   │  │
-│  │ prompt→cfg │  │   Registry   │  │  auto-tune   │  │
-│  └────────────┘  └──────────────┘  └──────────────┘  │
-│                                                        │
-│  ┌────────────────────────────────────────────────┐    │
-│  │              STRATEGY PLUGINS                   │    │
-│  │  AMM · Bands · MakerRebate · Sniper · Copy    │    │
-│  │  EventMM · ClassicMM                            │    │
-│  └────────────────────────────────────────────────┘    │
-└────────────────────────────────────────────────────────┘
+┌──────────────────────────────────────────────────────────┐
+│                      STRATEGY ENGINE                      │
+│                                                          │
+│  ┌────────────┐  ┌──────────────┐  ┌────────────────┐  │
+│  │ NL Parser  │  │   Strategy   │  │     Factor     │  │
+│  │ prompt→cfg │  │   Registry   │  │    Registry    │  │
+│  └────────────┘  └──────────────┘  └────────────────┘  │
+│                                                          │
+│  ┌──────────────────────────────────────────────────┐  │
+│  │               STRATEGY PLUGINS                    │  │
+│  │    MM: AMM · Bands · MakerRebate · Sniper       │  │
+│  │    MM: EventMM · ClassicMM · CopyTrade           │  │
+│  │    FACTORS: Momentum · Volatility · Volume       │  │
+│  │    FACTORS: Sentiment · Composite · Hedge        │  │
+│  └──────────────────────────────────────────────────┘  │
+└──────────────────────────────────────────────────────────┘
                             │
                             ▼
-┌────────────────────────────────────────────────────────┐
-│                     CORE ENGINE                         │
-│  ┌──────────┐  ┌───────────┐  ┌───────────────────┐  │
-│  │  Agent   │  │   Risk    │  │  Order Manager    │  │
-│  │  Loop    │  │  Manager  │  │  lifecycle + fill │  │
-│  │obs→dec→act│  │  kelly/   │  │  tracking         │  │
-│  │          │  │ stop-loss │  │                   │  │
-│  └──────────┘  └───────────┘  └───────────────────┘  │
-└────────────────────────────────────────────────────────┘
+┌──────────────────────────────────────────────────────────┐
+│                       CORE ENGINE                         │
+│  ┌──────────┐  ┌───────────┐  ┌───────────┐  ┌──────┐ │
+│  │  Agent   │  │   Risk    │  │  Factor   │  │Order │ │
+│  │  Loop    │  │  Manager  │  │ Pipeline  │  │ Mgr  │ │
+│  │obs→dec→act│  │  kelly/   │  │collect→   │  │fill  │ │
+│  │          │  │ stop-loss │  │ score→rank│  │track │ │
+│  └──────────┘  └───────────┘  └───────────┘  └──────┘ │
+└──────────────────────────────────────────────────────────┘
                             │
                             ▼
-┌────────────────────────────────────────────────────────┐
-│                  POLYMARKET LAYER                       │
-│  ┌──────────┐  ┌──────────┐  ┌──────────────────┐   │
-│  │CLOB API  │  │WebSocket │  │Smart Contracts  │   │
-│  │(HTTP)    │  │(realtime)│  │(merge/split/     │   │
-│  │          │  │          │  │ redeem)          │   │
-│  └──────────┘  └──────────┘  └──────────────────┘   │
-└────────────────────────────────────────────────────────┘
+┌──────────────────────────────────────────────────────────┐
+│                    POLYMARKET LAYER                       │
+│  ┌──────────┐  ┌──────────┐  ┌──────────┐  ┌────────┐ │
+│  │CLOB API  │  │WebSocket │  │Gamma API │  │Smart   │ │
+│  │(HTTP)    │  │(realtime)│  │(markets/ │  │Contracts│ │
+│  │          │  │          │  │ history) │  │        │ │
+│  └──────────┘  └──────────┘  └──────────┘  └────────┘ │
+└──────────────────────────────────────────────────────────┘
 ```
 
 ---
 
 ## 🎯 Available Strategies
+
+### Market Making (Bid-Ask)
 
 | Strategy | Source | Description |
 |----------|--------|-------------|
@@ -102,6 +113,23 @@ Polymind merges **four existing Polymarket trading projects** into one unified f
 | **Sniper** 🎯 | pm-terminal | Deep discount GTC orders on 5-minute markets to catch panic dumps |
 | **Copy Trade** 👥 | pm-terminal | Mirrors target wallet trades in real-time via WebSocket |
 | **Classic MM** 🔄 | pm-terminal | Split USDC → equal Y+N, limit sell at profit target, adaptive cut-loss |
+
+### Cross-Sectional Factor (Signal-Driven)
+
+| Strategy | Source | Description |
+|----------|--------|-------------|
+| **Momentum** 📈 | polymarket-cs-momentum | Rank all markets by trailing price change, long top decile, hold and exit |
+| **Volatility** 🌊 | polymarket-cs-momentum | Trade volatility regimes — go short when vol spikes, long when vol compresses |
+| **Volume** 💧 | polymarket-cs-momentum | Focus on liquidity-driven signals, avoid illiquid markets |
+| **Sentiment** 🗣️ | polymarket-cs-momentum | Social media / news sentiment as cross-sectional ranking signal |
+| **Composite** 🧬 | polymarket-cs-momentum | Multi-factor weighted composite (momentum + volume + sentiment) |
+| **Hedge** 🛡️ | polymarket-cs-momentum | Long top decile, short bottom decile — market-neutral |
+
+> **Critical insight from reference research**: Factor signals are real (6.19 Sharpe
+> backtested momentum), but **midpoint prices are untradeable**. CLOB bid-ask spread
+> (2–10%) can exceed the factor signal. Polymind factor strategies use
+> **market-making execution** — enter/exit via limit orders that earn the spread,
+> not market orders that pay it. Hybrid factor-MM. See [`docs/architecture.md`](docs/architecture.md).
 
 ---
 
@@ -142,6 +170,15 @@ polymind run "Maker rebate on ETH 15m, 10 shares, combined cap 0.96"
 # Copy trade
 polymind run --copy-trader 0x1234...abcd --sizing 0.1
 
+# Factor: cross-sectional momentum
+polymind run "Cross-sectional momentum on all markets, lookback 24h, top decile by volume"
+
+# Factor: multi-factor composite
+polymind run "Composite factor: momentum 0.5 + volume 0.3 + sentiment 0.2, top 10 markets"
+
+# Factor: market-neutral hedge
+polymind run "Factor hedge, long top decile short bottom decile, equal weight 10 each"
+
 # Risk-on: event-driven with tight stop-loss
 polymind run "Event-driven MM, aggressive sizing, stop loss at 5%, volatility threshold 150%"
 ```
@@ -151,14 +188,25 @@ polymind run "Event-driven MM, aggressive sizing, stop loss at 5%, volatility th
 ## 📋 Roadmap
 
 ```
-Phase · Skeleton        ▰▰▰▰▰▰▰▰░░░░  Project scaffold, CLI, core loop, CLOB client
-Phase · Port Strategies ░░░░░░░░░░░░  Port all 7 strategies to unified Python interface
-Phase · Unify & Test    ░░░░░░░░░░░░  Common risk layer, integration tests, WS refactor
-Phase · AI Studio       ░░░░░░░░░░░░  Natural language → strategy config, auto-optimizer
-Phase · Polish          ░░░░░░░░░░░░  Docs, CI, PyPI, strategy templates gallery
+Phase · Skeleton          ▰▰▰▰▰▰▰▰░░░░  Project scaffold, CLI, core loop, CLOB client
+Phase · Port MM           ░░░░░░░░░░░░  Port 7 MM strategies to unified Python interface
+Phase · Factor Engine     ░░░░░░░░░░░░  Snapshot collector, factor computation, ranking pipeline
+Phase · Factor Strategies ░░░░░░░░░░░░  Momentum, volatility, volume, sentiment, composite, hedge
+Phase · Unify & Test      ░░░░░░░░░░░░  Common risk layer, integration tests, WS refactor
+Phase · AI Studio         ░░░░░░░░░░░░  NL → strategy config, factor discovery, auto-optimizer
+Phase · Polish            ░░░░░░░░░░░░  Docs, CI, PyPI, strategy templates gallery
 ```
 
 This is a **vibe-coded** project — no fixed timelines, just iterative improvement based on what's interesting and useful.
+
+### What's been learned so far
+
+The reference project (`recallnet/polymarket-cross-sectional-momentum`) taught us
+a critical lesson that shapes everything: **midpoint prices are not tradeable.**
+A backtested 6.19 Sharpe momentum signal turned into −13.6% live PnL because
+CLOB bid-ask spread (2–10%) consumed the entire edge. Polymind's answer: factor
+strategies use **market-making execution** — enter via limit orders, earn the
+spread, never pay it. Factor signal + MM execution = hybrid alpha.
 
 ---
 
@@ -172,18 +220,21 @@ polymind/
 │
 ├── polymind/               # Main package
 │   ├── core/               # Agent loop, config, strategy base class
-│   ├── strategies/         # Strategy implementations (7 strategies)
-│   ├── polymarket/         # CLOB API, WebSocket, contracts
+│   ├── strategies/         # Strategy implementations
+│   │   ├── market_making/  # MM strategies (7 types)
+│   │   └── factors/        # Factor strategies (6 types)
+│   ├── factors/            # Factor engine (pipeline, registry, backtest)
+│   ├── polymarket/         # CLOB API, WebSocket, Gamma API, contracts
 │   ├── agents/             # AI providers (Claude, GPT, Gemini)
 │   ├── risk/               # Risk management
-│   ├── backtesting/        # Backtest engine
+│   ├── backtesting/        # Backtest engine (portfolio + factor)
 │   ├── studio/             # AI strategy studio
-│   ├── storage/            # Database persistence
+│   ├── storage/            # Database + price snapshot store
 │   ├── alerts/             # Telegram notifications
 │   └── utils/              # Logging, secrets, killswitch
 │
 ├── cli/                    # Command-line interface
-├── docs/                   # Documentation
+├── docs/                   # Documentation + reference project learnings
 └── tests/                  # Tests
 ```
 
@@ -224,6 +275,9 @@ Built from:
 - [poly-market-maker](https://github.com/Polymarket/poly-market-maker) by Polymarket
 - [poly-maker](https://github.com/warproxxx/warproxxx-mm-bot) by warproxxx
 - [pm-terminal](https://github.com/direkturcrypto/pm-terminal-all-in-one) by direkturcrypto
+- [polymarket-cross-sectional-momentum](https://github.com/recallnet/polymarket-cross-sectional-momentum) by recallnet
+- [Polymarket-Edge-Research](https://github.com/oscarc17/Polymarket-Edge-Research) by oscarc17
+- [prediction-market-backtesting](https://github.com/evan-kolberg/prediction-market-backtesting) by evan-kolberg
 
 ---
 
