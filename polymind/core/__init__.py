@@ -11,6 +11,7 @@ own CLOB transport.  See :mod:`polymind.core.intents` for the contract.
 from polymind.core.agent import BaseAgent
 from polymind.core.config import Config
 from polymind.core.intents import IntentExecutor, StrategyIntent
+from polymind.core.portfolio import PortfolioTarget, PositionDirection
 from polymind.core.strategy import BaseMMStrategy
 
 __all__ = [
@@ -18,5 +19,7 @@ __all__ = [
     "BaseMMStrategy",
     "Config",
     "IntentExecutor",
+    "PortfolioTarget",
+    "PositionDirection",
     "StrategyIntent",
 ]
