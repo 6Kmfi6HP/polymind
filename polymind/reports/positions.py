@@ -1,8 +1,6 @@
 """Position summary report."""
 from __future__ import annotations
 
-from typing import Any
-
 from rich.table import Table
 
 from polymind.execution.executor import PositionRecord
@@ -13,7 +11,7 @@ async def get_position_report(ledger: LedgerStore) -> list[PositionRecord]:
     """Fetch all positions from the ledger store."""
     # We query each known position — LedgerStore stores them individually
     # For now, we query known entries
-    entries = await ledger._ensure_connection()
+    await ledger._ensure_connection()
     conn = ledger._conn
     assert conn is not None
     rows = await conn.fetch_all(

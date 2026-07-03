@@ -1,7 +1,5 @@
 """Test position reporter."""
 import pytest
-from datetime import datetime
-from polymind.core.ledger import LedgerEntry, EntryType
 from polymind.storage.database import DatabaseConfig
 from polymind.storage.ledger import LedgerStore
 from polymind.execution.executor import PositionRecord
