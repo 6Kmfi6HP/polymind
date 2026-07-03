@@ -26,7 +26,7 @@ def identity_filter(u: UniverseSnapshot) -> UniverseSnapshot:
 
 
 def constant_score(u: UniverseSnapshot) -> ScoreResult:
-    scores = {mid: 0.5 for mid in u.markets}
+    scores = dict.fromkeys(u.markets, 0.5)
     return ScoreResult(scores=scores, timestamp=u.timestamp)
 
 
@@ -130,7 +130,7 @@ class TestFactorPipeline:
             return u
 
         def scoring(u: UniverseSnapshot) -> ScoreResult:
-            scores = {mid: 0.5 for mid in u.markets}
+            scores = dict.fromkeys(u.markets, 0.5)
             return ScoreResult(scores=scores, timestamp=u.timestamp)
 
         pipeline = FactorPipeline(

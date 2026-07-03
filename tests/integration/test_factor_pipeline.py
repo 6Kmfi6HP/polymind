@@ -462,7 +462,7 @@ class TestPriceStoreBacktestIntegration:
 
         # Pipeline that scores each market equally
         def equal_scores(u: UniverseSnapshot) -> ScoreResult:
-            scores = {mid: 0.5 for mid in u.markets}
+            scores = dict.fromkeys(u.markets, 0.5)
             return ScoreResult(scores=scores, timestamp=u.timestamp)
 
         pipeline = FactorPipeline(

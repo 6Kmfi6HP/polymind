@@ -19,7 +19,7 @@ class ConstSignal(FactorSignalModel):
         self._score = score
 
     async def compute_scores(self, universe: UniverseSnapshot) -> dict[str, float]:
-        return {mid: self._score for mid in universe.markets}
+        return dict.fromkeys(universe.markets, self._score)
 
 
 class TestCompositeFactor:

@@ -20,7 +20,7 @@ class ConstantSignal(FactorSignalModel):
     """Test signal that returns constant scores."""
 
     async def compute_scores(self, universe: UniverseSnapshot) -> dict[str, float]:
-        return {mid: 0.5 for mid in universe.markets}
+        return dict.fromkeys(universe.markets, 0.5)
 
 
 class DummyBridge(FactorExecutionBridge):
