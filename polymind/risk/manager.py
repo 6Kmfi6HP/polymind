@@ -23,7 +23,7 @@ class RiskManager:
         self.initial_capital = initial_capital
         self.current_capital = initial_capital
         self.peak_capital = initial_capital
-        self.trades: list = field(default_factory=list)
+        self.trades: list = []
         self._daily_loss = 0.0
 
     def calculate_position_size(
