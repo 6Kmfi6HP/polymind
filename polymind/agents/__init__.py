@@ -1,5 +1,6 @@
 """AI agent abstractions."""
 
+from polymind.agents.anthropic import AnthropicAgent, create_anthropic_agent
 from polymind.agents.base import (
     ActionResult,
     AgentConfig,
@@ -10,11 +11,10 @@ from polymind.agents.base import (
     Observation,
     Reflection,
 )
-from polymind.agents.anthropic import AnthropicAgent, create_anthropic_agent
-from polymind.agents.openai import OpenAIAgent, create_openai_agent
-from polymind.agents.gemini import GeminiAgent, create_gemini_agent
 from polymind.agents.ensemble import EnsembleAgent, EnsembleStrategy
+from polymind.agents.gemini import GeminiAgent, create_gemini_agent
 from polymind.agents.intelligence import IntelligenceAgent
+from polymind.agents.openai import OpenAIAgent, create_openai_agent
 
 __all__ = [
     "AgentRole",
