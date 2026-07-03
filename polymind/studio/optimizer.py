@@ -1,4 +1,3 @@
-
 """Strategy parameter optimizer."""
 
 from __future__ import annotations
@@ -23,6 +22,7 @@ class ParamRange:
     min_val: float
     max_val: float
     step_size: float = 1.0
+    param_type: str = "float"
 
 
 @dataclass
@@ -43,15 +43,37 @@ class StrategyOptimizer:
     def __init__(self, config: OptimizerConfig) -> None:
         self.config = config
 
-    def random_search(self, param_ranges: list[ParamRange]) -> list[dict[str, Any]]:
+    def _random_search(
+        self, param_ranges: list[ParamRange], max_evals: int
+    ) -> list[dict[str, Any]]:
         random.seed(self.config.random_seed)
-        results = []
-        for _ in range(self.config.max_evals):
-            params = {}
+        results: list[dict[str, Any]] = []
+        for _ in range(max_evals):
+            params: dict[str, Any] = {}
             for pr in param_ranges:
                 val = random.uniform(pr.min_val, pr.max_val)
                 if pr.step_size > 0:
                     val = round(val / pr.step_size) * pr.step_size
+                if pr.param_type == "int":
+                    val = int(val)
                 params[pr.name] = val
             results.append(params)
+        return results
+
+    async def optimize(
+        self,
+        strategy_cls: type,
+        param_ranges: list[ParamRange],
+        data: Any,
+    ) -> list[OptimizationResult]:
+        samples = self._random_search(param_ranges, self.config.max_evals)
+        results: list[OptimizationResult] = []
+        for params in samples:
+            results.append(
+                OptimizationResult(
+                    params=params,
+                    score=0.0,
+                    target=self.config.target,
+                )
+            )
         return results

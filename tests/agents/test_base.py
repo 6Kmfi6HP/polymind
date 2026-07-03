@@ -76,6 +76,18 @@ class TestConcreteAgent:
         assert o.data["price"] == 1.0
 
     @pytest.mark.asyncio
+    async def test_default_observe_returns_empty_dict(self) -> None:
+        class DefaultObserveAgent(BaseAgent):
+            async def decide(self, o): return Decision(action="hold")
+            async def act(self, d): return ActionResult(success=True)
+            async def reflect(self, r): return Reflection(insight="done")
+
+        a = DefaultObserveAgent(AgentConfig(role=AgentRole.OBSERVER))
+        o = await a.observe({"anything": 42})
+        assert isinstance(o, Observation)
+        assert o.data == {}
+
+    @pytest.mark.asyncio
     async def test_decide_returns_decision(self) -> None:
         a = self.SimpleAgent(AgentConfig(role=AgentRole.DECIDER))
         d = await a.decide(Observation())

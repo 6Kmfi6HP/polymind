@@ -62,9 +62,8 @@ class BaseAgent(ABC):
     def __init__(self, config: AgentConfig) -> None:
         self.config = config
 
-    @abstractmethod
     async def observe(self, context: dict) -> Observation:
-        ...
+        return Observation(data={})
 
     @abstractmethod
     async def decide(self, observation: Observation) -> Decision:
