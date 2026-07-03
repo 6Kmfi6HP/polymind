@@ -54,3 +54,6 @@ Append one entry per run. Prune entries older than 30 days.
 
 2026-07-04T01:05:00Z — dev-loop — fix-proposed — Phase 13 Plugin System 完成. 946 tests.
 {"run_id":"2026-07-04T01:05:00Z","pattern":"dev-loop","duration_s":900,"items_found":2,"actions_taken":2,"escalations":0,"tokens_estimate":80000,"outcome":"fix-proposed","note":"Phase 13 Plugin System: PluginRegistry singleton + entry point discovery. 30 new tests, 946 total. integration-tests推送完成."}
+
+2026-07-04T01:15:00Z — dev-loop — fix-proposed — Phase 13 + 覆盖率提升. 1017 tests.
+{"run_id":"2026-07-04T01:15:00Z","pattern":"dev-loop","duration_s":1800,"items_found":3,"actions_taken":3,"escalations":0,"tokens_estimate":120000,"outcome":"fix-proposed","note":"Phase 13 Plugin System(PluginRegistry+discovery). 覆盖率94%(+2pp). serializer 0%→100%, strategy 44%/78%→100%. 1017测试全通过."}
