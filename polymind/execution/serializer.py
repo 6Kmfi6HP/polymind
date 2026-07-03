@@ -9,10 +9,9 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 from datetime import datetime
-from typing import Any, Dict
+from typing import Any
 
 from polymind.core.intents import OrderIntent
-
 
 # ── Domain types ─────────────────────────────────────────────────────────────
 
@@ -88,7 +87,7 @@ class OrderSerializer:
             timestamp=datetime.now(),
         )
 
-    def serialize_cancel(self, market_id: str, order_id: str) -> Dict[str, Any]:
+    def serialize_cancel(self, market_id: str, order_id: str) -> dict[str, Any]:
         """Produce a cancel-order payload dict.
 
         Returns a minimal dict with ``market_id`` and ``order_id`` keys, as

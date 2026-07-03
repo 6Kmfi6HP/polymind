@@ -7,11 +7,10 @@ MarketFeatures. Supports 4h, 24h, and 7d lookback windows.
 
 from __future__ import annotations
 
-from dataclasses import dataclass, field
-from typing import Dict, List, Optional
+from dataclasses import dataclass
 
 from polymind.core.intents import StrategyIntent
-from polymind.factors.pipeline import MarketFeatures, UniverseSnapshot
+from polymind.factors.pipeline import UniverseSnapshot
 from polymind.factors.portfolio_construction import PortfolioConfig, construct_portfolio
 from polymind.factors.registry import FactorExecutionBridge, FactorMetadata, FactorSignalModel
 from polymind.factors.scoring import momentum_score, rank_normalize
@@ -36,7 +35,7 @@ class MomentumFactor(FactorSignalModel):
     negative = downward trend.
     """
 
-    def __init__(self, config: Optional[MomentumConfig] = None):
+    def __init__(self, config: MomentumConfig | None = None):
         self.config = config or MomentumConfig()
         metadata = FactorMetadata(
             name=f"momentum_{self.config.lookback}",
@@ -47,7 +46,7 @@ class MomentumFactor(FactorSignalModel):
         )
         super().__init__(metadata)
 
-    async def compute_scores(self, universe: UniverseSnapshot) -> Dict[str, float]:
+    async def compute_scores(self, universe: UniverseSnapshot) -> dict[str, float]:
         """Compute momentum scores for all markets."""
         raw_scores = momentum_score(universe, lookback=self.config.lookback)
         return raw_scores
@@ -60,8 +59,8 @@ class MomentumBridge(FactorExecutionBridge):
         self.strategy_name = strategy_name
 
     async def to_order_intents(
-        self, targets: List
-    ) -> List[StrategyIntent]:
+        self, targets: list
+    ) -> list[StrategyIntent]:
         """Convert PortfolioTargets to StrategyIntents.
 
         Current implementation creates one bare StrategyIntent per target.
@@ -71,7 +70,7 @@ class MomentumBridge(FactorExecutionBridge):
 
         from polymind.core.intents import StrategyIntent
 
-        intents: List[StrategyIntent] = []
+        intents: list[StrategyIntent] = []
         for target in targets:
             intent = StrategyIntent(
                 timestamp=datetime.now(timezone.utc),
@@ -91,8 +90,8 @@ class MomentumBridge(FactorExecutionBridge):
 # Convenience: run the full momentum pipeline
 def run_momentum_pipeline(
     universe: UniverseSnapshot,
-    config: Optional[MomentumConfig] = None,
-) -> List[StrategyIntent]:
+    config: MomentumConfig | None = None,
+) -> list[StrategyIntent]:
     """Run the full momentum pipeline: score → rank → portfolio → bridge.
 
     Convenience function that wires together all components.

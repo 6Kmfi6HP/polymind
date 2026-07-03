@@ -10,7 +10,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass, field
 from enum import Enum, auto
-from typing import Any, Dict, Optional
+from typing import Any
 
 
 class PositionDirection(Enum):
@@ -30,6 +30,6 @@ class PortfolioTarget:
     target_size: float  # in token/shares (not USD)
     confidence: float  # 0.0–1.0, from signal score
     rank: int  # decile / percentile rank among universe
-    holding_period_hours: Optional[float] = None
+    holding_period_hours: float | None = None
     reason: str = ""
-    metadata: Dict[str, Any] = field(default_factory=dict)
+    metadata: dict[str, Any] = field(default_factory=dict)

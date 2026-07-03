@@ -11,9 +11,9 @@ from __future__ import annotations
 from dataclasses import dataclass, field
 from datetime import datetime
 from enum import Enum, auto
-from typing import Any, Dict, Optional
+from typing import Any
 
-from polymind.core.fills import FillEvent, FillSource
+from polymind.core.fills import FillEvent
 from polymind.polymarket.client import PolymarketClient
 from polymind.polymarket.websocket import PolymarketWebSocketAdapter
 
@@ -40,7 +40,7 @@ class FillReconciliationRecord:
     status: ReconciliationStatus
     discrepancy: float  # absolute difference in size
     timestamp: datetime
-    metadata: Dict[str, Any] = field(default_factory=dict)
+    metadata: dict[str, Any] = field(default_factory=dict)
 
 
 class FillReconciler:
@@ -60,8 +60,8 @@ class FillReconciler:
 
     def __init__(
         self,
-        websocket_adapter: Optional[PolymarketWebSocketAdapter] = None,
-        clob_client: Optional[PolymarketClient] = None,
+        websocket_adapter: PolymarketWebSocketAdapter | None = None,
+        clob_client: PolymarketClient | None = None,
     ) -> None:
         self._websocket_adapter = websocket_adapter
         self._clob_client = clob_client
@@ -117,15 +117,14 @@ class FillReconciler:
         actual_fills = await self._fetch_actual_fills(expected.market_id)
 
         # Find a matching actual fill by fill_id, then by order_id
-        match: Optional[FillEvent] = None
+        match: FillEvent | None = None
         for actual in actual_fills:
             if actual.fill_id == expected.fill_id:
                 match = actual
                 break
-            if expected.order_id and actual.order_id == expected.order_id:
-                if abs(actual.price - expected.price) < 0.0001:
-                    match = actual
-                    break
+            if expected.order_id and actual.order_id == expected.order_id and abs(actual.price - expected.price) < 0.0001:
+                match = actual
+                break
 
         if match is None:
             return FillReconciliationRecord(

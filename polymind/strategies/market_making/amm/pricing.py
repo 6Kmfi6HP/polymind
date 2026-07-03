@@ -7,9 +7,7 @@ concentrated liquidity in a configurable spread range.
 
 from __future__ import annotations
 
-import math
 from dataclasses import dataclass
-from typing import List, Tuple
 
 from polymind.core.intents import OrderSide
 
@@ -27,7 +25,7 @@ class AMMPricingConfig:
 def compute_ladder(
     target_price: float,
     config: AMMPricingConfig,
-) -> List[Tuple[OrderSide, float, int]]:
+) -> list[tuple[OrderSide, float, int]]:
     """Compute a symmetric buy/sell ladder around a target price.
 
     Args:
@@ -41,7 +39,7 @@ def compute_ladder(
     if target_price <= 0:
         return []
 
-    ladder: List[Tuple[OrderSide, float, int]] = []
+    ladder: list[tuple[OrderSide, float, int]] = []
 
     for level in range(config.num_levels):
         # Linear interpolation between min and max spread

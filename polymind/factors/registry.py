@@ -9,10 +9,9 @@ from __future__ import annotations
 
 from abc import ABC, abstractmethod
 from dataclasses import dataclass, field
-from typing import Any, Dict, List, Optional
 
-from polymind.core.portfolio import PortfolioTarget
 from polymind.core.intents import StrategyIntent
+from polymind.core.portfolio import PortfolioTarget
 from polymind.factors.pipeline import UniverseSnapshot
 
 
@@ -24,7 +23,7 @@ class FactorMetadata:
     version: str = "0.1.0"
     description: str = ""
     lookback: str = "24h"  # default lookback
-    tags: List[str] = field(default_factory=list)
+    tags: list[str] = field(default_factory=list)
 
 
 class FactorSignalModel(ABC):
@@ -34,7 +33,7 @@ class FactorSignalModel(ABC):
         self.metadata = metadata
 
     @abstractmethod
-    async def compute_scores(self, universe: UniverseSnapshot) -> Dict[str, float]:
+    async def compute_scores(self, universe: UniverseSnapshot) -> dict[str, float]:
         """Score all markets in the universe. Returns market_id → score."""
         ...
 
@@ -45,7 +44,7 @@ class FactorExecutionBridge(ABC):
     @abstractmethod
     async def to_order_intents(
         self, target: PortfolioTarget
-    ) -> List[StrategyIntent]:
+    ) -> list[StrategyIntent]:
         """Convert a single PortfolioTarget into executable intents."""
         ...
 
@@ -58,8 +57,8 @@ class FactorRegistry:
     """
 
     def __init__(self):
-        self._signals: Dict[str, FactorSignalModel] = {}
-        self._bridges: Dict[str, FactorExecutionBridge] = {}
+        self._signals: dict[str, FactorSignalModel] = {}
+        self._bridges: dict[str, FactorExecutionBridge] = {}
 
     def register_signal(
         self, name: str, model: FactorSignalModel
@@ -73,19 +72,19 @@ class FactorRegistry:
         """Register an execution bridge for a factor."""
         self._bridges[name] = bridge
 
-    def get_signal(self, name: str) -> Optional[FactorSignalModel]:
+    def get_signal(self, name: str) -> FactorSignalModel | None:
         """Get a registered signal model by name."""
         return self._signals.get(name)
 
-    def get_bridge(self, name: str) -> Optional[FactorExecutionBridge]:
+    def get_bridge(self, name: str) -> FactorExecutionBridge | None:
         """Get a registered execution bridge by name."""
         return self._bridges.get(name)
 
-    def list_signals(self) -> List[str]:
+    def list_signals(self) -> list[str]:
         """List all registered signal names."""
         return list(self._signals.keys())
 
-    def list_bridges(self) -> List[str]:
+    def list_bridges(self) -> list[str]:
         """List all registered bridge names."""
         return list(self._bridges.keys())
 

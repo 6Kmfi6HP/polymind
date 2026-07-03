@@ -11,7 +11,6 @@ from __future__ import annotations
 from dataclasses import dataclass
 from datetime import datetime
 from enum import Enum, auto
-from typing import Optional
 
 from polymind.polymarket.contracts import ContractsGateway
 
@@ -48,7 +47,7 @@ class BalanceReconciler:
 
     def __init__(
         self,
-        contracts_gateway: Optional[ContractsGateway] = None,
+        contracts_gateway: ContractsGateway | None = None,
     ) -> None:
         self._contracts_gateway = contracts_gateway
 

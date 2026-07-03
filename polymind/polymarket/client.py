@@ -5,21 +5,21 @@ Wraps py-clob-client for order management, market data, positions, and balance.
 Supports both regular and negative-risk markets.
 """
 
-from typing import Any, List, Optional
+from typing import Any
 
 
 class PolymarketClient:
     """Client for Polymarket's CLOB API."""
 
-    def __init__(self, private_key: Optional[str] = None):
+    def __init__(self, private_key: str | None = None):
         self.private_key = private_key
         self._client = None
 
-    async def get_markets(self, active: bool = True, limit: int = 50) -> List[Any]:
+    async def get_markets(self, active: bool = True, limit: int = 50) -> list[Any]:
         """Fetch active markets from Polymarket."""
         return []
 
-    async def get_positions(self) -> List[Any]:
+    async def get_positions(self) -> list[Any]:
         """Fetch open positions."""
         return []
 
@@ -27,7 +27,7 @@ class PolymarketClient:
         """Fetch USDC balance."""
         return 0.0
 
-    async def place_order(self, **kwargs) -> Optional[Any]:
+    async def place_order(self, **kwargs) -> Any | None:
         """Place an order on the CLOB."""
         return None
 

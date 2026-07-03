@@ -96,6 +96,7 @@ dev = [
     "ruff>=0.1.0",
     "mypy>=1.5.0",
     "pre-commit>=3.7.0",
+    "bandit>=1.7.0",
 ]
 
 [project.urls]
@@ -126,13 +127,38 @@ target-version = "py310"
 
 [tool.ruff.lint]
 select = ["E", "W", "F", "I", "B", "C4", "UP", "ARG", "SIM"]
-ignore = ["E501", "B008", "C901", "ARG001"]
+ignore = ["E501", "B008", "C901", "ARG001", "ARG002", "B027"]
 
 [tool.ruff.lint.per-file-ignores]
 "tests/*" = ["ARG", "S101"]
 "__init__.py" = ["F401"]
 
+[tool.bandit]
+exclude_dirs = ["tests", ".venv", ".env"]
+skips = ["B101", "B303", "B311", "B404", "B603", "B607"]
+
+[tool.coverage.run]
+source = ["polymind"]
+omit = ["*/tests/*", "*/__pycache__/*", "*/_version.py"]
+
+[tool.coverage.report]
+show_missing = true
+fail_under = 70
+skip_covered = true
+exclude_lines = [
+    "pragma: no cover",
+    "if TYPE_CHECKING:",
+    "if __name__ == .__main__.:",
+    "raise NotImplementedError",
+    "raise NotImplementedError()",
+]
+
 [tool.pytest.ini_options]
 asyncio_mode = "auto"
 testpaths = ["tests"]
 timeout = 30
+filterwarnings = ["ignore::DeprecationWarning"]
+markers = [
+    "slow: marks tests as slow (deselect with '-m \"not slow\"')",
+    "network: marks tests that need network access",
+]

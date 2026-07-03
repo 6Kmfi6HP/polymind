@@ -8,7 +8,6 @@ Scores markets by their volatility level. High volatility = high score
 from __future__ import annotations
 
 from dataclasses import dataclass
-from typing import Dict, Optional
 
 from polymind.factors.pipeline import UniverseSnapshot
 from polymind.factors.registry import FactorMetadata, FactorSignalModel
@@ -30,7 +29,7 @@ class VolatilityFactor(FactorSignalModel):
     When invert=True, lower volatility = higher score (regime filter).
     """
 
-    def __init__(self, config: Optional[VolatilityConfig] = None):
+    def __init__(self, config: VolatilityConfig | None = None):
         self.config = config or VolatilityConfig()
         metadata = FactorMetadata(
             name=f"volatility_{self.config.lookback}",
@@ -41,9 +40,9 @@ class VolatilityFactor(FactorSignalModel):
         )
         super().__init__(metadata)
 
-    async def compute_scores(self, universe: UniverseSnapshot) -> Dict[str, float]:
+    async def compute_scores(self, universe: UniverseSnapshot) -> dict[str, float]:
         """Score markets by volatility level."""
-        scores: Dict[str, float] = {}
+        scores: dict[str, float] = {}
         for mid, mf in universe.markets.items():
             if mf is None:
                 continue

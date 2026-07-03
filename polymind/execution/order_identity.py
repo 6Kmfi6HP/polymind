@@ -9,7 +9,6 @@ same intent produces the same identity across restarts.
 from __future__ import annotations
 
 from dataclasses import dataclass
-from typing import Optional
 
 from polymind.core.intents import OrderSide
 
@@ -33,7 +32,7 @@ class OrderIdentity:
     market_id: str
     side: OrderSide
     price: float
-    outcome: Optional[str]
+    outcome: str | None
     client_id: str  # unique within (strategy_name, market_id) scope
 
     def to_identity_string(self) -> str:

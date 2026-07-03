@@ -6,10 +6,9 @@ Enforces per-market, per-category, and total exposure limits.
 
 from __future__ import annotations
 
-from dataclasses import dataclass, field
-from typing import Dict, List, Optional
+from dataclasses import dataclass
 
-from polymind.core.portfolio import PortfolioTarget, PositionDirection
+from polymind.core.portfolio import PortfolioTarget
 
 
 @dataclass
@@ -29,19 +28,19 @@ class ExposureManager:
     they reach the execution layer.
     """
 
-    def __init__(self, config: Optional[ExposureConfig] = None):
+    def __init__(self, config: ExposureConfig | None = None):
         self.config = config or ExposureConfig()
-        self._positions: Dict[str, float] = {}
+        self._positions: dict[str, float] = {}
 
     def validate_targets(
         self,
-        targets: List[PortfolioTarget],
-    ) -> List[PortfolioTarget]:
+        targets: list[PortfolioTarget],
+    ) -> list[PortfolioTarget]:
         """Filter targets that exceed exposure limits.
 
         Returns only targets that pass all checks.
         """
-        approved: List[PortfolioTarget] = []
+        approved: list[PortfolioTarget] = []
         running_total = self.get_total_exposure()
 
         for t in targets:
@@ -62,7 +61,7 @@ class ExposureManager:
         return approved
 
     def update_positions(
-        self, targets: List[PortfolioTarget]
+        self, targets: list[PortfolioTarget]
     ) -> None:
         """Update tracked positions from executed targets."""
         for t in targets:

@@ -10,10 +10,10 @@ from __future__ import annotations
 
 import csv
 import json
+from collections.abc import AsyncGenerator
 from dataclasses import dataclass
 from datetime import datetime
 from enum import Enum, auto
-from typing import AsyncGenerator, List, Optional
 
 from polymind.execution.fill_model import MarketSnapshot
 
@@ -161,7 +161,7 @@ class DataLoader:
         self, config: BacktestDataConfig
     ) -> AsyncGenerator[MarketDataPoint, None]:
         """Load data points from a newline-delimited JSON file."""
-        with open(config.path, "r") as f:
+        with open(config.path) as f:
             for line in f:
                 line = line.strip()
                 if not line:
@@ -179,7 +179,7 @@ class DataLoader:
         Expected columns: ``market_id``, ``timestamp``, ``bid_price``,
         ``ask_price``, ``mid_price``, ``bid_size``, ``ask_size``, ``volume``.
         """
-        with open(config.path, "r", newline="") as f:
+        with open(config.path, newline="") as f:
             reader = csv.DictReader(f)
             for row in reader:
                 dp = _record_to_point(row)

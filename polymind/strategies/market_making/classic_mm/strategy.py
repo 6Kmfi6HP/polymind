@@ -7,9 +7,8 @@ simplest MM strategy, used as the foundation for more complex workflows.
 
 from __future__ import annotations
 
+from dataclasses import dataclass
 from datetime import datetime, timezone
-from dataclasses import dataclass, field
-from typing import Optional
 
 from polymind.core.intents import CancelIntent, OrderIntent, OrderSide, StrategyIntent, TimeInForce
 from polymind.core.strategy import BaseMMStrategy, StrategyConfig
@@ -35,13 +34,13 @@ class ClassicMMStrategy(BaseMMStrategy):
 
     def __init__(
         self,
-        config: Optional[StrategyConfig] = None,
-        mm_config: Optional[ClassicMMConfig] = None,
+        config: StrategyConfig | None = None,
+        mm_config: ClassicMMConfig | None = None,
     ):
         super().__init__(config)
         self.mm_config = mm_config or ClassicMMConfig()
 
-    async def analyze(self, market: MarketSnapshot) -> Optional[StrategyIntent]:
+    async def analyze(self, market: MarketSnapshot) -> StrategyIntent | None:
         """Analyze a market snapshot and produce a StrategyIntent."""
         bid_price = market.bid_price
         if bid_price <= 0:

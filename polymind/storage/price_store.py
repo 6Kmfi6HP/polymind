@@ -8,11 +8,10 @@ Every snapshot is one JSON line; each market_id gets its own file.
 from __future__ import annotations
 
 import json
-import os
-from dataclasses import dataclass, asdict
+from collections.abc import AsyncGenerator
+from dataclasses import asdict, dataclass
 from datetime import datetime
 from pathlib import Path
-from typing import AsyncGenerator, Optional
 
 
 @dataclass
@@ -37,7 +36,7 @@ class PriceStore:
     When ``path`` is ``None``, operates in-memory (useful for testing).
     """
 
-    def __init__(self, path: Optional[str] = None) -> None:
+    def __init__(self, path: str | None = None) -> None:
         self._path = Path(path) if path else None
         self._in_memory: list[PriceSnapshot] = []
         self._closed = False
@@ -56,8 +55,8 @@ class PriceStore:
     async def read_snapshots(
         self,
         market_id: str,
-        start: Optional[str] = None,
-        end: Optional[str] = None,
+        start: str | None = None,
+        end: str | None = None,
     ) -> AsyncGenerator[PriceSnapshot, None]:
         """Yield PriceSnapshots for *market_id*, optionally filtered by date."""
         self._check_open()

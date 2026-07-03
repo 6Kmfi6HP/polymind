@@ -5,8 +5,7 @@ Performance metrics for backtesting and live trading.
 from __future__ import annotations
 
 import math
-from dataclasses import dataclass, field
-from typing import List, Optional
+from dataclasses import dataclass
 
 
 @dataclass
@@ -27,7 +26,7 @@ class PerformanceMetrics:
 
 
 def compute_metrics(
-    returns: List[float],
+    returns: list[float],
     risk_free_rate: float = 0.0,
     periods_per_year: int = 252,
 ) -> PerformanceMetrics:

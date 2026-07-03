@@ -7,9 +7,13 @@ Produces StrategyIntent with symmetric buy/sell ladder around the mid price.
 from __future__ import annotations
 
 from datetime import datetime, timezone
-from typing import Any, Dict, Optional
 
-from polymind.core.intents import CancelIntent, IntentType, OrderIntent, OrderSide, StrategyIntent, TimeInForce
+from polymind.core.intents import (
+    CancelIntent,
+    OrderIntent,
+    StrategyIntent,
+    TimeInForce,
+)
 from polymind.core.strategy import BaseMMStrategy, StrategyConfig
 from polymind.execution.fill_model import MarketSnapshot
 from polymind.strategies.market_making.amm.pricing import AMMPricingConfig, compute_ladder
@@ -25,15 +29,15 @@ class AMMStrategy(BaseMMStrategy):
 
     def __init__(
         self,
-        pricing_config: Optional[AMMPricingConfig] = None,
-        sizing_config: Optional[AMMSizingConfig] = None,
-        config: Optional[StrategyConfig] = None,
+        pricing_config: AMMPricingConfig | None = None,
+        sizing_config: AMMSizingConfig | None = None,
+        config: StrategyConfig | None = None,
     ):
         super().__init__(config)
         self.pricing_config = pricing_config or AMMPricingConfig()
         self.sizing_config = sizing_config or AMMSizingConfig()
 
-    async def analyze(self, market: MarketSnapshot) -> Optional[StrategyIntent]:
+    async def analyze(self, market: MarketSnapshot) -> StrategyIntent | None:
         """Analyze a market snapshot and produce a StrategyIntent.
 
         Cancels all open orders for this market, then places a new ladder
@@ -65,7 +69,7 @@ class AMMStrategy(BaseMMStrategy):
 
         # Place new ladder orders
         orders: list[OrderIntent] = []
-        for (side, price, level), size in zip(ladder, sizes * 2):
+        for (side, price, _level), size in zip(ladder, sizes * 2, strict=False):
             if size <= 0:
                 continue
             order = OrderIntent(

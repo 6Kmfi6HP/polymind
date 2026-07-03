@@ -8,7 +8,7 @@ Subclasses must implement decide() with their trading logic.
 import asyncio
 from abc import ABC, abstractmethod
 from datetime import datetime
-from typing import Any, Dict, List, Optional
+from typing import Any
 
 from pydantic import BaseModel
 
@@ -16,18 +16,18 @@ from pydantic import BaseModel
 class Observation(BaseModel):
     """Market state observation."""
     timestamp: datetime
-    markets: List[Any] = []
-    positions: List[Any] = []
+    markets: list[Any] = []
+    positions: list[Any] = []
     balance: float = 0.0
 
 
 class Decision(BaseModel):
     """Trading decision."""
     action: str  # "buy", "sell", "hold", "close"
-    market_id: Optional[str] = None
-    outcome: Optional[str] = None
+    market_id: str | None = None
+    outcome: str | None = None
     size: float = 0.0
-    price: Optional[float] = None
+    price: float | None = None
     reasoning: str = ""
     confidence: float = 0.5
 

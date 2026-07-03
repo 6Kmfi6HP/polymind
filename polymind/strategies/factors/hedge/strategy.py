@@ -7,8 +7,7 @@ offsetting correlated exposures.
 
 from __future__ import annotations
 
-from dataclasses import dataclass, field
-from typing import Dict, List, Optional
+from dataclasses import dataclass
 
 from polymind.core.portfolio import PortfolioTarget, PositionDirection
 from polymind.factors.pipeline import UniverseSnapshot
@@ -29,14 +28,14 @@ class HedgeOverlay:
     to neutralize net exposure within configured limits.
     """
 
-    def __init__(self, config: Optional[HedgeConfig] = None):
+    def __init__(self, config: HedgeConfig | None = None):
         self.config = config or HedgeConfig()
 
     def apply(
         self,
-        targets: List[PortfolioTarget],
+        targets: list[PortfolioTarget],
         universe: UniverseSnapshot,
-    ) -> List[PortfolioTarget]:
+    ) -> list[PortfolioTarget]:
         """Apply hedge overlay to a list of targets.
 
         Pairs LONG positions with SHORT positions on correlated markets
@@ -64,7 +63,7 @@ class HedgeOverlay:
         return targets
 
     def compute_net_exposure(
-        self, targets: List[PortfolioTarget]
+        self, targets: list[PortfolioTarget]
     ) -> float:
         """Compute net directional exposure across all targets."""
         net = 0.0

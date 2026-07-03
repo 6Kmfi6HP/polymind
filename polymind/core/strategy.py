@@ -11,7 +11,7 @@ own CLOB transport, retries, and order lifecycle.
 
 from abc import ABC, abstractmethod
 from dataclasses import dataclass, field
-from typing import Any, Dict, List, Optional
+from typing import Any
 
 from polymind.core.intents import StrategyIntent
 
@@ -21,7 +21,7 @@ class StrategyConfig:
     """Configuration for a market-making strategy."""
     name: str
     enabled: bool = True
-    params: Dict[str, Any] = field(default_factory=dict)
+    params: dict[str, Any] = field(default_factory=dict)
 
 
 @dataclass
@@ -34,12 +34,12 @@ class StrategySignal:
     """
     action: str  # "place", "cancel", "hold", "close"
     market_id: str
-    outcome: Optional[str] = None
-    side: Optional[str] = None
-    price: Optional[float] = None
+    outcome: str | None = None
+    side: str | None = None
+    price: float | None = None
     size: float = 0.0
     confidence: float = 1.0
-    metadata: Dict[str, Any] = field(default_factory=dict)
+    metadata: dict[str, Any] = field(default_factory=dict)
 
 
 class BaseMMStrategy(ABC):
@@ -53,14 +53,14 @@ class BaseMMStrategy(ABC):
     - How to manage risk (stop-loss, drawdown)
     """
 
-    def __init__(self, config: Optional[StrategyConfig] = None):
+    def __init__(self, config: StrategyConfig | None = None):
         self.config = config or StrategyConfig(name=self.__class__.__name__)
         self.name = self.config.name
 
     # ── Primary analysis interface (ADR 0002) ──────────────────────────────
 
     @abstractmethod
-    async def analyze(self, market: Any) -> Optional[StrategyIntent]:
+    async def analyze(self, market: Any) -> StrategyIntent | None:
         """
         Analyze a market and produce a StrategyIntent.
 
@@ -75,7 +75,7 @@ class BaseMMStrategy(ABC):
 
     # ── Legacy signal interface ────────────────────────────────────────────
 
-    async def analyze_to_signal(self, market: Any) -> Optional[StrategySignal]:
+    async def analyze_to_signal(self, market: Any) -> StrategySignal | None:
         """
         Legacy analysis method returning ``StrategySignal``.
 
@@ -109,7 +109,7 @@ class BaseMMStrategy(ABC):
 
     # ── Legacy order placement (deprecated) ─────────────────────────────────
 
-    async def place_orders(self, signal: StrategySignal) -> List[Any]:
+    async def place_orders(self, signal: StrategySignal) -> list[Any]:
         """
         Place orders based on a trading signal.
 
@@ -130,7 +130,7 @@ class BaseMMStrategy(ABC):
         """
         return True
 
-    def get_config_summary(self) -> Dict[str, Any]:
+    def get_config_summary(self) -> dict[str, Any]:
         """Return human-readable config summary."""
         return {
             "strategy": self.name,

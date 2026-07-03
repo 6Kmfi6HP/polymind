@@ -11,7 +11,6 @@ from __future__ import annotations
 from abc import ABC, abstractmethod
 from dataclasses import dataclass, field
 from datetime import datetime, timezone
-from typing import Any, Dict, Optional
 
 from polymind.core.intents import StrategyIntent
 
@@ -23,7 +22,7 @@ class RiskDecision:
     gate_name: str
     approved: bool
     reason: str
-    overrides: Optional[Dict[str, float]] = None
+    overrides: dict[str, float] | None = None
     timestamp: datetime = field(default_factory=lambda: datetime.now(timezone.utc))
 
 
@@ -31,7 +30,7 @@ class RiskDecision:
 class RiskContext:
     """Context provided to every risk gate."""
 
-    current_positions: Dict[str, float]
+    current_positions: dict[str, float]
     current_exposure: float
     daily_pnl: float
     is_kill_switch_active: bool

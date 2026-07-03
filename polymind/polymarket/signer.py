@@ -10,7 +10,6 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 from enum import Enum, auto
-from typing import Optional
 
 
 class AuthTier(Enum):
@@ -58,8 +57,8 @@ class Signer:
     def __init__(
         self,
         tier: AuthTier,
-        api_creds: Optional[ApiKeyCredentials] = None,
-        wallet_creds: Optional[WalletCredentials] = None,
+        api_creds: ApiKeyCredentials | None = None,
+        wallet_creds: WalletCredentials | None = None,
     ):
         self.tier = tier
         self.api_creds = api_creds

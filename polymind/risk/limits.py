@@ -3,7 +3,6 @@
 from __future__ import annotations
 
 from dataclasses import dataclass, field
-from typing import List
 
 
 @dataclass
@@ -44,7 +43,7 @@ class ExposureLimit:
 class LimitsConfig:
     """Aggregate configuration for all risk limits."""
 
-    positions: List[PositionLimit] = field(default_factory=list)
+    positions: list[PositionLimit] = field(default_factory=list)
     order_rate: OrderRateLimit = field(default_factory=OrderRateLimit)
     daily_loss: DailyLossLimit = field(default_factory=DailyLossLimit)
     exposure: ExposureLimit = field(default_factory=ExposureLimit)
@@ -61,9 +60,7 @@ class LimitsManager:
         limit = self._find_position_limit(market_id)
         if size < limit.min_size:
             return False
-        if size > limit.max_size:
-            return False
-        return True
+        return not size > limit.max_size
 
     def check_order_rate(self, recent_order_count: int) -> bool:
         """Check if the recent order count is within the rate limit."""
@@ -93,9 +90,9 @@ class LimitsManager:
         order_count: int,
         current_loss: float,
         exposure: float,
-    ) -> List[str]:
+    ) -> list[str]:
         """Run all checks and return a list of failed check descriptions."""
-        failed: List[str] = []
+        failed: list[str] = []
         if not self.check_position_size(market_id, size):
             failed.append(f"position_size_exceeded:{market_id}")
         if not self.check_order_rate(order_count):

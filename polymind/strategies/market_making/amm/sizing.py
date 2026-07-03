@@ -7,9 +7,7 @@ concentration toward inner levels.
 
 from __future__ import annotations
 
-import math
 from dataclasses import dataclass
-from typing import List
 
 
 @dataclass
@@ -26,7 +24,7 @@ def distribute_size(
     total_exposure: float,
     num_levels: int,
     concentration_pct: float,
-) -> List[float]:
+) -> list[float]:
     """Distribute total exposure across ladder levels.
 
     Uses linear decay from inner to outer levels. Higher concentration_pct

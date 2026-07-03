@@ -11,7 +11,6 @@ from __future__ import annotations
 from dataclasses import dataclass, field
 from datetime import datetime
 from enum import Enum, auto
-from typing import Dict, List, Optional
 
 from polymind.core.fills import FillEvent
 from polymind.reconciliation.fills import (
@@ -40,7 +39,7 @@ class RecoveryRecord:
     action: RecoveryAction
     resolved: bool
     timestamp: datetime
-    metadata: Dict[str, str] = field(default_factory=dict)
+    metadata: dict[str, str] = field(default_factory=dict)
 
 
 class RecoveryManager:
@@ -58,8 +57,8 @@ class RecoveryManager:
 
     def __init__(self, max_retries: int = 3) -> None:
         self._max_retries = max_retries
-        self._retry_counts: Dict[str, int] = {}
-        self._history: List[RecoveryRecord] = []
+        self._retry_counts: dict[str, int] = {}
+        self._history: list[RecoveryRecord] = []
 
     async def assess(
         self,

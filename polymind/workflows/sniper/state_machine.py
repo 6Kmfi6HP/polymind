@@ -7,10 +7,8 @@ when price drops far below fair value.
 
 from __future__ import annotations
 
-from dataclasses import dataclass, field
 from datetime import datetime, timezone
 from enum import Enum, auto
-from typing import Dict, List
 
 
 class SniperState(Enum):
@@ -35,7 +33,7 @@ class SniperEvent(Enum):
     RESUME = auto()
 
 
-TRANSITIONS: Dict[SniperState, Dict[SniperEvent, SniperState]] = {
+TRANSITIONS: dict[SniperState, dict[SniperEvent, SniperState]] = {
     SniperState.IDLE: {
         SniperEvent.START: SniperState.WATCHING,
         SniperEvent.HALT: SniperState.HALTED,
@@ -63,7 +61,7 @@ class SniperStateMachine:
     def __init__(self, workflow_id: str):
         self.workflow_id = workflow_id
         self.state: SniperState = SniperState.IDLE
-        self.history: List[tuple[SniperState, SniperEvent, datetime]] = []
+        self.history: list[tuple[SniperState, SniperEvent, datetime]] = []
         self.created_at: datetime = datetime.now(timezone.utc)
         self.updated_at: datetime = self.created_at
 

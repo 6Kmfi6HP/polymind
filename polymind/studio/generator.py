@@ -11,7 +11,7 @@ from __future__ import annotations
 import re
 from dataclasses import dataclass, field
 from enum import Enum
-from typing import Any, Dict, List, Optional
+from typing import Any
 
 
 class StrategyTemplate(Enum):
@@ -24,11 +24,11 @@ class StrategyTemplate(Enum):
     CUSTOM = "custom"
 
     @property
-    def required_params(self) -> List[str]:
+    def required_params(self) -> list[str]:
         return _TEMPLATE_PARAMS[self]["required"]
 
     @property
-    def defaults(self) -> Dict[str, Any]:
+    def defaults(self) -> dict[str, Any]:
         return _TEMPLATE_PARAMS[self]["defaults"]
 
 
@@ -62,7 +62,7 @@ class GeneratedConfig:
 
     template: StrategyTemplate
     strategy_name: str
-    params: Dict[str, Any] = field(default_factory=dict)
+    params: dict[str, Any] = field(default_factory=dict)
     confidence: float = 0.0
     validated: bool = True
     raw_description: str = ""
@@ -98,7 +98,7 @@ class StrategyGenerator:
 
     def generate(self, description: str) -> GeneratedConfig:
         """Parse a NL description and return a GeneratedConfig."""
-        best_match: Optional[GeneratedConfig] = None
+        best_match: GeneratedConfig | None = None
         best_conf = 0.0
 
         for pattern, matcher in self._patterns:

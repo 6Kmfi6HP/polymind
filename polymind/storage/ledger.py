@@ -9,7 +9,6 @@ from __future__ import annotations
 
 import json
 from datetime import datetime
-from typing import Optional
 
 from polymind.core.ledger import EntryType, LedgerEntry
 from polymind.execution.executor import PositionRecord
@@ -25,7 +24,7 @@ class LedgerStore:
 
     def __init__(self, config: DatabaseConfig) -> None:
         self._config = config
-        self._conn: Optional[DatabaseConnection] = None
+        self._conn: DatabaseConnection | None = None
 
     # ── public API ─────────────────────────────────────────────────────────
 
@@ -93,7 +92,7 @@ class LedgerStore:
 
     async def get_position(
         self, market_id: str
-    ) -> Optional[PositionRecord]:
+    ) -> PositionRecord | None:
         """Return the stored position for a market, or None."""
         conn = await self._ensure_connection()
         row = await conn.fetch_one(

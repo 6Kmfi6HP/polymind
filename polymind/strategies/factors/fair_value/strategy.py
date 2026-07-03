@@ -8,7 +8,6 @@ market price. Higher scores when market is undervalued (bid below fair value).
 from __future__ import annotations
 
 from dataclasses import dataclass
-from typing import Dict, Optional
 
 from polymind.factors.pipeline import UniverseSnapshot
 from polymind.factors.registry import FactorMetadata, FactorSignalModel
@@ -29,7 +28,7 @@ class FairValueFactor(FactorSignalModel):
     market is relatively undervalued.
     """
 
-    def __init__(self, config: Optional[FairValueConfig] = None):
+    def __init__(self, config: FairValueConfig | None = None):
         self.config = config or FairValueConfig()
         metadata = FactorMetadata(
             name="fair_value",
@@ -39,13 +38,13 @@ class FairValueFactor(FactorSignalModel):
         )
         super().__init__(metadata)
 
-    async def compute_scores(self, universe: UniverseSnapshot) -> Dict[str, float]:
+    async def compute_scores(self, universe: UniverseSnapshot) -> dict[str, float]:
         """Score markets by fair-value deviation.
 
         Micro-price = (bid_price * ask_size + ask_price * bid_size) / (bid_size + ask_size)
         Score = (micro_price - mid_price) / mid_price  (positive = undervalued)
         """
-        scores: Dict[str, float] = {}
+        scores: dict[str, float] = {}
         for mid, mf in universe.markets.items():
             if mf is None or mf.mid_price <= 0:
                 continue

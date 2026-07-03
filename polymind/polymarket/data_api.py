@@ -10,7 +10,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass, field
 from datetime import datetime
-from typing import Any, Optional
+from typing import Any
 
 import aiohttp
 
@@ -46,7 +46,7 @@ class OrderbookSnapshot:
     market_id: str
     bids: list[OrderLevel] = field(default_factory=list)
     asks: list[OrderLevel] = field(default_factory=list)
-    timestamp: Optional[datetime] = None
+    timestamp: datetime | None = None
 
 
 @dataclass
@@ -87,7 +87,7 @@ class DataAPIConfig:
     """Configuration for the Data API adapter."""
 
     base_url: str = "https://gamma-api.polymarket.com"
-    api_key: Optional[str] = None
+    api_key: str | None = None
     timeout: float = 30.0
     rate_limit_per_sec: int = 10
 
@@ -102,7 +102,7 @@ class PolymarketDataAPI:
 
     def __init__(self, config: DataAPIConfig) -> None:
         self.config = config
-        self._client: Optional[aiohttp.ClientSession] = None
+        self._client: aiohttp.ClientSession | None = None
 
     async def __aenter__(self) -> PolymarketDataAPI:
         return self
@@ -151,7 +151,7 @@ class PolymarketDataAPI:
         )
 
     @staticmethod
-    def _parse_timestamp(ts: Any) -> Optional[datetime]:
+    def _parse_timestamp(ts: Any) -> datetime | None:
         if ts is None:
             return None
         if isinstance(ts, (int, float)):

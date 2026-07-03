@@ -8,6 +8,7 @@ operations.
 
 from __future__ import annotations
 
+import contextlib
 import os
 
 
@@ -73,9 +74,7 @@ class KillSwitch:
         Otherwise the in-process ``_triggered_flag`` is cleared.
         """
         if self._file_path is not None:
-            try:
+            with contextlib.suppress(FileNotFoundError):
                 os.remove(self._file_path)
-            except FileNotFoundError:
-                pass
         else:
             self._triggered_flag = False

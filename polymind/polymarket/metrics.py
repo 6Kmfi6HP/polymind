@@ -8,7 +8,6 @@ import math
 import threading
 from contextlib import contextmanager
 from dataclasses import dataclass, field
-from typing import Dict, List
 
 
 @dataclass
@@ -32,7 +31,7 @@ class Histogram:
 
     name: str
     _buckets: tuple = (0.005, 0.01, 0.025, 0.05, 0.1, 0.25, 0.5, 1.0, 2.5, 5.0, 10.0)
-    _counts: Dict[float, int] = field(default_factory=lambda: {})
+    _counts: dict[float, int] = field(default_factory=lambda: {})
     _sum: float = 0.0
     _total_count: int = 0
 
@@ -94,9 +93,9 @@ class AdapterMetrics:
         self.ws_messages_received: Counter = Counter(f"{prefix}_ws_messages_received")
 
         # Per-endpoint detailed tracking
-        self._request_counts: Dict[str, int] = {}
-        self._error_counts: Dict[str, int] = {}
-        self._latencies: Dict[str, List[float]] = {}
+        self._request_counts: dict[str, int] = {}
+        self._error_counts: dict[str, int] = {}
+        self._latencies: dict[str, list[float]] = {}
 
     # -----------------------------------------------------------------------
     # Public API
@@ -184,7 +183,7 @@ class AdapterMetrics:
             p99 = self._percentile_from_list(all_lats, 99.0)
 
             # Per-endpoint summaries
-            per_ep: Dict[str, MetricsSummary] = {}
+            per_ep: dict[str, MetricsSummary] = {}
             for ep in set(
                 list(self._request_counts.keys())
                 + list(self._error_counts.keys())
@@ -249,7 +248,7 @@ class AdapterMetrics:
     # -----------------------------------------------------------------------
 
     @staticmethod
-    def _percentile_from_list(sorted_samples: List[float], percentile: float) -> float:
+    def _percentile_from_list(sorted_samples: list[float], percentile: float) -> float:
         """Return the *percentile* value from a *pre-sorted* list."""
         if not sorted_samples:
             return 0.0

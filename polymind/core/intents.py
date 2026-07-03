@@ -15,8 +15,7 @@ from abc import ABC, abstractmethod
 from dataclasses import dataclass, field
 from datetime import datetime
 from enum import Enum, auto
-from typing import Any, Dict, List, Optional
-
+from typing import Any
 
 # ── Enums ─────────────────────────────────────────────────────────────────
 
@@ -63,11 +62,11 @@ class OrderIntent:
     side: OrderSide
     price: float
     size: float
-    outcome: Optional[str] = None
+    outcome: str | None = None
     time_in_force: TimeInForce = TimeInForce.GTC
-    expiration: Optional[datetime] = None
+    expiration: datetime | None = None
     reduce_only: bool = False
-    metadata: Dict[str, Any] = field(default_factory=dict)
+    metadata: dict[str, Any] = field(default_factory=dict)
 
 
 @dataclass
@@ -81,7 +80,7 @@ class CancelIntent:
     """
 
     market_id: str
-    order_id: Optional[str] = None
+    order_id: str | None = None
     reason: str = ""
 
 
@@ -101,10 +100,10 @@ class StrategyIntent:
 
     timestamp: datetime
     strategy_name: str
-    orders: List[OrderIntent] = field(default_factory=list)
-    cancels: List[CancelIntent] = field(default_factory=list)
-    risk_override: Optional[Dict[str, float]] = None
-    metadata: Dict[str, Any] = field(default_factory=dict)
+    orders: list[OrderIntent] = field(default_factory=list)
+    cancels: list[CancelIntent] = field(default_factory=list)
+    risk_override: dict[str, float] | None = None
+    metadata: dict[str, Any] = field(default_factory=dict)
 
     def is_empty(self) -> bool:
         """Return True when no work needs doing."""
@@ -127,7 +126,7 @@ class IntentExecutor(ABC):
     """
 
     @abstractmethod
-    async def execute(self, intent: StrategyIntent) -> Dict[str, Any]:
+    async def execute(self, intent: StrategyIntent) -> dict[str, Any]:
         """
         Execute the given intent against the exchange.
 
@@ -136,7 +135,7 @@ class IntentExecutor(ABC):
         """
         ...
 
-    async def dry_run(self, intent: StrategyIntent) -> Dict[str, Any]:
+    async def dry_run(self, intent: StrategyIntent) -> dict[str, Any]:
         """
         Simulate execution without placing real orders.
 

@@ -8,9 +8,8 @@ combine them to reject markets that fail any check.
 from __future__ import annotations
 
 from dataclasses import dataclass
-from typing import List
 
-from polymind.factors.pipeline import MarketFeatures, UniverseSnapshot
+from polymind.factors.pipeline import UniverseSnapshot
 
 
 @dataclass

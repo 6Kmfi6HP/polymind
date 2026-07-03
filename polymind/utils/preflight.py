@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass, field
 from datetime import datetime, timezone
-from enum import auto, Enum
+from enum import Enum, auto
 
 
 class PreflightSeverity(Enum):

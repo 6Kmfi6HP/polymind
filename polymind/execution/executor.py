@@ -7,10 +7,10 @@ FillModel.  No exchange credentials or network access required.
 
 from __future__ import annotations
 
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 from datetime import datetime, timezone
 from enum import Enum, auto
-from typing import Any, Dict, List, Optional, Tuple
+from typing import Any
 
 from polymind.core.fills import FillEvent, FillSource
 from polymind.core.intents import (
@@ -44,7 +44,7 @@ class OrderRecord:
     filled_size: float = 0.0
     filled_value: float = 0.0
     cancelled_size: float = 0.0
-    last_tick: Optional[datetime] = None
+    last_tick: datetime | None = None
 
 
 @dataclass
@@ -75,21 +75,21 @@ class PaperExecutor(IntentExecutor):
         self.fill_model = fill_model
         self.initial_cash = initial_cash
         self.cash: float = initial_cash
-        self.orders: Dict[str, OrderRecord] = {}
-        self.fills: List[FillEvent] = []
-        self.ledger: List[LedgerEntry] = []
-        self.positions: Dict[str, PositionRecord] = {}
+        self.orders: dict[str, OrderRecord] = {}
+        self.fills: list[FillEvent] = []
+        self.ledger: list[LedgerEntry] = []
+        self.positions: dict[str, PositionRecord] = {}
         self.loop_interval = loop_interval
-        self._current_snapshot: Optional[MarketSnapshot] = None
+        self._current_snapshot: MarketSnapshot | None = None
         self._fill_counter: int = 0
         self._ledger_counter: int = 0
 
-    async def execute(self, intent: StrategyIntent) -> Dict[str, Any]:
+    async def execute(self, intent: StrategyIntent) -> dict[str, Any]:
         """Process a StrategyIntent: place orders, cancel orders, simulate ticks.
 
         Returns a summary dict keyed by market_id.
         """
-        results: Dict[str, Dict[str, Any]] = {}
+        results: dict[str, dict[str, Any]] = {}
 
         # Process cancellations first, then new orders
         for cancel in intent.cancels:
@@ -103,7 +103,7 @@ class PaperExecutor(IntentExecutor):
             await self.simulate_tick(self._current_snapshot)
 
         # Build per-market summary
-        summary: Dict[str, Any] = {}
+        summary: dict[str, Any] = {}
         for market_id, data in results.items():
             summary[market_id] = data
 
@@ -147,7 +147,7 @@ class PaperExecutor(IntentExecutor):
 
         return fill_count
 
-    def get_position(self, market_id: str) -> Optional[PositionRecord]:
+    def get_position(self, market_id: str) -> PositionRecord | None:
         """Return current position for a market (paper)."""
         # Position key is market_id (single-outcome simplified)
         return self.positions.get(market_id)
@@ -184,7 +184,7 @@ class PaperExecutor(IntentExecutor):
         self,
         order: OrderIntent,
         strategy_name: str,
-        results: Dict[str, Dict[str, Any]],
+        results: dict[str, dict[str, Any]],
     ) -> None:
         """Process a single OrderIntent."""
         identity = self._make_identity(order, strategy_name)
@@ -218,7 +218,7 @@ class PaperExecutor(IntentExecutor):
     async def _process_cancel(
         self,
         cancel: CancelIntent,
-        results: Dict[str, Dict[str, Any]],
+        results: dict[str, dict[str, Any]],
     ) -> None:
         """Process a single CancelIntent."""
         market = cancel.market_id

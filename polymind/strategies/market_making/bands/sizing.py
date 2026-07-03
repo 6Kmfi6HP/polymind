@@ -7,10 +7,9 @@ weight parameter.
 
 from __future__ import annotations
 
-from dataclasses import dataclass, field
-from typing import List
+from dataclasses import dataclass
 
-from polymind.strategies.market_making.bands.pricing import BandConfig, BandPricingConfig
+from polymind.strategies.market_making.bands.pricing import BandPricingConfig
 
 
 @dataclass
@@ -23,7 +22,7 @@ class BandSizingConfig:
 def distribute_band_sizes(
     config: BandPricingConfig,
     sizing_config: BandSizingConfig,
-) -> List[float]:
+) -> list[float]:
     """Compute size for each band based on weight and exposure.
 
     Each band gets: exposure_per_band * weight.  Unless weights

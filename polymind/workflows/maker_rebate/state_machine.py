@@ -8,10 +8,8 @@ from order placement through settlement.
 
 from __future__ import annotations
 
-from dataclasses import dataclass, field
 from datetime import datetime, timezone
 from enum import Enum, auto
-from typing import Dict, List, Optional
 
 
 class RebateState(Enum):
@@ -42,7 +40,7 @@ class RebateEvent(Enum):
     RESUME = auto()
 
 
-TRANSITIONS: Dict[RebateState, Dict[RebateEvent, RebateState]] = {
+TRANSITIONS: dict[RebateState, dict[RebateEvent, RebateState]] = {
     RebateState.IDLE: {
         RebateEvent.START: RebateState.PLACING_ORDERS,
         RebateEvent.HALT: RebateState.HALTED,
@@ -82,7 +80,7 @@ class RebateStateMachine:
     def __init__(self, workflow_id: str):
         self.workflow_id = workflow_id
         self.state: RebateState = RebateState.IDLE
-        self.history: List[tuple[RebateState, RebateEvent, datetime]] = []
+        self.history: list[tuple[RebateState, RebateEvent, datetime]] = []
         self.created_at: datetime = datetime.now(timezone.utc)
         self.updated_at: datetime = self.created_at
 

@@ -5,7 +5,6 @@ Composite factor strategy — weighted combination of multiple signals.
 from __future__ import annotations
 
 from dataclasses import dataclass, field
-from typing import Dict, List, Optional
 
 from polymind.factors.pipeline import UniverseSnapshot
 from polymind.factors.registry import FactorMetadata, FactorSignalModel
@@ -15,7 +14,7 @@ from polymind.factors.registry import FactorMetadata, FactorSignalModel
 class CompositeConfig:
     """Configuration for composite factor."""
 
-    weights: Dict[str, float] = field(default_factory=lambda: {
+    weights: dict[str, float] = field(default_factory=lambda: {
         "momentum": 0.4,
         "volatility": 0.2,
         "sentiment": 0.2,
@@ -33,8 +32,8 @@ class CompositeFactor(FactorSignalModel):
 
     def __init__(
         self,
-        sub_factors: Dict[str, FactorSignalModel],
-        config: Optional[CompositeConfig] = None,
+        sub_factors: dict[str, FactorSignalModel],
+        config: CompositeConfig | None = None,
     ):
         self.config = config or CompositeConfig()
         self.sub_factors = sub_factors
@@ -46,9 +45,9 @@ class CompositeFactor(FactorSignalModel):
         )
         super().__init__(metadata)
 
-    async def compute_scores(self, universe: UniverseSnapshot) -> Dict[str, float]:
+    async def compute_scores(self, universe: UniverseSnapshot) -> dict[str, float]:
         """Compute weighted composite scores."""
-        all_scores: Dict[str, Dict[str, float]] = {}
+        all_scores: dict[str, dict[str, float]] = {}
 
         for name, factor in self.sub_factors.items():
             weight = self.config.weights.get(name, 0.0)
@@ -63,14 +62,14 @@ class CompositeFactor(FactorSignalModel):
                 all_scores[mid][name] = score * weight
 
         # Sum weighted scores per market
-        composite: Dict[str, float] = {}
+        composite: dict[str, float] = {}
         for mid, subs in all_scores.items():
             composite[mid] = sum(subs.values())
 
         return composite
 
     @staticmethod
-    def _normalize(scores: Dict[str, float]) -> Dict[str, float]:
+    def _normalize(scores: dict[str, float]) -> dict[str, float]:
         """Min-max normalize scores to 0-1 range."""
         if not scores:
             return {}
@@ -78,5 +77,5 @@ class CompositeFactor(FactorSignalModel):
         min_v, max_v = min(values), max(values)
         diff = max_v - min_v
         if diff == 0:
-            return {k: 0.5 for k in scores}
+            return dict.fromkeys(scores, 0.5)
         return {k: (v - min_v) / diff for k, v in scores.items()}

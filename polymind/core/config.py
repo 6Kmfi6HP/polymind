@@ -7,7 +7,6 @@ Priority: environment variables > .env file > ~/.polymind/config.yaml
 import os
 from dataclasses import dataclass, field
 from pathlib import Path
-from typing import Optional
 
 import yaml
 from dotenv import load_dotenv
@@ -29,13 +28,13 @@ class RiskLimits:
 class Config:
     """Main configuration."""
     # AI
-    anthropic_api_key: Optional[str] = None
-    openai_api_key: Optional[str] = None
-    google_api_key: Optional[str] = None
+    anthropic_api_key: str | None = None
+    openai_api_key: str | None = None
+    google_api_key: str | None = None
     preferred_agent: str = "auto"
 
     # Wallet
-    private_key: Optional[str] = None
+    private_key: str | None = None
     platform: str = "polymarket"
 
     # Trading
@@ -63,7 +62,7 @@ class Config:
 
 
 # Global singleton
-_config: Optional[Config] = None
+_config: Config | None = None
 
 
 def get_config() -> Config:

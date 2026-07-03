@@ -8,9 +8,9 @@ each implemented as a separate port.
 
 from __future__ import annotations
 
+from collections.abc import Callable
 from dataclasses import dataclass, field
 from datetime import datetime
-from typing import Any, Callable, Dict, List, Optional
 
 from polymind.core.portfolio import PortfolioTarget
 
@@ -20,7 +20,7 @@ class UniverseSnapshot:
     """Snapshot of the entire tradable universe at a point in time."""
 
     timestamp: datetime
-    markets: Dict[str, "MarketFeatures"] = field(default_factory=dict)
+    markets: dict[str, MarketFeatures] = field(default_factory=dict)
 
 
 @dataclass
@@ -31,18 +31,18 @@ class MarketFeatures:
     mid_price: float = 0.0
     spread_bps: float = 0.0
     volume_24h: float = 0.0
-    momentum_4h: Optional[float] = None
-    momentum_24h: Optional[float] = None
-    momentum_7d: Optional[float] = None
-    volatility_24h: Optional[float] = None
-    additional: Dict[str, float] = field(default_factory=dict)
+    momentum_4h: float | None = None
+    momentum_24h: float | None = None
+    momentum_7d: float | None = None
+    volatility_24h: float | None = None
+    additional: dict[str, float] = field(default_factory=dict)
 
 
 @dataclass
 class ScoreResult:
     """Result of scoring a universe."""
 
-    scores: Dict[str, float]  # market_id → score
+    scores: dict[str, float]  # market_id → score
     timestamp: datetime
 
 
@@ -61,14 +61,14 @@ class FactorPipeline:
         feature_fn: Callable[[UniverseSnapshot], UniverseSnapshot],
         filter_fn: Callable[[UniverseSnapshot], UniverseSnapshot],
         score_fn: Callable[[UniverseSnapshot], ScoreResult],
-        portfolio_fn: Callable[[ScoreResult], List[PortfolioTarget]],
+        portfolio_fn: Callable[[ScoreResult], list[PortfolioTarget]],
     ):
         self.feature_fn = feature_fn
         self.filter_fn = filter_fn
         self.score_fn = score_fn
         self.portfolio_fn = portfolio_fn
 
-    async def run(self, universe: UniverseSnapshot) -> List[PortfolioTarget]:
+    async def run(self, universe: UniverseSnapshot) -> list[PortfolioTarget]:
         """Run the full pipeline on a universe snapshot.
 
         Returns a list of PortfolioTargets for positions to take.
@@ -102,6 +102,6 @@ class FactorPipeline:
 
     async def _construct_portfolio(
         self, scores: ScoreResult
-    ) -> List[PortfolioTarget]:
+    ) -> list[PortfolioTarget]:
         """Convert scores into portfolio targets."""
         return self.portfolio_fn(scores)

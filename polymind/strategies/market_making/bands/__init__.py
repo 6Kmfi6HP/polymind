@@ -7,7 +7,11 @@ intent-executor architecture (ADR 0002).
 
 from __future__ import annotations
 
-from polymind.strategies.market_making.bands.pricing import BandConfig, BandPricingConfig, compute_band_prices
+from polymind.strategies.market_making.bands.pricing import (
+    BandConfig,
+    BandPricingConfig,
+    compute_band_prices,
+)
 from polymind.strategies.market_making.bands.sizing import BandSizingConfig, distribute_band_sizes
 from polymind.strategies.market_making.bands.strategy import BandsStrategy
 

@@ -1,11 +1,13 @@
 """Polymarket CLOB integration — client, orders, WebSocket, contracts, data, signing, metrics."""
 
 from polymind.polymarket.client import PolymarketClient
-from polymind.polymarket.websocket import (
-    MarketEvent,
-    PolymarketWebSocketAdapter,
-    WebSocketChannel,
-    WebSocketConfig,
+from polymind.polymarket.contracts import (
+    ContractsConfig,
+    ContractsGateway,
+    MergeResult,
+    RedeemResult,
+    SplitResult,
+    TokenBalance,
 )
 from polymind.polymarket.data_api import (
     Candle,
@@ -17,21 +19,19 @@ from polymind.polymarket.data_api import (
     Trade,
     VolumeInfo,
 )
-from polymind.polymarket.contracts import (
-    ContractsConfig,
-    ContractsGateway,
-    MergeResult,
-    RedeemResult,
-    SplitResult,
-    TokenBalance,
-)
+from polymind.polymarket.metrics import AdapterMetrics, Counter, Histogram, MetricsSummary
 from polymind.polymarket.signer import (
     ApiKeyCredentials,
     AuthTier,
     Signer,
     WalletCredentials,
 )
-from polymind.polymarket.metrics import AdapterMetrics, Counter, Histogram, MetricsSummary
+from polymind.polymarket.websocket import (
+    MarketEvent,
+    PolymarketWebSocketAdapter,
+    WebSocketChannel,
+    WebSocketConfig,
+)
 
 __all__ = [
     "PolymarketClient",

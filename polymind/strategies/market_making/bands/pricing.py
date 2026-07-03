@@ -9,7 +9,6 @@ per band level.
 from __future__ import annotations
 
 from dataclasses import dataclass, field
-from typing import List, Tuple
 
 from polymind.core.intents import OrderSide
 
@@ -26,7 +25,7 @@ class BandConfig:
 class BandPricingConfig:
     """Configuration for band pricing."""
 
-    bands: List[BandConfig] = field(
+    bands: list[BandConfig] = field(
         default_factory=lambda: [
             BandConfig(spread_pct=0.015),  # inner band
             BandConfig(spread_pct=0.03),  # middle band
@@ -38,7 +37,7 @@ class BandPricingConfig:
 def compute_band_prices(
     target_price: float,
     config: BandPricingConfig,
-) -> List[Tuple[OrderSide, float, int]]:
+) -> list[tuple[OrderSide, float, int]]:
     """Compute band prices around a target price.
 
     Args:
@@ -52,7 +51,7 @@ def compute_band_prices(
     if target_price <= 0:
         return []
 
-    result: List[Tuple[OrderSide, float, int]] = []
+    result: list[tuple[OrderSide, float, int]] = []
     for idx, band in enumerate(config.bands):
         buy_price = target_price * (1.0 - band.spread_pct)
         sell_price = target_price * (1.0 + band.spread_pct)

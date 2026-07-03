@@ -6,15 +6,13 @@ Score markets based on their features. Higher score = more attractive.
 
 from __future__ import annotations
 
-from typing import Dict
-
-from polymind.factors.pipeline import MarketFeatures, UniverseSnapshot
+from polymind.factors.pipeline import UniverseSnapshot
 
 
 def momentum_score(
     universe: UniverseSnapshot,
     lookback: str = "24h",
-) -> Dict[str, float]:
+) -> dict[str, float]:
     """Score markets by momentum signal.
 
     Args:
@@ -24,7 +22,7 @@ def momentum_score(
     Returns:
         Dict of market_id → score (-1 to 1 range, positive = momentum).
     """
-    scores: Dict[str, float] = {}
+    scores: dict[str, float] = {}
     for mid, mf in universe.markets.items():
         if lookback == "4h":
             mom = mf.momentum_4h
@@ -40,7 +38,7 @@ def momentum_score(
     return scores
 
 
-def rank_normalize(scores: Dict[str, float]) -> Dict[str, float]:
+def rank_normalize(scores: dict[str, float]) -> dict[str, float]:
     """Convert raw scores to percentile ranks (0.0–1.0)."""
     if not scores:
         return {}

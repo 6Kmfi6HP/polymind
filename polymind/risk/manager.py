@@ -2,8 +2,8 @@
 Risk management — position limits, Kelly sizing, drawdown protection.
 """
 
-from dataclasses import dataclass, field
-from typing import Any, Dict
+from dataclasses import dataclass
+from typing import Any
 
 
 @dataclass
@@ -51,7 +51,7 @@ class RiskManager:
         """Record a completed trade."""
         self.trades.append({"size": size, "price": price})
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         """Serialise state for persistence."""
         return {
             "initial_capital": self.initial_capital,

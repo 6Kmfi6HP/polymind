@@ -8,9 +8,9 @@ use this adapter through the IntentExecutor or workflow layer.
 
 from __future__ import annotations
 
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 from datetime import datetime
-from typing import Any, Optional
+from typing import Any
 
 
 @dataclass
@@ -20,7 +20,7 @@ class SplitResult:
     tx_hash: str
     outcome_a_amount: float = 0.0
     outcome_b_amount: float = 0.0
-    timestamp: Optional[datetime] = None
+    timestamp: datetime | None = None
 
 
 @dataclass
@@ -30,7 +30,7 @@ class MergeResult:
     tx_hash: str
     outcome_a_amount: float = 0.0
     outcome_b_amount: float = 0.0
-    timestamp: Optional[datetime] = None
+    timestamp: datetime | None = None
 
 
 @dataclass
@@ -39,7 +39,7 @@ class RedeemResult:
 
     tx_hash: str
     proceeds_usdc: float = 0.0
-    timestamp: Optional[datetime] = None
+    timestamp: datetime | None = None
 
 
 @dataclass
@@ -56,7 +56,7 @@ class ContractsConfig:
     """Configuration for the on-chain contracts gateway."""
 
     rpc_url: str = "https://polygon-rpc.com"
-    private_key: Optional[str] = None
+    private_key: str | None = None
     chain_id: int = 137
     gas_limit: int = 500_000
     gas_price_gwei: float = 50.0

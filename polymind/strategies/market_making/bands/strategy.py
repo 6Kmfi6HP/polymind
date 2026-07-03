@@ -8,7 +8,6 @@ mid price. Each band has an independent spread and size weight.
 from __future__ import annotations
 
 from datetime import datetime, timezone
-from typing import Optional
 
 from polymind.core.intents import CancelIntent, OrderIntent, StrategyIntent, TimeInForce
 from polymind.core.strategy import BaseMMStrategy, StrategyConfig
@@ -26,15 +25,15 @@ class BandsStrategy(BaseMMStrategy):
 
     def __init__(
         self,
-        pricing_config: Optional[BandPricingConfig] = None,
-        sizing_config: Optional[BandSizingConfig] = None,
-        config: Optional[StrategyConfig] = None,
+        pricing_config: BandPricingConfig | None = None,
+        sizing_config: BandSizingConfig | None = None,
+        config: StrategyConfig | None = None,
     ):
         super().__init__(config)
         self.pricing_config = pricing_config or BandPricingConfig()
         self.sizing_config = sizing_config or BandSizingConfig()
 
-    async def analyze(self, market: MarketSnapshot) -> Optional[StrategyIntent]:
+    async def analyze(self, market: MarketSnapshot) -> StrategyIntent | None:
         """Analyze a market snapshot and produce a StrategyIntent."""
         target_price = market.mid_price
         if target_price <= 0:

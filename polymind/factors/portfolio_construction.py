@@ -8,8 +8,7 @@ exposure limits.
 
 from __future__ import annotations
 
-from dataclasses import dataclass, field
-from typing import Dict, List, Optional
+from dataclasses import dataclass
 
 from polymind.core.portfolio import PortfolioTarget, PositionDirection
 
@@ -26,9 +25,9 @@ class PortfolioConfig:
 
 
 def select_top_n(
-    scores: Dict[str, float],
+    scores: dict[str, float],
     n: int,
-) -> List[str]:
+) -> list[str]:
     """Select the top N markets by score.
 
     Args:
@@ -43,9 +42,9 @@ def select_top_n(
 
 
 def select_top_and_bottom_n(
-    scores: Dict[str, float],
+    scores: dict[str, float],
     n: int,
-) -> Dict[str, PositionDirection]:
+) -> dict[str, PositionDirection]:
     """Select top N (LONG) and bottom N (SHORT) markets.
 
     Args:
@@ -56,7 +55,7 @@ def select_top_and_bottom_n(
         Dict of market_id → direction.
     """
     sorted_items = sorted(scores.items(), key=lambda x: x[1], reverse=True)
-    result: Dict[str, PositionDirection] = {}
+    result: dict[str, PositionDirection] = {}
 
     for mid, _ in sorted_items[:n]:
         result[mid] = PositionDirection.LONG
@@ -69,9 +68,9 @@ def select_top_and_bottom_n(
 
 
 def size_by_rank(
-    scores: Dict[str, float],
+    scores: dict[str, float],
     config: PortfolioConfig,
-) -> Dict[str, float]:
+) -> dict[str, float]:
     """Assign sizes proportional to rank score.
 
     Higher score → larger size, clamped by max_exposure_per_market
@@ -89,9 +88,9 @@ def size_by_rank(
             config.max_exposure_per_market,
             config.total_exposure / len(scores),
         )
-        return {mid: equal_size for mid in scores}
+        return dict.fromkeys(scores, equal_size)
 
-    raw: Dict[str, float] = {}
+    raw: dict[str, float] = {}
     for mid, score in scores.items():
         normalized = (score - min_score) / score_range  # 0.0–1.0
         # Ensure every market gets at least 10% of max
@@ -109,9 +108,9 @@ def size_by_rank(
 
 
 def construct_portfolio(
-    scores: Dict[str, float],
+    scores: dict[str, float],
     config: PortfolioConfig,
-) -> List[PortfolioTarget]:
+) -> list[PortfolioTarget]:
     """Convert ranked scores into a list of PortfolioTargets.
 
     Selects top N markets (by absolute score), assigns LONG/SHORT
@@ -142,7 +141,7 @@ def construct_portfolio(
     # Compute sizes
     sizes = size_by_rank(selected, config)
 
-    targets: List[PortfolioTarget] = []
+    targets: list[PortfolioTarget] = []
     for i, (mid, score) in enumerate(
         sorted(selected.items(), key=lambda x: abs(x[1]), reverse=True)
     ):

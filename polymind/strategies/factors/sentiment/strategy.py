@@ -7,8 +7,7 @@ uses a placeholder that returns scores from market feature data.
 
 from __future__ import annotations
 
-from dataclasses import dataclass, field
-from typing import Dict, List, Optional
+from dataclasses import dataclass
 
 from polymind.factors.pipeline import UniverseSnapshot
 from polymind.factors.registry import FactorMetadata, FactorSignalModel
@@ -29,7 +28,7 @@ class SentimentFactor(FactorSignalModel):
     version ingests external social/news signals.
     """
 
-    def __init__(self, config: Optional[SentimentConfig] = None):
+    def __init__(self, config: SentimentConfig | None = None):
         self.config = config or SentimentConfig()
         metadata = FactorMetadata(
             name=f"sentiment_{self.config.source}",
@@ -39,12 +38,12 @@ class SentimentFactor(FactorSignalModel):
         )
         super().__init__(metadata)
 
-    async def compute_scores(self, universe: UniverseSnapshot) -> Dict[str, float]:
+    async def compute_scores(self, universe: UniverseSnapshot) -> dict[str, float]:
         """Score markets by sentiment signal.
 
         Falls back to 'sentiment' key in additional features.
         """
-        scores: Dict[str, float] = {}
+        scores: dict[str, float] = {}
         for mid, mf in universe.markets.items():
             if mf is None:
                 continue

@@ -8,10 +8,9 @@ fill at executable price).
 
 from __future__ import annotations
 
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 from datetime import datetime
 from enum import Enum, auto
-from typing import Optional
 
 from polymind.core.intents import OrderIntent, OrderSide
 

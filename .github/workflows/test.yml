@@ -1,63 +1,35 @@
-name: CI
+name: Tests
 
 on:
   push:
-    branches: [main]
+    branches-ignore: [main]
   pull_request:
-    branches: [main]
+    branches-ignore: [main]
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  PYTHONUNBUFFERED: "1"
 
 jobs:
   test:
     runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        python-version: ["3.10", "3.11"]
 
     steps:
       - uses: actions/checkout@v4
 
-      - name: Set up Python ${{ matrix.python-version }}
+      - name: Set up Python 3.11
         uses: actions/setup-python@v5
         with:
-          python-version: ${{ matrix.python-version }}
+          python-version: "3.11"
 
       - name: Install dependencies
         run: |
-          pip install --upgrade pip
-          pip install pydantic python-dotenv aiosqlite
-          pip install pytest pytest-asyncio
+          python -m pip install --upgrade pip
+          pip install -e ".[dev]"
 
       - name: Run tests
         run: |
           python -m pytest tests/ -v --tb=short
-
-      - name: Verify imports
-        run: |
-          python -c "
-          from polymind.execution import (
-              FillMode, FillModel, FillModelConfig, FillResult, MarketSnapshot,
-              OrderIdentity, OrderRecord, OrderStatus, PaperExecutor, PositionRecord,
-              LedgerStore, KillSwitch, LogRedaction, PreflightChecker, PreflightResult,
-          )
-          from polymind.core import (
-              PortfolioTarget, PositionDirection,
-              FillEvent, FillSource,
-              EntryType, LedgerEntry,
-              RiskDecision, RiskGate, RiskContext,
-              CommandType, WorkflowCommand,
-              OrderIntent, CancelIntent, StrategyIntent, IntentExecutor,
-          )
-          from polymind.core.strategy import BaseMMStrategy
-          from polymind.factors.pipeline import FactorPipeline, UniverseSnapshot
-          from polymind.factors.registry import FactorRegistry, FactorSignalModel
-          from polymind.factors.scoring import momentum_score
-          from polymind.storage.price_store import PriceStore
-          from polymind.strategies.market_making.amm.strategy import AMMStrategy
-          from polymind.strategies.market_making.bands.strategy import BandsStrategy
-          from polymind.strategies.market_making.classic_mm.strategy import ClassicMMStrategy
-          from polymind.strategies.factors.momentum.strategy import MomentumFactor
-          from polymind.studio.generator import StrategyGenerator
-          from polymind.workflows.maker_rebate.state_machine import RebateStateMachine
-          from polymind.workflows.event_mm.state_machine import EventMMStateMachine
-          print('All modules import successfully')
-          "

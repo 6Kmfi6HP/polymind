@@ -6,7 +6,6 @@ from __future__ import annotations
 
 from dataclasses import dataclass, field
 from datetime import datetime
-from typing import List, Optional
 
 
 @dataclass
@@ -26,7 +25,7 @@ class AlertManager:
     """
 
     def __init__(self):
-        self._alerts: List[Alert] = []
+        self._alerts: list[Alert] = []
 
     def info(self, message: str, source: str = "") -> None:
         self._alerts.append(Alert("INFO", message, source=source))
@@ -40,7 +39,7 @@ class AlertManager:
     def critical(self, message: str, source: str = "") -> None:
         self._alerts.append(Alert("CRITICAL", message, source=source))
 
-    def get_recent(self, n: int = 10) -> List[Alert]:
+    def get_recent(self, n: int = 10) -> list[Alert]:
         return self._alerts[-n:]
 
     def get_unread_count(self) -> int:

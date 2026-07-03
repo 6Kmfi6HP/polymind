@@ -10,7 +10,7 @@ from __future__ import annotations
 from dataclasses import dataclass, field
 from datetime import datetime
 from enum import Enum, auto
-from typing import Any, Dict, Optional
+from typing import Any
 
 
 class EntryType(Enum):
@@ -42,6 +42,6 @@ class LedgerEntry:
     delta_position: float
     position_after: float
     cash_after: float
-    fill_ref: Optional[str] = None
-    supersedes: Optional[str] = None
-    metadata: Dict[str, Any] = field(default_factory=dict)
+    fill_ref: str | None = None
+    supersedes: str | None = None
+    metadata: dict[str, Any] = field(default_factory=dict)

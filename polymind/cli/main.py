@@ -8,8 +8,6 @@ Usage:
     polymind status
 """
 
-import asyncio
-import sys
 
 import click
 from rich.console import Console
@@ -116,7 +114,6 @@ def run(strategy_text, strategy_file, paper, dry_run, once, interval):
 @cli.command(name="strategies")
 def list_strategies():
     """List all available market-making strategies."""
-    from polymind.strategies import list_strategies as get_strategies
 
     strategies = {
         "amm": "Concentrated liquidity AMM simulation (CPMM order ladders)",
@@ -147,7 +144,6 @@ def list_strategies():
 @cli.command()
 def status():
     """Check configuration and system status."""
-    from polymind.core.config import get_config
 
     config = load_config()
     console.print(BANNER)

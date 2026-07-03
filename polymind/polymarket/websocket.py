@@ -4,12 +4,12 @@ from __future__ import annotations
 
 import asyncio
 import json
-import copy
 from collections import defaultdict
+from collections.abc import AsyncGenerator
 from dataclasses import dataclass, field
 from datetime import datetime
 from enum import Enum, auto
-from typing import Any, AsyncGenerator, Optional
+from typing import Any
 
 from websockets.asyncio.client import connect as ws_connect
 from websockets.exceptions import ConnectionClosed
@@ -32,7 +32,7 @@ class WebSocketConfig:
 
     url: str
     channels: list[WebSocketChannel] = field(default_factory=list)
-    auth_token: Optional[str] = None
+    auth_token: str | None = None
     reconnect_delay: float = 1.0
     max_reconnects: int = 5
 
@@ -57,8 +57,8 @@ class PolymarketWebSocketAdapter:
 
     def __init__(self, config: WebSocketConfig) -> None:
         self.config = config
-        self._ws: Optional[Any] = None
-        self._ws_conn: Optional[Any] = None
+        self._ws: Any | None = None
+        self._ws_conn: Any | None = None
         self._subscriptions: dict[WebSocketChannel, set[str]] = defaultdict(set)
         self._running = False
         self._reconnect_count = 0

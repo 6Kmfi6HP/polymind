@@ -11,7 +11,7 @@ from __future__ import annotations
 from dataclasses import dataclass, field
 from datetime import datetime
 from enum import Enum, auto
-from typing import Any, Dict, Optional
+from typing import Any
 
 from polymind.core.intents import OrderSide
 
@@ -38,6 +38,6 @@ class FillEvent:
     fee: float
     timestamp: datetime
     source: FillSource
-    order_id: Optional[str] = None
+    order_id: str | None = None
     taker: bool = False
-    metadata: Dict[str, Any] = field(default_factory=dict)
+    metadata: dict[str, Any] = field(default_factory=dict)

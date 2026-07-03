@@ -8,10 +8,9 @@ Records P&L, Sharpe ratio, and position-level attribution.
 from __future__ import annotations
 
 from dataclasses import dataclass, field
-from datetime import datetime, timedelta
-from typing import Any, Callable, Dict, List, Optional
+from datetime import datetime
 
-from polymind.core.portfolio import PortfolioTarget, PositionDirection
+from polymind.core.portfolio import PortfolioTarget
 from polymind.factors.pipeline import FactorPipeline, UniverseSnapshot
 
 
@@ -26,10 +25,10 @@ class BacktestResult:
     num_trades: int = 0
     num_winners: int = 0
     num_losers: int = 0
-    pnl_series: List[float] = field(default_factory=list)
-    portfolio_values: List[float] = field(default_factory=list)
-    timestamps: List[datetime] = field(default_factory=list)
-    trades: List[dict] = field(default_factory=list)
+    pnl_series: list[float] = field(default_factory=list)
+    portfolio_values: list[float] = field(default_factory=list)
+    timestamps: list[datetime] = field(default_factory=list)
+    trades: list[dict] = field(default_factory=list)
 
 
 @dataclass
@@ -50,14 +49,14 @@ class BacktestEngine:
     def __init__(
         self,
         pipeline: FactorPipeline,
-        config: Optional[BacktestConfig] = None,
+        config: BacktestConfig | None = None,
     ):
         self.pipeline = pipeline
         self.config = config or BacktestConfig()
 
     async def run(
         self,
-        snapshots: List[UniverseSnapshot],
+        snapshots: list[UniverseSnapshot],
     ) -> BacktestResult:
         """Run a backtest over a sequence of historical snapshots.
 
@@ -68,8 +67,8 @@ class BacktestEngine:
             BacktestResult with performance metrics.
         """
         capital = self.config.initial_capital
-        positions: Dict[str, float] = {}
-        entry_prices: Dict[str, float] = {}
+        positions: dict[str, float] = {}
+        entry_prices: dict[str, float] = {}
 
         result = BacktestResult()
         result.portfolio_values.append(capital)
@@ -103,9 +102,9 @@ class BacktestEngine:
     def _process_targets(
         self,
         snap: UniverseSnapshot,
-        targets: List[PortfolioTarget],
-        positions: Dict[str, float],
-        entry_prices: Dict[str, float],
+        targets: list[PortfolioTarget],
+        positions: dict[str, float],
+        entry_prices: dict[str, float],
         capital: float,
         result: BacktestResult,
     ) -> float:
@@ -151,8 +150,8 @@ class BacktestEngine:
     def _close_position(
         mid: str,
         snap: UniverseSnapshot,
-        positions: Dict[str, float],
-        entry_prices: Dict[str, float],
+        positions: dict[str, float],
+        entry_prices: dict[str, float],
         result: BacktestResult,
     ) -> float:
         """Close a position and record P&L."""

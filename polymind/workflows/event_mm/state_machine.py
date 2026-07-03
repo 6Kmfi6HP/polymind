@@ -8,10 +8,8 @@ through cooldown after an event trigger.
 
 from __future__ import annotations
 
-from dataclasses import dataclass, field
 from datetime import datetime, timezone
 from enum import Enum, auto
-from typing import Dict, List, Optional
 
 
 class EventMMState(Enum):
@@ -42,7 +40,7 @@ class EventMMEvent(Enum):
     RESUME = auto()
 
 
-TRANSITIONS: Dict[EventMMState, Dict[EventMMEvent, EventMMState]] = {
+TRANSITIONS: dict[EventMMState, dict[EventMMEvent, EventMMState]] = {
     EventMMState.IDLE: {
         EventMMEvent.START: EventMMState.WATCHING,
         EventMMEvent.HALT: EventMMState.HALTED,
@@ -76,7 +74,7 @@ class EventMMStateMachine:
     def __init__(self, workflow_id: str):
         self.workflow_id = workflow_id
         self.state: EventMMState = EventMMState.IDLE
-        self.history: List[tuple[EventMMState, EventMMEvent, datetime]] = []
+        self.history: list[tuple[EventMMState, EventMMEvent, datetime]] = []
         self.created_at: datetime = datetime.now(timezone.utc)
         self.updated_at: datetime = self.created_at
 

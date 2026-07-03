@@ -8,7 +8,6 @@ from __future__ import annotations
 
 from datetime import datetime, timezone
 from enum import Enum, auto
-from typing import Dict, List
 
 
 class CopyTradeState(Enum):
@@ -34,7 +33,7 @@ class CopyTradeEvent(Enum):
     RESUME = auto()
 
 
-TRANSITIONS: Dict[CopyTradeState, Dict[CopyTradeEvent, CopyTradeState]] = {
+TRANSITIONS: dict[CopyTradeState, dict[CopyTradeEvent, CopyTradeState]] = {
     CopyTradeState.IDLE: {
         CopyTradeEvent.START: CopyTradeState.MONITORING,
         CopyTradeEvent.HALT: CopyTradeState.HALTED,
@@ -66,7 +65,7 @@ class CopyTradeStateMachine:
     def __init__(self, workflow_id: str):
         self.workflow_id = workflow_id
         self.state: CopyTradeState = CopyTradeState.IDLE
-        self.history: List[tuple[CopyTradeState, CopyTradeEvent, datetime]] = []
+        self.history: list[tuple[CopyTradeState, CopyTradeEvent, datetime]] = []
         self.created_at: datetime = datetime.now(timezone.utc)
         self.updated_at: datetime = self.created_at
 
