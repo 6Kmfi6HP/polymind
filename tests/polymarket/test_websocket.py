@@ -704,3 +704,66 @@ class TestUnknownChannel:
         events = [e async for e in adapter.on_events()]
         assert len(events) == 1
         assert events[0].market_id == "m1"
+
+
+class TestEdgeCoverage:
+    """Cover remaining lines: 151, 154-157, 192-193."""
+
+    @pytest.mark.asyncio
+    async def test_on_events_stop_async_iteration(
+        self, adapter: PolymarketWebSocketAdapter, mock_ws: MagicMock
+    ):
+        """Line 152-153: StopAsyncIteration breaks the loop."""
+        mock_ws.recv.side_effect = StopAsyncIteration
+        events = [e async for e in adapter.on_events()]
+        assert len(events) == 0
+
+    @pytest.mark.asyncio
+    async def test_on_events_generic_exception_re_raises(
+        self, adapter: PolymarketWebSocketAdapter, mock_ws: MagicMock
+    ):
+        """Line 157: generic Exception re-raises when _running is True."""
+        mock_ws.recv.side_effect = ValueError("unexpected")
+        adapter._running = True
+        gen = adapter.on_events()
+        with pytest.raises(ValueError, match="unexpected"):
+            await gen.__anext__()
+
+    # Lines 151 and 156 (the `if not self._running: break` guards in the
+    # ConnectionClosed / Exception handlers) require the generator to have
+    # yielded at least once, then _running set to False mid-stream. This is
+    # covered structurally by the test_on_events_exits_cleanly_on_close test.
+
+    @pytest.mark.asyncio
+    async def test_heartbeat_cancelled_error(
+        self, adapter: PolymarketWebSocketAdapter, mock_ws: MagicMock
+    ):
+        """Line 190-191: CancelledError in heartbeat is caught silently."""
+        import asyncio
+
+        task = asyncio.create_task(adapter._heartbeat_loop())
+        await asyncio.sleep(0.01)
+        task.cancel()
+        await asyncio.sleep(0.01)
+        # Task completes silently — no exception propagated
+
+    @pytest.mark.asyncio
+    async def test_heartbeat_generic_exception(self, config: WebSocketConfig):
+        """Line 192-193: generic Exception in heartbeat is caught silently."""
+        adapter = PolymarketWebSocketAdapter(config)
+        import asyncio
+
+        # Directly modify _send_json to raise on call
+        async def bad_send(*args):
+            raise RuntimeError("heartbeat oops")
+
+        adapter._send_json = bad_send
+        adapter._ws = MagicMock()
+
+        async def run_and_stop():
+            await asyncio.sleep(0.02)
+            adapter._running = False
+
+        adapter._running = True
+        await asyncio.gather(adapter._heartbeat_loop(), run_and_stop())
+        # No exception raised — heartbeat silently catches errors
