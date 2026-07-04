@@ -110,24 +110,75 @@ def run(ctx, strategy_text, strategy_file, paper, dry_run, once, interval):
             for key, val in config.params.items():
                 console.print(f"  {key}: {val}")
 
+        # Build executor
         if dry_run or once:
-            console.print("[dim]Dry-run mode — no orders placed.[/dim]")
+            from polymind.execution.executor import PaperExecutor
+            from polymind.execution.fill_model import FillModel, FillModelConfig
+
+            fill_model = FillModel(FillModelConfig())
+            executor = PaperExecutor(fill_model=fill_model)
+            console.print("[dim]Dry-run mode — simulated fills, no orders placed.[/dim]")
         elif paper:
             from polymind.execution.executor import PaperExecutor
             from polymind.execution.fill_model import FillModel, FillModelConfig
 
             fill_model = FillModel(FillModelConfig())
-            PaperExecutor(fill_model=fill_model)
+            executor = PaperExecutor(fill_model=fill_model)
             console.print("[cyan]PAPER[/cyan] executor ready — simulated fills.")
         else:
             from polymind.polymarket.client import PolymarketClient
 
             client = PolymarketClient()
             _run_async(client.connect())
+            from polymind.execution.live_executor import LiveExecutor
+
+            executor = LiveExecutor(client=client)
             console.print("[red]LIVE[/red] executor ready — real CLOB orders.")
 
-        console.print("[green]✓[/green] Strategy parsed and validated.")
+        # Set up strategy instance
+        from polymind.strategies import get_strategy
+
+        strategy_instance = get_strategy(config.strategy_name, config)
+
+        # Build TradingEngine
+        from polymind.core.engine import TradingEngine, TradingEngineConfig
+
+        engine = TradingEngine(
+            strategy=strategy_instance,
+            executor=executor,
+            config=TradingEngineConfig(
+                strategy_name=config.strategy_name,
+                loop_interval=interval,
+                dry_run=dry_run or False,
+            ),
+        )
+
+        console.print("[green]✓[/green] TradingEngine ready — observe → decide → act.")
         console.print()
+
+        if once:
+            # Single tick
+            from datetime import datetime, timezone
+
+            from polymind.execution.fill_model import MarketSnapshot
+
+            dummy = MarketSnapshot(
+                market_id="",
+                timestamp=datetime.now(timezone.utc),
+                bid_price=0.0,
+                ask_price=0.0,
+                mid_price=0.0,
+                bid_size=0.0,
+                ask_size=0.0,
+            )
+            result = _run_async(engine.run_tick(dummy))
+            console.print(f"[dim]Result: {result.orders_placed} orders placed.[/dim]")
+        else:
+            console.print("[green]✓[/green] Engine configured for continuous operation.")
+            console.print(f"[dim]  Strategy: {config.strategy_name}, interval={interval}s[/dim]")
+            console.print(
+                "[dim]  Use --once for single-tick execution, or integrate with async market provider.[/dim]"
+            )
     except Exception as e:
         console.print(f"[red]Error: {e}[/red]")
 
