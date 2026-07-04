@@ -226,6 +226,56 @@ def templates():
     pass
 
 
+@cli.group()
+def factor():
+    """AI-powered factor discovery and backtesting."""
+    pass
+
+
+@factor.command(name="discover")
+@click.argument("description")
+def factor_discover(description: str):
+    """Discover a factor from a natural language description."""
+    from polymind.studio.factor_discovery import FactorDiscoveryAgent
+
+    agent = FactorDiscoveryAgent()
+    fd = _run_async(agent.discover(description))
+
+    console.print("\n[bold]Factor Discovery Result[/bold]")
+    console.print(f"  Name:      [green]{fd.name}[/green]")
+    console.print(f"  Lookback:  {fd.lookback}")
+    console.print(f"  Scoring:   {fd.scoring_fn}")
+    console.print(f"  Top N:     {fd.top_n}")
+    console.print(f"  Rebalance: every {fd.rebal_freq_hours}h")
+    if fd.params:
+        console.print(f"  Params:    {fd.params}")
+    console.print()
+
+
+@factor.command(name="backtest")
+@click.argument("description")
+def factor_backtest(description: str):
+    """Discover and backtest a factor from a description."""
+    from polymind.studio.factor_discovery import FactorDiscoveryAgent
+
+    agent = FactorDiscoveryAgent()
+    card = _run_async(agent.discover_and_backtest(description))
+
+    console.print("\n[bold]Factor Backtest Result[/bold]")
+    status = "[green]✅ APPROVED[/green]" if card.approved else "[red]❌ REJECTED[/red]"
+    console.print(f"  Name:      [green]{card.definition.name}[/green]")
+    console.print(f"  Status:    {status}")
+    console.print(f"  Sharpe:    {card.sharpe:.2f}")
+    console.print(f"  Sortino:   {card.sortino:.2f}")
+    console.print(f"  Max DD:    {card.max_drawdown:.1%}")
+    console.print(f"  Return:    {card.total_return:.1%}")
+    console.print(f"  Win Rate:  {card.win_rate:.1%}")
+    console.print(f"  Trades:    {card.total_trades}")
+    if card.error:
+        console.print(f"  Error:     [red]{card.error}[/red]")
+    console.print()
+
+
 @templates.command(name="list")
 def list_templates():
     """Show all available strategy templates."""
