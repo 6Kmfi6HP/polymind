@@ -22,6 +22,7 @@ from polymind.core.intents import (
 from polymind.core.ledger import EntryType, LedgerEntry
 from polymind.execution.fill_model import FillModel, MarketSnapshot
 from polymind.execution.order_identity import OrderIdentity
+from polymind.execution.order_manager import OrderManager
 
 
 class OrderStatus(Enum):
@@ -71,6 +72,7 @@ class PaperExecutor(IntentExecutor):
         fill_model: FillModel,
         initial_cash: float = 10_000.0,
         loop_interval: int = 60,
+        order_manager: OrderManager | None = None,
     ):
         self.fill_model = fill_model
         self.initial_cash = initial_cash
@@ -83,6 +85,7 @@ class PaperExecutor(IntentExecutor):
         self._current_snapshot: MarketSnapshot | None = None
         self._fill_counter: int = 0
         self._ledger_counter: int = 0
+        self._order_manager = order_manager
 
     async def execute(self, intent: StrategyIntent) -> dict[str, Any]:
         """Process a StrategyIntent: place orders, cancel orders, simulate ticks.
