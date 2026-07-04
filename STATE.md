@@ -1,39 +1,51 @@
 # Loop State — Polymind
 
-Last run: 2026-07-03T23:55:00Z
+**Last run:** 2026-07-04T01:20:00Z
 
-## High Priority
-- CI pipeline implementation (Phase 9) — in progress
+## Status: Architecture Complete
 
-## Completed — Full Architecture
+**所有架构路线图阶段 (Phase 0-13) 全部实现。**
 
-**所有 docs/architecture.md 列出的 61 个模块已完整实现。**
-
-| 层 | 模块 | 测试 |
+| 阶段 | 内容 | 状态 |
 |------|------|------|
-| **Core** (9) | agent, config, intents, strategy, fills, ledger, portfolio, risk, workflows | ✅ |
-| **Execution** (4) | executor, order_identity, fill_model, serializer | ✅ |
-| **Strategies** (6) | AMM pricing/sizing/strategy, Bands pricing/sizing/strategy, Classic MM | ✅ |
-| **Workflows** (4) | MakerRebate, EventMM, Sniper, CopyTrade 状态机 | ✅ |
-| **Polymarket** (6) | client, websocket, data_api, contracts, signer, metrics | ✅ |
-| **Reconciliation** (3) | fills, balances, recovery | ✅ |
-| **Storage** (5) | price_store, database, models, ledger, warehouse | ✅ |
-| **Risk** (4) | manager, limits, drawdown, exposure | ✅ |
-| **Backtesting** (5) | engine, data, metrics, execution_model, factor_bt | ✅ |
-| **Factors** (5) | pipeline, registry, filters, execution, portfolio_construction | ✅ |
-| **Studio** (2) | generator, optimizer | ✅ |
-| **Agents** (1) | base agent ABC | ✅ |
-| **Alerts** (1) | telegram | ✅ |
-| **Utils** (4) | logging, secrets, killswitch, preflight | ✅ |
-| **CLI** (1) | main | ✅ |
+| **Phase 0-9** | 61 核心模块 + CI + 文档站点 + 策略模板 + 集成测试 | ✅ |
+| **Phase 10** | Operations Dashboard — 持仓/P&L/风险报告 + CLI | ✅ |
+| **Phase 11** | PyPI Release — Makefile, pre-commit, build 验证, CHANGELOG | ✅ |
+| **Phase 12** | Agent Providers — Anthropic/OpenAI/Gemini/Ensemble/Intelligence | ✅ |
+| **Phase 13** | Plugin System — PluginRegistry + entry point 发现 | ✅ |
 
-**总计: 760 测试全部通过 · 源头文件 75+ · 测试文件 84+**
+## 项目指标
 
-## 正在运行
-- CI Pipeline setup (GitHub Actions) — 后台工作流
-- Cron: 每 15 分钟 auto-fire
+| 指标 | 数值 |
+|------|------|
+| **测试** | 1,017 ✅ |
+| **覆盖率** | 94% (目标 70%) ✅ |
+| **源文件** | 108 |
+| **测试文件** | 97 |
+| **代码行数** | ~20k |
+| **Lint/Format/Security** | 全部 clean ✅ |
+| **Pre-commit** | 全部 hook 通过 ✅ |
 
-## 下一个方向
-- 集成测试和端到端测试
-- 文档站点 (docs site)
-- SDK 适配器生产级验证
+## 质量保障
+
+- **CI**: GitHub Actions (ruff + pytest + bandit + coverage)
+- **Lint**: ruff (E/W/F/I/B/C4/UP/ARG/SIM rules)
+- **Format**: ruff format
+- **Security**: bandit (0 issues)
+- **Pre-commit**: trailing-whitespace, EOF fixer, YAML/JSON/TOML, ruff, ruff-format
+- **Build**: sdist (154 KB) + wheel (115 KB)
+
+## 当前分支
+
+- **integration-tests**: 47 commits ahead of main
+- **Draft PR**: [#18](https://github.com/6Kmfi6HP/polymind/pull/18) (Phase 10-13, 冲突因 main 坏合并)
+- **main**: 含 bad merge b7373ad，需要修复
+
+## 待处理
+
+| 项目 | 原因 | 需要的操作 |
+|------|------|-----------|
+| main 分支修复 | bad merge 删除了 48 文件 | 重置 main 到干净状态或用户决断 |
+| Draft PR #18 冲突 | main 坏合并导致 | 修复 main 后 PR 自动可合并 |
+| 多交易所支持 | 架构 "未来考虑" 项目 | 新功能开发 |
+| 自动因子发现 | 架构 "未来考虑" 项目 | 新功能研发 |

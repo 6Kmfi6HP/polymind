@@ -8,7 +8,7 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow?style=for-the-badge)](https://opensource.org/licenses/MIT)
 [![CI](https://github.com/6Kmfi6HP/polymind/actions/workflows/ci.yml/badge.svg)](https://github.com/6Kmfi6HP/polymind/actions/workflows/ci.yml)
 [![Tests](https://github.com/6Kmfi6HP/polymind/actions/workflows/test.yml/badge.svg)](https://github.com/6Kmfi6HP/polymind/actions/workflows/test.yml)
-[![Coverage](https://img.shields.io/badge/coverage-760%20tests-brightgreen?style=for-the-badge)]()
+[![Coverage](https://img.shields.io/badge/coverage-1017%20tests-brightgreen?style=for-the-badge)]()
 
 **Write market-making strategies in natural language. Let AI assemble, tune, and execute them.**
 
@@ -69,7 +69,7 @@ Polymind merges **eight existing Polymarket projects** into one unified, AI-nati
 | 🔜 **Next** | **Docs Site** | Comprehensive documentation site |
 | 🔜 **Next** | **E2E Tests** | Full integration and end-to-end test suite |
 
-**760+ tests passing · 61 architecture modules implemented · 84 test files · 75+ source files**
+**1,017 tests passing · 61 architecture modules implemented · 97 test files · 108 source files · 94% coverage**
 
 ---
 
@@ -169,7 +169,7 @@ polymind/
 │   └── utils/                    # Logging, secrets, kill switch, preflight
 │
 ├── docs/                         # Architecture decisions & reference evidence
-└── tests/                        # 84 test files, 760+ tests
+└── tests/                        # 97 test files, 1,017+ tests
 ```
 
 ---
