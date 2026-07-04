@@ -124,26 +124,30 @@ def run(strategy_text, strategy_file, paper, dry_run, once, interval):
 @cli.command(name="strategies")
 def list_strategies():
     """List all available market-making strategies."""
+    from polymind.core.discover import discover_strategies
+    from polymind.strategies import list_strategies as get_strategies
 
-    strategies = {
-        "amm": "Concentrated liquidity AMM simulation (CPMM order ladders)",
-        "bands": "Price margin bands around midpoint",
-        "maker-rebate": "Y+N<$1 arbitrage + maker fee rebate",
-        "event-mm": "WebSocket-driven real-time MM with stop-loss",
-        "sniper": "Deep discount GTC orders on short-term options",
-        "copy-trade": "Mirror target wallet trades in real-time",
-        "classic-mm": "Split USDC → limit sell at profit target",
-    }
+    builtin = get_strategies()
+    discovered_raw = discover_strategies()
+
+    # Discovered plugins not already known as built-in
+    discovered: dict[str, str] = {}
+    for name, cls in discovered_raw.items():
+        if name not in builtin:
+            discovered[name] = cls.__doc__ or ""
 
     console.print("\n[bold]Available Strategies[/bold]\n")
 
     table = Table(show_header=True, header_style="bold")
     table.add_column("Strategy", style="cyan", width=16)
     table.add_column("Description", width=60)
-    table.add_column("Status")
+    table.add_column("Source")
 
-    for name, desc in strategies.items():
-        table.add_row(name, desc, "[green]implemented[/green]")
+    for name, desc in builtin.items():
+        table.add_row(name, desc, "[green]built-in[/green]")
+
+    for name, desc in discovered.items():
+        table.add_row(name, desc, "[yellow]plugin[/yellow]")
 
     console.print(table)
     console.print()
@@ -295,6 +299,13 @@ def risk():
 
 def main():
     """Entry point."""
+    from polymind.factors.registry import register_builtin_factors
+    from polymind.strategies import register_builtin_strategies
+
+    # Register built-in plugins on startup
+    register_builtin_strategies()
+    register_builtin_factors()
+
     cli()
 
 

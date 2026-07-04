@@ -11,6 +11,7 @@ from abc import ABC, abstractmethod
 from dataclasses import dataclass, field
 
 from polymind.core.intents import StrategyIntent
+from polymind.core.plugin import PluginRegistry
 from polymind.core.portfolio import PortfolioTarget
 from polymind.factors.pipeline import UniverseSnapshot
 
@@ -59,33 +60,71 @@ class FactorRegistry:
         self._bridges: dict[str, FactorExecutionBridge] = {}
 
     def register_signal(self, name: str, model: FactorSignalModel) -> None:
-        """Register a factor signal model."""
+        """Register a factor signal model under *name*.
+
+        Also registers the model's class with the global PluginRegistry so
+        that discovered plugins appear alongside built-in signals.
+        """
         self._signals[name] = model
+        PluginRegistry().register_factor(name, model.__class__)
 
     def register_bridge(self, name: str, bridge: FactorExecutionBridge) -> None:
         """Register an execution bridge for a factor."""
         self._bridges[name] = bridge
 
     def get_signal(self, name: str) -> FactorSignalModel | None:
-        """Get a registered signal model by name."""
-        return self._signals.get(name)
+        """Get a registered signal model by name.
+
+        Falls back to the global PluginRegistry so that any
+        externally-discovered factor can be lazily instantiated.
+        """
+        if name in self._signals:
+            return self._signals[name]
+        cls = PluginRegistry().get_factor(name)
+        if cls is not None:
+            return cls(FactorMetadata(name=name))
+        return None
 
     def get_bridge(self, name: str) -> FactorExecutionBridge | None:
         """Get a registered execution bridge by name."""
         return self._bridges.get(name)
 
     def list_signals(self) -> list[str]:
-        """List all registered signal names."""
-        return list(self._signals.keys())
+        """List all registered signal names, merging with PluginRegistry."""
+        builtin = list(self._signals.keys())
+        discovered = list(PluginRegistry().list_factors().keys())
+        return list(dict.fromkeys(builtin + discovered))  # deduped, order-preserving
 
     def list_bridges(self) -> list[str]:
         """List all registered bridge names."""
         return list(self._bridges.keys())
 
     def remove_signal(self, name: str) -> None:
-        """Remove a registered signal."""
+        """Remove a registered signal from local dict and PluginRegistry."""
         self._signals.pop(name, None)
+        PluginRegistry().remove_factor(name)
 
     def remove_bridge(self, name: str) -> None:
         """Remove a registered bridge."""
         self._bridges.pop(name, None)
+
+
+def register_builtin_factors() -> None:
+    """Register all built-in factor signal model classes in PluginRegistry.
+
+    Registered classes can be discovered via :meth:`PluginRegistry.list_factors`
+    and lazily resolved through :meth:`FactorRegistry.get_signal`.
+    """
+    from polymind.strategies.factors.fair_value.strategy import FairValueFactor
+    from polymind.strategies.factors.momentum.strategy import MomentumFactor
+    from polymind.strategies.factors.sentiment.strategy import SentimentFactor
+    from polymind.strategies.factors.volatility.strategy import VolatilityFactor
+
+    factors: list[tuple[str, type]] = [
+        ("momentum", MomentumFactor),
+        ("volatility", VolatilityFactor),
+        ("sentiment", SentimentFactor),
+        ("fair_value", FairValueFactor),
+    ]
+    for name, cls in factors:
+        PluginRegistry().register_factor(name, cls)

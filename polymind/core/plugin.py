@@ -36,6 +36,10 @@ class PluginRegistry:
             raise ValueError(f"Workflow '{name}' already registered")
         self._workflows[name] = cls_type
 
+    def remove_factor(self, name: str) -> None:
+        """Remove a registered factor (no-op if not found)."""
+        self._factors.pop(name, None)
+
     def get_strategy(self, name: str) -> type | None:
         return self._strategies.get(name)
 
