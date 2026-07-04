@@ -50,6 +50,12 @@ class TestConfig:
         cfg = Config()
         assert cfg.get_available_agents() == []
 
+    def test_google_agent(self):
+        """Line 62: google_api_key enables google agent."""
+        cfg = Config(google_api_key="sk-google-xxx")
+        agents = cfg.get_available_agents()
+        assert "google" in agents
+
 
 class TestLoadConfig:
     def test_default_config_no_env(self):
@@ -74,6 +80,15 @@ class TestLoadConfig:
             del os.environ["INITIAL_CAPITAL"]
             del os.environ["PRIVATE_KEY"]
 
+    def test_max_position_size_env(self):
+        """Line 93: MAX_POSITION_SIZE env var sets risk.max_position_size."""
+        os.environ["MAX_POSITION_SIZE"] = "200"
+        try:
+            cfg = load_config()
+            assert cfg.risk.max_position_size == 200.0
+        finally:
+            del os.environ["MAX_POSITION_SIZE"]
+
     def test_save_and_load_roundtrip(self):
         """save_config then load should preserve dry_run setting."""
         from polymind.core.config import CONFIG_DIR, CONFIG_FILE
@@ -97,3 +112,14 @@ class TestLoadConfig:
             finally:
                 cfg_mod.CONFIG_DIR = orig_dir
                 cfg_mod.CONFIG_FILE = orig_file
+
+    def test_get_config_singleton(self):
+        """get_config returns cached config (lines 72-74)."""
+        # Reset singleton
+        import polymind.core.config as cfg_mod
+        from polymind.core.config import get_config
+
+        cfg_mod._config = None
+        cfg1 = get_config()
+        cfg2 = get_config()
+        assert cfg1 is cfg2  # same singleton instance
