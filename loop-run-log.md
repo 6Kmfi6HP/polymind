@@ -75,3 +75,6 @@ Append one entry per run. Prune entries older than 30 days.
 
 2026-07-04T07:57:00Z — dev-loop — fix-proposed — Phase 15 Adapter Errors & Signer 完成. 1092 tests.
 {"run_id":"2026-07-04T07:57:00Z","pattern":"dev-loop","duration_s":600,"items_found":2,"actions_taken":2,"escalations":0,"tokens_estimate":90000,"outcome":"fix-proposed","note":"Phase 15: Adapter error hierarchy (10 classes, 40 tests) + Signer real EIP-712 signing, hash signing, API key derivation (16 tests). integration-tests推送完成."}
+
+2026-07-04T08:00:00Z — dev-loop — fix-proposed — Phase 14-17 完成. 1142 tests.
+{"run_id":"2026-07-04T08:00:00Z","pattern":"dev-loop","duration_s":1200,"items_found":4,"actions_taken":4,"escalations":0,"tokens_estimate":400000,"outcome":"fix-proposed","note":"Phase 14 Plugin接线 + Phase 15 错误层次/Signer + Phase 16 真实CLOB客户端 + Phase 17 真实Web3合约网关. 98新测试. 1142总测试. integration-tests全部推送."}

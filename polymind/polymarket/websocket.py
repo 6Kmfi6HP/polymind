@@ -5,7 +5,8 @@ from __future__ import annotations
 import asyncio
 import json
 from collections import defaultdict
-from collections.abc import AsyncGenerator
+from collections.abc import AsyncGenerator, Callable
+from contextlib import suppress
 from dataclasses import dataclass, field
 from datetime import datetime
 from enum import Enum, auto
@@ -35,6 +36,10 @@ class WebSocketConfig:
     auth_token: str | None = None
     reconnect_delay: float = 1.0
     max_reconnects: int = 5
+    exponential_base: float = 2.0
+    max_retry_delay: float = 60.0
+    ping_interval: float = 20.0
+    ping_timeout: float = 10.0
 
 
 @dataclass(frozen=True)
@@ -60,8 +65,10 @@ class PolymarketWebSocketAdapter:
         self._ws: Any | None = None
         self._ws_conn: Any | None = None
         self._subscriptions: dict[WebSocketChannel, set[str]] = defaultdict(set)
+        self._callbacks: dict[WebSocketChannel, list[Callable]] = defaultdict(list)
         self._running = False
         self._reconnect_count = 0
+        self._heartbeat_task: asyncio.Task | None = None
 
     async def connect(self) -> None:
         """Establish the WebSocket connection with optional authentication."""
@@ -74,6 +81,8 @@ class PolymarketWebSocketAdapter:
                     "token": self.config.auth_token,
                 }
             )
+        self._running = True
+        self._heartbeat_task = asyncio.create_task(self._heartbeat_loop())
 
     async def subscribe(self, channel: WebSocketChannel, market_ids: list[str]) -> None:
         """Subscribe to *channel* for the given *market_ids*."""
@@ -113,7 +122,14 @@ class PolymarketWebSocketAdapter:
                 msg_type = data.get("type", "unknown")
                 channel_str = data.get("channel", "unknown")
                 market_id = data.get("market", data.get("market_id", ""))
-                channel = WebSocketChannel[channel_str.upper()]
+
+                # Safe channel parsing
+                try:
+                    channel = WebSocketChannel[channel_str.upper()]
+                except (KeyError, ValueError):
+                    # Unknown channel — skip or yield with None
+                    continue
+
                 event = MarketEvent(
                     market_id=market_id,
                     channel=channel,
@@ -121,6 +137,12 @@ class PolymarketWebSocketAdapter:
                     data=data,
                     timestamp=datetime.utcnow(),
                 )
+
+                # Dispatch to callbacks
+                for cb in self._callbacks.get(channel, []):
+                    with suppress(Exception):
+                        cb(event)
+
                 yield event
             except ConnectionClosed:
                 if self._running:
@@ -140,7 +162,12 @@ class PolymarketWebSocketAdapter:
         if self._reconnect_count > self.config.max_reconnects:
             self._running = False
             return
-        await asyncio.sleep(self.config.reconnect_delay)
+        delay = min(
+            self.config.reconnect_delay
+            * (self.config.exponential_base ** (self._reconnect_count - 1)),
+            self.config.max_retry_delay,
+        )
+        await asyncio.sleep(delay)
         try:
             await self.connect()
         except Exception:
@@ -153,9 +180,24 @@ class PolymarketWebSocketAdapter:
         if self._ws is not None:
             await self._ws.send(json.dumps(data))
 
+    async def _heartbeat_loop(self) -> None:
+        """Periodically send ping to keep connection alive."""
+        try:
+            while self._running and self._ws is not None:
+                await asyncio.sleep(self.config.ping_interval)
+                if self._ws is not None:
+                    await self._send_json({"type": "ping"})
+        except asyncio.CancelledError:
+            pass
+        except Exception:
+            pass  # heartbeat failures are non-fatal
+
     async def close(self) -> None:
         """Gracefully shut down the WebSocket and reset adapter state."""
         self._running = False
+        if self._heartbeat_task is not None:
+            self._heartbeat_task.cancel()
+            self._heartbeat_task = None
         if self._ws is not None:
             await self._ws.close()
             self._ws = None
@@ -163,12 +205,25 @@ class PolymarketWebSocketAdapter:
             await self._ws_conn.__aexit__(None, None, None)
             self._ws_conn = None
         self._subscriptions.clear()
+        self._callbacks.clear()
         self._reconnect_count = 0
 
     @property
     def connected(self) -> bool:
         """Return ``True`` if the WebSocket connection is currently open."""
         return self._ws is not None and self._ws.state is State.OPEN
+
+    def add_callback(
+        self, channel: WebSocketChannel, callback: Callable[[MarketEvent], None]
+    ) -> None:
+        """Register a callback for events on *channel*."""
+        self._callbacks[channel].append(callback)
+
+    def remove_callback(
+        self, channel: WebSocketChannel, callback: Callable[[MarketEvent], None]
+    ) -> None:
+        """Remove a previously registered callback."""
+        self._callbacks[channel] = [cb for cb in self._callbacks[channel] if cb is not callback]
 
     @property
     def active_subscriptions(self) -> dict[WebSocketChannel, set[str]]:
