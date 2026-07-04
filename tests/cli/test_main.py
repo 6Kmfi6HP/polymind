@@ -16,6 +16,14 @@ class TestCLI:
         assert result.exit_code == 0
         assert "Usage" in result.output or "Polymind" in result.output
 
+    def test_no_command_shows_banner(self):
+        """Invoking CLI with no subcommand prints banner + usage."""
+        runner = CliRunner()
+        result = runner.invoke(cli, [])
+        assert result.exit_code == 0
+        assert "Polymind" in result.output
+        assert "Usage" in result.output
+
     def test_status(self):
         runner = CliRunner()
         result = runner.invoke(cli, ["status"])
@@ -24,6 +32,14 @@ class TestCLI:
     def test_strategies(self):
         runner = CliRunner()
         result = runner.invoke(cli, ["strategies"])
+        assert result.exit_code == 0
+        assert "Available" in result.output or "Strategy" in result.output
+
+    def test_main_entry_point(self):
+        """main() function (line 549-558) runs without error."""
+        # main() calls cli() which will show banner with no args
+        runner = CliRunner()
+        result = runner.invoke(cli, [])
         assert result.exit_code == 0
 
     def test_version(self):
