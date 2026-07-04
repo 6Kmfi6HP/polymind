@@ -16,6 +16,7 @@ from typing import Any
 
 from polymind.core.plugin import PluginRegistry
 from polymind.core.workflows import CommandType, WorkflowCommand
+from polymind.polymarket.pair_lifecycle import PairLifecycleManager
 from polymind.workflows.copy_trade.state_machine import (
     CopyTradeEvent,
     CopyTradeStateMachine,
@@ -109,10 +110,15 @@ class WorkflowRunner:
         matching entry.
     """
 
-    def __init__(self, registry: PluginRegistry | None = None) -> None:
+    def __init__(
+        self,
+        registry: PluginRegistry | None = None,
+        pair_lifecycle: PairLifecycleManager | None = None,
+    ) -> None:
         self._instances: dict[str, Any] = {}
         self._types: dict[str, str] = {}  # workflow_id -> type_name
         self._registry = registry or PluginRegistry()
+        self._pair_lifecycle = pair_lifecycle
 
     # ── Public API ────────────────────────────────────────────────────
 
@@ -120,10 +126,26 @@ class WorkflowRunner:
         """Route *cmd* to the correct state machine and apply the transition.
 
         Returns a :class:`CommandResult` describing the outcome.
+
+        Pair lifecycle commands (SPLIT, MERGE, REDEEM, SELL_REMAINDER,
+        ONE_SIDED_HALT) are delegated to the optional
+        :class:`PairLifecycleManager` when configured.
         """
         if cmd.command == CommandType.START:
             return self._handle_start(cmd)
+        if self._is_pair_command(cmd.command):
+            return await self._handle_pair_command(cmd)
         return self._handle_existing(cmd)
+
+    @staticmethod
+    def _is_pair_command(command: CommandType) -> bool:
+        return command in (
+            CommandType.SPLIT,
+            CommandType.MERGE,
+            CommandType.REDEEM,
+            CommandType.SELL_REMAINDER,
+            CommandType.ONE_SIDED_HALT,
+        )
 
     def get_instance(self, workflow_id: str) -> Any | None:
         """Return the active state machine instance, if any."""
@@ -227,6 +249,83 @@ class WorkflowRunner:
             state=sm.state.name,
             instance_count=len(self._instances),
         )
+
+    async def _handle_pair_command(self, cmd: WorkflowCommand) -> CommandResult:
+        """Delegate a pair lifecycle command to PairLifecycleManager.
+
+        Returns a :class:`CommandResult` with the outcome of the operation.
+        The state machine is NOT transitioned here — the caller should
+        drive the SM independently after the on-chain operation completes.
+        """
+        if self._pair_lifecycle is None:
+            return _fail(
+                cmd,
+                "PairLifecycleManager not configured on this runner",
+            )
+
+        condition_id = cmd.params.get("condition_id", "")
+        amount = cmd.params.get("amount", 0)
+        market_id = cmd.params.get("market_id", "")
+        outcome = cmd.params.get("outcome", "")
+
+        try:
+            if cmd.command == CommandType.SPLIT:
+                result = await self._pair_lifecycle.split(condition_id, amount)
+                return CommandResult(
+                    workflow_id=cmd.workflow_id,
+                    command=cmd.command,
+                    success=True,
+                    state=result.updated_position.condition_id,
+                    message=f"Split {amount / 1e6} USDC, tx={result.tx_hash}",
+                    instance_count=len(self._instances),
+                )
+            elif cmd.command == CommandType.MERGE:
+                result = await self._pair_lifecycle.merge(condition_id, amount)
+                return CommandResult(
+                    workflow_id=cmd.workflow_id,
+                    command=cmd.command,
+                    success=True,
+                    state=result.updated_position.condition_id,
+                    message=f"Merged {result.outcome_token_amount} pairs, tx={result.tx_hash}",
+                    instance_count=len(self._instances),
+                )
+            elif cmd.command == CommandType.REDEEM:
+                result = await self._pair_lifecycle.redeem(condition_id)
+                return CommandResult(
+                    workflow_id=cmd.workflow_id,
+                    command=cmd.command,
+                    success=True,
+                    state=result.updated_position.condition_id,
+                    message=f"Redeemed {result.amount_redeemed} {result.outcome} tokens, "
+                    f"proceeds={result.proceeds_usdc} USDC",
+                    instance_count=len(self._instances),
+                )
+            elif cmd.command == CommandType.SELL_REMAINDER:
+                result = await self._pair_lifecycle.sell_remainder(market_id, outcome)
+                return CommandResult(
+                    workflow_id=cmd.workflow_id,
+                    command=cmd.command,
+                    success=True,
+                    state="",
+                    message=f"Sold {result.amount_sold} {outcome} tokens, "
+                    f"{result.orders_placed} orders placed",
+                    instance_count=len(self._instances),
+                )
+            elif cmd.command == CommandType.ONE_SIDED_HALT:
+                result = await self._pair_lifecycle.one_sided_halt(market_id, outcome)
+                return CommandResult(
+                    workflow_id=cmd.workflow_id,
+                    command=cmd.command,
+                    success=True,
+                    state="",
+                    message=f"Halted {outcome} side on {market_id}, "
+                    f"{result.orders_cancelled} orders cancelled",
+                    instance_count=len(self._instances),
+                )
+            else:
+                return _fail(cmd, f"Unknown pair command: {cmd.command}")
+        except Exception as exc:
+            return _fail(cmd, str(exc))
 
     def _handle_existing(self, cmd: WorkflowCommand) -> CommandResult:
         """Process a command that targets an existing workflow instance."""
