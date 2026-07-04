@@ -8,78 +8,24 @@ on the project-owned domain types, not raw SDK response shapes.
 
 from __future__ import annotations
 
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 from datetime import datetime
 from typing import Any
 
 import aiohttp
 
+from polymind.polymarket.types import (
+    Candle,
+    MarketDetail,
+    OrderBookLevel,
+    OrderBookSnapshot,
+    Trade,
+    VolumeInfo,
+)
 
-@dataclass
-class MarketDetail:
-    """Full market metadata from the Polymarket Data API."""
-
-    market_id: str
-    condition_id: str
-    title: str
-    outcomes: list[str] = field(default_factory=list)
-    end_date_iso: str = ""
-    volume_24h: float = 0.0
-    liquidity: float = 0.0
-    tick_size: float = 0.01
-    min_size: float = 1.0
-    status: str = "active"
-
-
-@dataclass
-class OrderLevel:
-    """A single bid or ask level in the order book."""
-
-    price: float
-    size: float
-
-
-@dataclass
-class OrderbookSnapshot:
-    """Point-in-time order book for a market."""
-
-    market_id: str
-    bids: list[OrderLevel] = field(default_factory=list)
-    asks: list[OrderLevel] = field(default_factory=list)
-    timestamp: datetime | None = None
-
-
-@dataclass
-class Candle:
-    """OHLCV candlestick."""
-
-    timestamp: datetime
-    open: float
-    high: float
-    low: float
-    close: float
-    volume: float
-
-
-@dataclass
-class Trade:
-    """A single executed trade."""
-
-    trade_id: str
-    market_id: str
-    side: str
-    price: float
-    size: float
-    timestamp: datetime
-
-
-@dataclass
-class VolumeInfo:
-    """Market volume and liquidity summary."""
-
-    market_id: str
-    volume_24h: float = 0.0
-    liquidity: float = 0.0
+# Backward-compat aliases — these match the old names exported from this module.
+OrderLevel = OrderBookLevel
+OrderbookSnapshot = OrderBookSnapshot
 
 
 @dataclass
@@ -179,18 +125,20 @@ class PolymarketDataAPI:
         data = await self._request("GET", "/markets", params=params)
         return [self._parse_market(item) for item in data]
 
-    async def get_orderbook(self, market_id: str) -> OrderbookSnapshot:
+    async def get_orderbook(self, market_id: str) -> OrderBookSnapshot:
         """Fetch the current order book snapshot."""
         params = {"market": market_id}
         data = await self._request("GET", "/orderbook", params=params)
         bids = [
-            OrderLevel(price=float(b["price"]), size=float(b["size"])) for b in data.get("bids", [])
+            OrderBookLevel(price=float(b["price"]), size=float(b["size"]))
+            for b in data.get("bids", [])
         ]
         asks = [
-            OrderLevel(price=float(a["price"]), size=float(a["size"])) for a in data.get("asks", [])
+            OrderBookLevel(price=float(a["price"]), size=float(a["size"]))
+            for a in data.get("asks", [])
         ]
         timestamp = self._parse_timestamp(data.get("timestamp"))
-        return OrderbookSnapshot(
+        return OrderBookSnapshot(
             market_id=market_id,
             bids=bids,
             asks=asks,

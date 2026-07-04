@@ -11,16 +11,7 @@ from polymind.polymarket.contracts import (
     TokenBalance,
     TransactionResult,
 )
-from polymind.polymarket.data_api import (
-    Candle,
-    DataAPIConfig,
-    MarketDetail,
-    OrderbookSnapshot,
-    OrderLevel,
-    PolymarketDataAPI,
-    Trade,
-    VolumeInfo,
-)
+from polymind.polymarket.data_api import DataAPIConfig, PolymarketDataAPI
 from polymind.polymarket.errors import (
     AuthenticationError,
     ConnectionError,
@@ -40,6 +31,20 @@ from polymind.polymarket.signer import (
     Signer,
     WalletCredentials,
 )
+from polymind.polymarket.types import (
+    Candle,
+    MarketDetail,
+    OrderBookLevel,
+    OrderBookSnapshot,
+    Trade,
+    VolumeInfo,
+)
+from polymind.polymarket.types import (
+    OrderBookLevel as OrderLevel,
+)
+from polymind.polymarket.types import (
+    OrderBookSnapshot as OrderbookSnapshot,
+)
 from polymind.polymarket.websocket import (
     MarketEvent,
     PolymarketWebSocketAdapter,
@@ -56,8 +61,10 @@ __all__ = [
     "PolymarketDataAPI",
     "DataAPIConfig",
     "MarketDetail",
-    "OrderbookSnapshot",
-    "OrderLevel",
+    "OrderBookLevel",  # canonical
+    "OrderLevel",  # backward-compat alias
+    "OrderBookSnapshot",  # canonical
+    "OrderbookSnapshot",  # backward-compat alias
     "Candle",
     "Trade",
     "VolumeInfo",

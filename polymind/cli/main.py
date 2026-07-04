@@ -53,7 +53,8 @@ def cli(ctx):
 @click.option("--dry-run", is_flag=True, help="Simulation mode (no real trades)")
 @click.option("--once", is_flag=True, help="Run once and exit")
 @click.option("--interval", "-i", type=int, default=60, help="Loop interval in seconds")
-def run(strategy_text, strategy_file, paper, dry_run, once, interval):
+@click.pass_context
+def run(ctx, strategy_text, strategy_file, paper, dry_run, once, interval):
     """
     Run a market-making strategy.
 
@@ -111,9 +112,19 @@ def run(strategy_text, strategy_file, paper, dry_run, once, interval):
 
         if dry_run or once:
             console.print("[dim]Dry-run mode — no orders placed.[/dim]")
+        elif paper:
+            from polymind.execution.executor import PaperExecutor
+            from polymind.execution.fill_model import FillModel, FillModelConfig
+
+            fill_model = FillModel(FillModelConfig())
+            PaperExecutor(fill_model=fill_model)
+            console.print("[cyan]PAPER[/cyan] executor ready — simulated fills.")
         else:
-            run_mode = "paper" if paper else "live"
-            console.print(f"[yellow]→ Would execute in {run_mode} mode (v0.2 runtime)[/yellow]")
+            from polymind.polymarket.client import PolymarketClient
+
+            client = PolymarketClient()
+            _run_async(client.connect())
+            console.print("[red]LIVE[/red] executor ready — real CLOB orders.")
 
         console.print("[green]✓[/green] Strategy parsed and validated.")
         console.print()
@@ -176,6 +187,13 @@ def status():
 
     mode = "Safe (dry-run)" if config.dry_run else "[red]Live[/red]"
     console.print(f"[{'yellow' if config.dry_run else 'red'}]○[/] Mode: {mode}")
+
+    executor_type = (
+        "[cyan]PaperExecutor[/cyan] (sandbox)"
+        if config.dry_run
+        else "[red]LiveExecutor[/red] (CLOB)"
+    )
+    console.print(f"[green]✓[/green] Executor: {executor_type}")
     console.print()
     console.print(
         "[dim]Run [bold]polymind setup[/bold] to configure API keys or create a .env file.[/dim]"

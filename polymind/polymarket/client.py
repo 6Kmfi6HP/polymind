@@ -26,6 +26,7 @@ from polymind.polymarket.errors import (
 )
 from polymind.polymarket.metrics import AdapterMetrics
 from polymind.polymarket.signer import Signer
+from polymind.polymarket.types import OrderBookLevel, OrderBookSnapshot
 
 # ---------------------------------------------------------------------------
 # Domain types
@@ -49,28 +50,6 @@ class MarketSummary:
     neg_risk: bool = False
     closed: bool = False
     created_at: datetime | None = None
-
-
-@dataclass
-class OrderBookLevel:
-    """A single bid or ask level in the order book."""
-
-    price: float
-    size: float
-    num_orders: int = 0
-
-
-@dataclass
-class OrderBookSnapshot:
-    """Point-in-time order book snapshot for a token."""
-
-    market_id: str
-    token_id: str
-    bids: list[OrderBookLevel]
-    asks: list[OrderBookLevel]
-    timestamp: datetime
-    tick_size: float = 0.01
-    min_order_size: str = "1"
 
 
 @dataclass

@@ -109,6 +109,17 @@ Issues = "https://github.com/6Kmfi6HP/polymind/issues"
 polymind = "polymind.cli.main:main"
 pm = "polymind.cli.main:main"
 
+[project.entry-points."polymind.strategies"]
+amm = "polymind.strategies.market_making.amm:AMMStrategy"
+bands = "polymind.strategies.market_making.bands:BandsStrategy"
+classic_mm = "polymind.strategies.market_making.classic_mm:ClassicMMStrategy"
+
+[project.entry-points."polymind.factors"]
+momentum = "polymind.strategies.factors.momentum.strategy:MomentumFactor"
+volatility = "polymind.strategies.factors.volatility.strategy:VolatilityFactor"
+sentiment = "polymind.strategies.factors.sentiment.strategy:SentimentFactor"
+fair_value = "polymind.strategies.factors.fair_value.strategy:FairValueFactor"
+
 [tool.setuptools.packages.find]
 where = ["."]
 include = ["polymind*"]
