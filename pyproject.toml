@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "polymind"
-version = "0.1.0"
+version = "0.5.0"
 description = "AI-native market making for Polymarket. Write strategies in English, let AI execute them."
 authors = [{name = "Polymind Contributors"}]
 readme = "README.md"

@@ -26,7 +26,7 @@ BANNER = """
 
 @click.group(invoke_without_command=True)
 @click.pass_context
-@click.version_option(version="0.1.0", prog_name="polymind")
+@click.version_option(version="0.5.0", prog_name="polymind")
 def cli(ctx):
     """
     Polymind — AI-native market making for Polymarket.
