@@ -87,3 +87,6 @@ Append one entry per run. Prune entries older than 30 days.
 
 2026-07-04T09:07:00Z — dev-loop — fix-proposed — Phase 20 类型统一完成. 1160 tests.
 {"run_id":"2026-07-04T09:07:00Z","pattern":"dev-loop","duration_s":600,"items_found":2,"actions_taken":2,"escalations":0,"tokens_estimate":130000,"outcome":"fix-proposed","note":"Phase 20: 域类型统一 types.py + pyproject.toml入口点 + CLI executor接线. 1160总测试. integration-tests推送."}
+
+2026-07-04T10:00:00Z — dev-loop — fix-proposed — split/merge/redeem 实现. 1166 tests. 零NotImplementedError.
+{"run_id":"2026-07-04T10:00:00Z","pattern":"dev-loop","duration_s":600,"items_found":1,"actions_taken":1,"escalations":0,"tokens_estimate":90000,"outcome":"fix-proposed","note":"ContractsGateway split/merge/redeem 实现. 最后3个NotImplementedError消除. 1166总测试. 零存根遗留."}
