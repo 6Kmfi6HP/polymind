@@ -243,8 +243,7 @@ class PairLifecycleManager:
         token_bal = await self._gateway.get_onchain_balance(pos.yes_token_id)
         if token_bal.usdc_balance * 1e6 < amount:
             raise InsufficientBalanceError(
-                f"USDC balance {token_bal.usdc_balance:.2f} < "
-                f"{amount / 1e6:.2f} required for split"
+                f"USDC balance {token_bal.usdc_balance:.2f} < {amount / 1e6:.2f} required for split"
             )
 
         if approve:

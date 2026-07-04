@@ -90,3 +90,6 @@ Append one entry per run. Prune entries older than 30 days.
 
 2026-07-04T10:00:00Z — dev-loop — fix-proposed — split/merge/redeem 实现. 1166 tests. 零NotImplementedError.
 {"run_id":"2026-07-04T10:00:00Z","pattern":"dev-loop","duration_s":600,"items_found":1,"actions_taken":1,"escalations":0,"tokens_estimate":90000,"outcome":"fix-proposed","note":"ContractsGateway split/merge/redeem 实现. 最后3个NotImplementedError消除. 1166总测试. 零存根遗留."}
+
+2026-07-04T10:12:00Z — dev-loop — fix-proposed — Phase 21 ExchangeAdapter + CI/docs 增强. 1230 tests.
+{"run_id":"2026-07-04T10:12:00Z","pattern":"dev-loop","duration_s":900,"items_found":3,"actions_taken":3,"escalations":0,"tokens_estimate":150000,"outcome":"fix-proposed","note":"Phase 21 ExchangeAdapter接口 + CI mkdocs + state更新. 1230总测试. 遗留PR#19待合并."}
