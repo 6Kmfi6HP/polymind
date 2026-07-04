@@ -69,3 +69,6 @@ Append one entry per run. Prune entries older than 30 days.
 
 2026-07-04T02:30:00Z — dev-loop — fix-proposed — 分支恢复. 1017 tests.
 {"run_id":"2026-07-04T02:30:00Z","pattern":"dev-loop","duration_s":60,"items_found":1,"actions_taken":1,"escalations":0,"tokens_estimate":3000,"outcome":"fix-proposed","note":"本地 integration-tests 分支丢失(从main恢复). 从 origin 重建. 1017测试确认完好."}
+
+2026-07-04T07:50:00Z — dev-loop — fix-proposed — Phase 14 Plugin Integration 完成. 1044 tests.
+{"run_id":"2026-07-04T07:50:00Z","pattern":"dev-loop","duration_s":600,"items_found":3,"actions_taken":3,"escalations":0,"tokens_estimate":120000,"outcome":"fix-proposed","note":"Phase 14 Plugin System Integration: Wire PluginRegistry into strategies/factors/CLI. 27 new tests. 1044 total. integration-tests分支提交完成. 等待推送确认."}
