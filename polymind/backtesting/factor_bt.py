@@ -119,6 +119,22 @@ class FactorBacktester:
             A :class:`FactorBacktestResult` summarising this step.
         """
         if not scores or not snapshots:
+            # Close remaining open positions when no new scores arrive
+            step_pnl = 0.0
+            step_trades = 0
+            for market_id in list(self._positions.keys()):
+                snap = snapshots.get(market_id)
+                if snap is not None:
+                    step_trades += 1
+                    step_pnl += self._close_position(market_id, snap.bid_price)
+
+            if step_trades > 0:
+                self._pnl_history.append(step_pnl)
+                self._cumulative_pnl += step_pnl
+                if self._cumulative_pnl > self._peak_cumulative:
+                    self._peak_cumulative = self._cumulative_pnl
+                self._total_trades += step_trades
+
             return self._build_result()
 
         # --- 1. Select top-N markets by score ---------------------------
@@ -134,7 +150,7 @@ class FactorBacktester:
                 snap = snapshots.get(market_id)
                 if snap is not None:
                     step_trades += 1
-                    step_pnl += self._close_position(market_id, snap.mid_price)
+                    step_pnl += self._close_position(market_id, snap.bid_price)
 
         # --- 3. Open new positions in entrants ---------------------------
         for market_id in selected:
@@ -143,7 +159,8 @@ class FactorBacktester:
                 continue
             if market_id not in self._positions:
                 step_trades += 1
-                self._open_position(market_id, snap.mid_price)
+                # Buy at ask (pay spread to enter)
+                self._open_position(market_id, snap.ask_price)
 
         # --- 4. Update aggregate state -----------------------------------
         if step_trades > 0:

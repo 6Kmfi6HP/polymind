@@ -130,8 +130,7 @@ class TestAsyncDatabase:
             c1 = await db.get_connection()
             c2 = await db.get_connection()
             with pytest.raises(asyncio.TimeoutError):
-                async with asyncio.timeout(0.1):
-                    await db.get_connection()
+                await asyncio.wait_for(db.get_connection(), timeout=0.1)
             await c1.close()
             await c2.close()
 

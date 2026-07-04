@@ -22,6 +22,7 @@ from polymind.core.intents import (
 from polymind.core.ledger import EntryType, LedgerEntry
 from polymind.execution.fill_model import FillModel, MarketSnapshot
 from polymind.execution.order_identity import OrderIdentity
+from polymind.execution.order_manager import OrderManager
 
 
 class OrderStatus(Enum):
@@ -71,6 +72,7 @@ class PaperExecutor(IntentExecutor):
         fill_model: FillModel,
         initial_cash: float = 10_000.0,
         loop_interval: int = 60,
+        order_manager: OrderManager | None = None,
     ):
         self.fill_model = fill_model
         self.initial_cash = initial_cash
@@ -83,6 +85,7 @@ class PaperExecutor(IntentExecutor):
         self._current_snapshot: MarketSnapshot | None = None
         self._fill_counter: int = 0
         self._ledger_counter: int = 0
+        self._order_manager = order_manager
 
     async def execute(self, intent: StrategyIntent) -> dict[str, Any]:
         """Process a StrategyIntent: place orders, cancel orders, simulate ticks.
@@ -198,6 +201,10 @@ class PaperExecutor(IntentExecutor):
         )
         self.orders[oid_str] = record
 
+        # Track in OrderManager if configured
+        if self._order_manager is not None:
+            self._order_manager.add_order(identity, order)
+
         market = order.market_id
         if market not in results:
             results[market] = {"orders_placed": 0, "fills": 0, "filled_size": 0.0, "cancelled": 0}
@@ -258,6 +265,10 @@ class PaperExecutor(IntentExecutor):
             source=FillSource.SIMULATED,
         )
         self.fills.append(event)
+
+        # Track fill in OrderManager if configured
+        if self._order_manager is not None:
+            self._order_manager.add_fill(event)
 
         # Update cash
         trade_value = fill_result.fill_price * fill_result.fill_size

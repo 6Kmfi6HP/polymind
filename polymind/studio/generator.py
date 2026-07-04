@@ -21,6 +21,11 @@ class StrategyTemplate(Enum):
     BANDS = "bands"
     CLASSIC_MM = "classic_mm"
     MOMENTUM = "momentum"
+    MAKER_REBATE = "maker_rebate"
+    EVENT_MM = "event_mm"
+    SNIPER = "sniper"
+    COPY_TRADE = "copy_trade"
+    FACTOR = "factor"
     CUSTOM = "custom"
 
     @property

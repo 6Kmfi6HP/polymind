@@ -1,38 +1,75 @@
 # Current State
 
 **Status:** Documentation truth source
-**Date:** 2026-07-03
+**Date:** 2026-07-04
 
 This file records repository state separately from the target architecture in
 `../architecture.md`.
 
-## Implemented in the skeleton
+## Implemented
 
 - Python package scaffold under `polymind/`.
-- CLI shell with help, status, setup, and strategy-list commands.
-- Core package markers and base modules for agent, config, and strategy concepts.
-- Placeholder package directories for strategies, factors, backtesting, storage,
-  agents, alerts, studio, utilities, risk, and Polymarket adapters.
-- Reference documentation for the cross-sectional momentum failure.
+- CLI shell with help, status, setup, strategy-list, and report commands.
+- Core packages: agent loop, config, domain contracts (Phase 2), strategy base,
+  intents, fills, ledger, risk, portfolio, workflows, plugin registry, discovery.
 - **Phase 2 domain contracts (frozen):**
   - `PortfolioTarget` / `PositionDirection` — factor strategy portfolio output
-  - `FillEvent` / `FillSource` — unified fill representation
-  - `LedgerEntry` / `EntryType` — append-only P&L ledger entry
-  - `RiskDecision` / `RiskGate` / `RiskContext` — composable risk gate contracts
-  - `WorkflowCommand` / `CommandType` — workflow lifecycle and pair-management commands
+  - `FillEvent` / `FillSource` / `LedgerEntry` / `EntryType`
+  - `RiskDecision` / `RiskGate` / `RiskContext`
+  - `WorkflowCommand` / `CommandType`
+  - `OrderIntent` / `CancelIntent` / `StrategyIntent`
+- **Phase 4: AMM + Bands strategies** — pricing, sizing, full strategy modules.
+- **Phase 5: All 7 strategies** — AMM, Bands, Classic MM, Maker Rebate, Event MM, Sniper,
+  Copy Trade — each with config, analyze() producing StrategyIntent, full test coverage.
+- **Phase 21: WorkflowRunner** — routes WorkflowCommand to state machines, type
+  inference, PluginRegistry integration, lifecycle management (START/STOP/PAUSE/RESUME/
+  RESTART), pair command delegation.
+- **Phase 22: PairLifecycleManager** — YES/NO token pair lifecycle (split/merge/redeem/
+  sell remainder/one-sided halt), inventory tracking, on-chain sync.
+- **Phase 24: SnapshotCollector** — CLOB data collector, polls PolymarketDataAPI,
+  stores in PriceStore, configurable poll interval and market limit.
+- **Phase 25: TradingEngine** — central orchestrator wiring strategy→risk→executor,
+  run_tick/run_forever, background task support.
+- **Phase 26: Integration Test Suite** — full pipeline, workflow, risk, multi-strategy
+  end-to-end tests. 69 integration tests.
+- **Phase 5: Workflow state machines** — Maker Rebate, Event MM, Sniper, Copy Trade,
+  each with full state machine, transitions, and unit tests.
+- **Phase 21: WorkflowRunner** — routes WorkflowCommand to state machines, type
+  inference, PluginRegistry integration, lifecycle management (START/STOP/PAUSE/RESUME/
+  RESTART).
+- **Phase 6: Factor framework** — pipeline, scoring, portfolio construction, filters,
+  execution model, registry with built-in factors (momentum, volatility, sentiment,
+  fair-value, composite, hedge, volume).
+- **Phase 7: Factor strategies** — separate packages for each factor type, all
+  implementing the score interface.
+- **Phase 3: Execution** — PaperExecutor, FillModel, OrderIdentity, LiveExecutor,
+  Serializer.
+- **Phase 8: Studio** — NL-to-config generator, optimizer.
+- **Phase 9: Reports** — Dashboard, positions, P&L, risk reports with Rich tables.
+- **Phase 9: Docs** — Mkdocs site with strict build, mkdocs-material theme.
+- **Phase 10: Operations dashboard** — CLI commands for dashboard/positions/pnl/risk.
+- **Phase 12-13: Agent providers** — Anthropic, OpenAI, Gemini, Ensemble, Intelligence.
+- **Phase 14: Plugin system** — PluginRegistry with entry-point discovery.
+- **Phase 15-20: Polymarket adapters** — CLOB client, WebSocket, Data API, contracts
+  gateway (split/merge/redeem), signer, errors, metrics, types (unified), LiveExecutor.
+- **Reconciliation** — fill reconciliation, balance checks, recovery.
+- **Storage** — database, warehouse, ledger, price store, models.
+- **Safety** — KillSwitch, Preflight checks, secrets handling, logging.
+- **CI** — GitHub Actions with tests + docs build on Python 3.11, pre-commit hooks (ruff).
+- **Reference documentation** — cross-sectional momentum analysis, factor research,
+  official MM keeper, terminal, probablyprofit, warproxxx patterns and anti-patterns.
+- **Template project files** — Makefile, MANIFEST.in, .pre-commit-config.yaml,
+  pyproject.toml with PyPI metadata, entry points.
 
 ## Not yet implemented
 
-- Executable strategy backends for AMM, Bands, Maker Rebate, Event MM, Sniper,
-  Copy Trade, Classic MM, or factor strategies.
 - CLOB SDK v2/unified SDK adapter validation.
-- Order manager, WebSocket adapters, Data API adapter, contracts gateway, signer,
-  or reconciliation layer.
-- Durable storage models, repositories, price snapshot store, or paper OMS ledger.
-- Executable-price backtesting.
-- Safety mechanisms: kill switch, preflight, log redaction, secure credential
-  storage, live confirmation, and production risk enforcement.
-- AI studio natural-language strategy generation.
+- Order manager integration layer.
+- Native DuckDB research panels.
+- Executable-price backtesting with CLOB bid/ask (execution models exist, need full pipeline demo).
+- AI factor discovery (studio enhancement).
+- Strategy templates gallery.
+- Kalshi, Limitless, other venue adapters.
 
 ## Documentation policy
 
@@ -46,6 +83,5 @@ This file records repository state separately from the target architecture in
 ## Historical external spec
 
 The historical spec at `../../../docs/superpowers/specs/2026-07-03-polymind-architecture-design.md`
-belongs outside the `polymind` repository. It remains an initial draft for the
-four-project market-making design. This repository's active architecture source
+belongs outside the `polymind` repository. This repository's active architecture source
 is `docs/architecture.md`.

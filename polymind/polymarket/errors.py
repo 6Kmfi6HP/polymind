@@ -64,3 +64,15 @@ class InsufficientGasError(ContractError):
     """Wallet lacks MATIC for gas."""
 
     ...
+
+
+class InsufficientBalanceError(PolymarketError):
+    """Insufficient token or USDC balance for the requested operation."""
+
+    ...
+
+
+class PairLifecycleError(PolymarketError):
+    """Invalid pair-lifecycle operation (e.g., redeem on unresolved market)."""
+
+    ...

@@ -49,11 +49,19 @@ def register_builtin_strategies() -> None:
     from polymind.strategies.market_making.amm import AMMStrategy
     from polymind.strategies.market_making.bands import BandsStrategy
     from polymind.strategies.market_making.classic_mm.strategy import ClassicMMStrategy
+    from polymind.strategies.market_making.copy_trade.strategy import CopyTradeStrategy
+    from polymind.strategies.market_making.event_mm.strategy import EventMMStrategy
+    from polymind.strategies.market_making.maker_rebate.strategy import MakerRebateStrategy
+    from polymind.strategies.market_making.sniper.strategy import SniperStrategy
 
     for name, cls in [
         ("amm", AMMStrategy),
         ("bands", BandsStrategy),
         ("classic_mm", ClassicMMStrategy),
+        ("maker_rebate", MakerRebateStrategy),
+        ("event_mm", EventMMStrategy),
+        ("sniper", SniperStrategy),
+        ("copy_trade", CopyTradeStrategy),
     ]:
         if name not in _registry:
             _registry[name] = cls
