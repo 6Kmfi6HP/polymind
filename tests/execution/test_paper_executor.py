@@ -500,6 +500,276 @@ class TestPaperExecutorShutdown:
         assert len(taker_executor.ledger) == 0
 
 
+class TestPaperExecutorEdgeCoverage:
+    """Test previously uncovered branches."""
+
+    @pytest.mark.asyncio
+    async def test_order_manager_flow(self, snap: MarketSnapshot):
+        """OrderManager path in _process_order and _record_fill (lines 206, 271)."""
+        from polymind.execution.order_manager import OrderManager
+
+        om = OrderManager()
+        cfg = FillModelConfig(mode=FillMode.TAKER, taker_fee_rate=0.003)
+        model = FillModel(cfg)
+        ex = PaperExecutor(fill_model=model, order_manager=om)
+        ex._current_snapshot = snap
+        intent = StrategyIntent(
+            timestamp=datetime.now(timezone.utc),
+            strategy_name="test",
+            orders=[OrderIntent(market_id="0xabc", side=OrderSide.BUY, price=0.85, size=10.0)],
+        )
+        await ex.execute(intent)
+        assert len(om._orders) > 0
+        assert len(om._fills) > 0
+
+    @pytest.mark.asyncio
+    async def test_simulate_tick_record_removed(self, snap: MarketSnapshot):
+        """Line 142: record disappears between open_ids collection and iteration."""
+        cfg = FillModelConfig(mode=FillMode.PASSIVE)
+        model = FillModel(cfg)
+        ex = PaperExecutor(fill_model=model)
+        intent = StrategyIntent(
+            timestamp=datetime.now(timezone.utc),
+            strategy_name="test",
+            orders=[OrderIntent(market_id="0xabc", side=OrderSide.BUY, price=0.75, size=10.0)],
+        )
+        ex._current_snapshot = snap
+        await ex.execute(intent)
+        # Remove the order from the orders dict while it's in open_ids
+        oid = list(ex.orders.keys())[0]
+        del ex.orders[oid]
+        fills = await ex.simulate_tick(snap)
+        assert fills == 0  # skipped by continue on line 142
+
+    @pytest.mark.asyncio
+    async def test_position_same_direction_avg_entry(self, snap: MarketSnapshot):
+        """Line 312-317: same-direction new position blends avg entry."""
+        cfg = FillModelConfig(mode=FillMode.TAKER, taker_fee_rate=0.0)
+        model = FillModel(cfg)
+        ex = PaperExecutor(fill_model=model)
+        # Taker BUY fills at ask price from snapshot
+        # snap ask=0.85 → first buy fill at 0.85
+        # snap2 ask=0.86 → second buy fill at 0.86
+        intent1 = StrategyIntent(
+            timestamp=datetime.now(timezone.utc),
+            strategy_name="test",
+            orders=[OrderIntent(market_id="0xabc", side=OrderSide.BUY, price=0.85, size=10.0)],
+        )
+        ex._current_snapshot = snap
+        await ex.execute(intent1)
+        # fill_price will be snap.ask_price = 0.85
+        pos = ex.get_position("0xabc")
+        assert pos.size == 10.0
+        assert pos.avg_entry == 0.85
+
+        # Second buy at higher price
+        snap2 = MarketSnapshot(
+            market_id="0xabc",
+            bid_price=0.84,
+            bid_size=100.0,
+            ask_price=0.86,
+            ask_size=200.0,
+            mid_price=0.85,
+            timestamp=datetime.now(),
+        )
+        intent2 = StrategyIntent(
+            timestamp=datetime.now(timezone.utc),
+            strategy_name="test",
+            orders=[OrderIntent(market_id="0xabc", side=OrderSide.BUY, price=0.86, size=10.0)],
+        )
+        ex._current_snapshot = snap2
+        await ex.execute(intent2)
+        # fill_price will be snap2.ask_price = 0.86
+        pos = ex.get_position("0xabc")
+        assert pos.size == 20.0
+        assert pos.avg_entry == pytest.approx(0.855, abs=1e-9)
+
+    @pytest.mark.asyncio
+    async def test_position_flip_new_direction(self, snap: MarketSnapshot):
+        """Line 318-321: flip path resets avg_entry to fill price."""
+        cfg = FillModelConfig(mode=FillMode.TAKER, taker_fee_rate=0.0)
+        model = FillModel(cfg)
+        ex = PaperExecutor(fill_model=model)
+        # Taker BUY fills at snap.ask_price = 0.85
+        ex._current_snapshot = snap
+        await ex.execute(
+            StrategyIntent(
+                timestamp=datetime.now(timezone.utc),
+                strategy_name="test",
+                orders=[OrderIntent(market_id="0xabc", side=OrderSide.BUY, price=0.85, size=10.0)],
+            )
+        )
+        pos = ex.get_position("0xabc")
+        assert pos.size == 10.0
+
+        # Taker SELL fills at snap2.bid_price = 0.75
+        snap2 = MarketSnapshot(
+            market_id="0xabc",
+            bid_price=0.75,
+            bid_size=100.0,
+            ask_price=0.80,
+            ask_size=200.0,
+            mid_price=0.775,
+            timestamp=datetime.now(),
+        )
+        ex._current_snapshot = snap2
+        await ex.execute(
+            StrategyIntent(
+                timestamp=datetime.now(timezone.utc),
+                strategy_name="test",
+                orders=[OrderIntent(market_id="0xabc", side=OrderSide.SELL, price=0.75, size=15.0)],
+            )
+        )
+        # Fill at 0.75. old_size=10, size_delta=-15, new_size=-5
+        # old_size * new_size = 10 * -5 = -50 < 0 → flip branch (line 318-321)
+        pos = ex.get_position("0xabc")
+        assert pos.size == -5.0
+        assert pos.avg_entry == 0.75  # flip price
+
+    @pytest.mark.asyncio
+    async def test_short_realized_pnl(self, snap: MarketSnapshot):
+        """Closing a short position calculates realized PnL correctly (line 305)."""
+        cfg = FillModelConfig(mode=FillMode.TAKER, taker_fee_rate=0.0)
+        model = FillModel(cfg)
+        ex = PaperExecutor(fill_model=model)
+
+        # Sell short 10 at 0.90 (taker SELL: fill at snap.bid_price = 0.90)
+        snap_short = MarketSnapshot(
+            market_id="0xabc",
+            bid_price=0.90,
+            bid_size=100.0,
+            ask_price=0.92,
+            ask_size=200.0,
+            mid_price=0.91,
+            timestamp=datetime.now(),
+        )
+        ex._current_snapshot = snap_short
+        await ex.execute(
+            StrategyIntent(
+                timestamp=datetime.now(timezone.utc),
+                strategy_name="test",
+                orders=[OrderIntent(market_id="0xabc", side=OrderSide.SELL, price=0.90, size=10.0)],
+            )
+        )
+        pos = ex.get_position("0xabc")
+        assert pos.size == -10.0
+        assert pos.avg_entry == 0.90
+
+        # Buy back 5 at 0.85 (taker BUY: fill at snap.ask_price = 0.85)
+        snap_close = MarketSnapshot(
+            market_id="0xabc",
+            bid_price=0.82,
+            bid_size=100.0,
+            ask_price=0.85,
+            ask_size=200.0,
+            mid_price=0.835,
+            timestamp=datetime.now(),
+        )
+        ex._current_snapshot = snap_close
+        await ex.execute(
+            StrategyIntent(
+                timestamp=datetime.now(timezone.utc),
+                strategy_name="test",
+                orders=[OrderIntent(market_id="0xabc", side=OrderSide.BUY, price=0.85, size=5.0)],
+            )
+        )
+        # Short close: old_size=-10, size_delta=5, new_size=-5
+        # old_size * new_size = -10 * -5 = 50 > 0 AND |new_size|=5 < |old_size|=10
+        # → closing part of a short. realized = (avg_entry - fill_price) * close_size
+        # = (0.90 - 0.85) * 5 = 0.25
+        assert pos.realized_pnl == pytest.approx(0.25, abs=1e-9)
+        assert pos.size == -5.0
+
+    @pytest.mark.asyncio
+    async def test_position_partial_reduce_long(self, snap: MarketSnapshot):
+        """Line 299-303: partial close of a long position."""
+        cfg = FillModelConfig(mode=FillMode.TAKER, taker_fee_rate=0.0)
+        model = FillModel(cfg)
+        ex = PaperExecutor(fill_model=model)
+
+        # Buy 10 at 0.80 (ask=0.80 on snap)
+        snap_buy = MarketSnapshot(
+            market_id="0xabc",
+            bid_price=0.78,
+            bid_size=100.0,
+            ask_price=0.80,
+            ask_size=200.0,
+            mid_price=0.79,
+            timestamp=datetime.now(),
+        )
+        ex._current_snapshot = snap_buy
+        await ex.execute(
+            StrategyIntent(
+                timestamp=datetime.now(timezone.utc),
+                strategy_name="test",
+                orders=[OrderIntent(market_id="0xabc", side=OrderSide.BUY, price=0.80, size=10.0)],
+            )
+        )
+        pos = ex.get_position("0xabc")
+        assert pos.size == 10.0
+
+        # Sell 4 at 0.85 (bid=0.85) → partial close at profit
+        snap_sell = MarketSnapshot(
+            market_id="0xabc",
+            bid_price=0.85,
+            bid_size=100.0,
+            ask_price=0.87,
+            ask_size=200.0,
+            mid_price=0.86,
+            timestamp=datetime.now(),
+        )
+        ex._current_snapshot = snap_sell
+        await ex.execute(
+            StrategyIntent(
+                timestamp=datetime.now(timezone.utc),
+                strategy_name="test",
+                orders=[OrderIntent(market_id="0xabc", side=OrderSide.SELL, price=0.85, size=4.0)],
+            )
+        )
+        # old_size=10, size_delta=-4, new_size=6
+        # old_size * new_size = 10 * 6 = 60 > 0 AND 6 < 10 → partial close
+        # close_size = min(10, 4) = 4
+        # old_size > 0 → closing a long: realized = (0.85 - 0.80) * 4 = 0.20
+        assert pos.size == 6.0
+        assert pos.realized_pnl == pytest.approx(0.20, abs=1e-9)
+
+    @pytest.mark.asyncio
+    async def test_position_exact_close(self, snap: MarketSnapshot):
+        """Line 309-311: new_size == 0 zeros out avg_entry."""
+        cfg = FillModelConfig(mode=FillMode.TAKER, taker_fee_rate=0.0)
+        model = FillModel(cfg)
+        ex = PaperExecutor(fill_model=model)
+
+        ex._current_snapshot = snap  # ask=0.85
+        await ex.execute(
+            StrategyIntent(
+                timestamp=datetime.now(timezone.utc),
+                strategy_name="test",
+                orders=[OrderIntent(market_id="0xabc", side=OrderSide.BUY, price=0.85, size=10.0)],
+            )
+        )
+        snap_sell = MarketSnapshot(
+            market_id="0xabc",
+            bid_price=0.85,
+            bid_size=100.0,
+            ask_price=0.87,
+            ask_size=200.0,
+            mid_price=0.86,
+            timestamp=datetime.now(),
+        )
+        ex._current_snapshot = snap_sell
+        await ex.execute(
+            StrategyIntent(
+                timestamp=datetime.now(timezone.utc),
+                strategy_name="test",
+                orders=[OrderIntent(market_id="0xabc", side=OrderSide.SELL, price=0.85, size=10.0)],
+            )
+        )
+        pos = ex.get_position("0xabc")
+        assert pos.size == 0.0
+        assert pos.avg_entry == 0.0
+
+
 class TestOrderRecord:
     def test_minimal_construction(self):
         now = datetime.now(timezone.utc)

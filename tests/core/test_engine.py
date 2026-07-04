@@ -221,3 +221,83 @@ class TestTradingEngine:
         await engine.stop()
         await loop_task
         assert engine._running is False
+
+    # ── New: cover engine edge cases ────────────────────────────────
+
+    async def test_empty_intent_is_empty(self, engine, strategy, market):
+        """Empty StrategyIntent with no orders/cancels (line 123-132)."""
+        strategy.analyze.return_value = StrategyIntent(
+            timestamp=datetime(2026, 7, 4, 12, 0, 0),
+            strategy_name="test",
+            orders=[],
+            cancels=[],
+        )
+        result = await engine.run_tick(market)
+        assert result.orders_proposed == 0
+        assert result.error == ""
+
+    async def test_exec_result_with_cancelled_status(
+        self,
+        engine,
+        strategy,
+        executor,
+        market,
+    ):
+        """Line 177-180: cancelled status counted in orders_cancelled."""
+        order = OrderIntent(market_id="mkt1", side=OrderSide.BUY, price=0.45, size=10.0)
+        intent = StrategyIntent(
+            timestamp=datetime(2026, 7, 4, 12, 0, 0),
+            strategy_name="test",
+            orders=[order],
+        )
+        strategy.analyze.return_value = intent
+        executor.execute.return_value = {
+            "mkt1": {"status": "CANCELLED"},
+        }
+        result = await engine.run_tick(market)
+        assert result.orders_cancelled == 1
+        assert result.orders_placed == 0
+
+    async def test_exec_result_with_non_dict_values(self, engine, strategy, executor, market):
+        """Line 175-176: handle non-dict entries in exec_result."""
+        order = OrderIntent(market_id="mkt1", side=OrderSide.BUY, price=0.45, size=10.0)
+        intent = StrategyIntent(
+            timestamp=datetime(2026, 7, 4, 12, 0, 0),
+            strategy_name="test",
+            orders=[order],
+        )
+        strategy.analyze.return_value = intent
+        executor.execute.return_value = {"mkt1": "some_string"}
+        result = await engine.run_tick(market)
+        assert result.orders_placed == 0
+        assert result.error == ""
+
+    async def test_status_after_ticks(self, engine, strategy, executor, market):
+        """status() reflects tick counts (line 244-247)."""
+        strategy.analyze.return_value = None
+        await engine.run_tick(market)
+        await engine.run_tick(market)
+        status = engine.status()
+        assert status["total_ticks"] == 2
+        assert status["last_tick"] is not None
+
+    async def test_risk_gate_approved_line_174(self, strategy, executor, market):
+        """Execute result dict with 'status' key not matching any known status."""
+        risk = AsyncMock(spec=RiskGate)
+        risk.evaluate = AsyncMock(
+            return_value=RiskDecision(
+                gate_name="tg",
+                approved=True,
+                reason="ok",
+            )
+        )
+        engine = TradingEngine(strategy=strategy, executor=executor, risk_manager=risk)
+        order = OrderIntent(market_id="mkt1", side=OrderSide.BUY, price=0.45, size=10.0)
+        strategy.analyze.return_value = StrategyIntent(
+            timestamp=datetime(2026, 7, 4, 12, 0, 0),
+            strategy_name="test",
+            orders=[order],
+        )
+        executor.execute.return_value = {}
+        result = await engine.run_tick(market)
+        assert result.risk_approved is True
