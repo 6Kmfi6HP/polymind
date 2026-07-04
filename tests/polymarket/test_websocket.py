@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import asyncio
 import json
 from datetime import datetime
 from unittest.mock import AsyncMock, MagicMock, patch
@@ -16,6 +17,34 @@ from polymind.polymarket.websocket import (
     WebSocketChannel,
     WebSocketConfig,
 )
+
+
+@pytest.fixture
+def config() -> WebSocketConfig:
+    return WebSocketConfig(url="ws://localhost:9999/ws")
+
+
+@pytest.fixture
+def mock_ws() -> MagicMock:
+    """Return a fully functional mock WebSocket connection."""
+    ws = MagicMock()
+    ws.state = State.OPEN
+    ws.recv = AsyncMock()
+    ws.send = AsyncMock()
+    ws.close = AsyncMock()
+    return ws
+
+
+@pytest.fixture
+async def adapter(config: WebSocketConfig, mock_ws: MagicMock):
+    """Create an adapter with a mocked WebSocket connection."""
+    mock_conn = AsyncMock()
+    mock_conn.__aenter__.return_value = mock_ws
+    with patch("polymind.polymarket.websocket.ws_connect", return_value=mock_conn):
+        a = PolymarketWebSocketAdapter(config)
+        await a.connect()
+        yield a
+        await a.close()
 
 
 class TestWebSocketChannel:
@@ -40,6 +69,10 @@ class TestWebSocketConfig:
         assert cfg.auth_token is None
         assert cfg.reconnect_delay == 1.0
         assert cfg.max_reconnects == 5
+        assert cfg.exponential_base == 2.0
+        assert cfg.max_retry_delay == 60.0
+        assert cfg.ping_interval == 20.0
+        assert cfg.ping_timeout == 10.0
 
     def test_url_required(self):
         """url is a required positional argument."""
@@ -79,31 +112,6 @@ class TestMarketEvent:
 
 class TestPolymarketWebSocketAdapter:
     """Integration-style tests that mock the underlying WebSocket connection."""
-
-    @pytest.fixture
-    def config(self) -> WebSocketConfig:
-        return WebSocketConfig(url="ws://localhost:9999/ws")
-
-    @pytest.fixture
-    def mock_ws(self) -> MagicMock:
-        """Return a fully functional mock WebSocket connection."""
-        ws = MagicMock()
-        ws.state = State.OPEN
-        ws.recv = AsyncMock()
-        ws.send = AsyncMock()
-        ws.close = AsyncMock()
-        return ws
-
-    @pytest.fixture
-    async def adapter(self, config: WebSocketConfig, mock_ws: MagicMock):
-        """Create an adapter with a mocked WebSocket connection."""
-        mock_conn = AsyncMock()
-        mock_conn.__aenter__.return_value = mock_ws
-        with patch("polymind.polymarket.websocket.ws_connect", return_value=mock_conn):
-            a = PolymarketWebSocketAdapter(config)
-            await a.connect()
-            yield a
-            await a.close()
 
     # ---------- connect ----------
 
@@ -405,3 +413,294 @@ class TestPolymarketWebSocketAdapter:
         """connected returns False before connect() is called."""
         a = PolymarketWebSocketAdapter(config)
         assert not a.connected
+
+
+class TestExponentialBackoff:
+    """Tests for exponential backoff in reconnection logic."""
+
+    @pytest.mark.asyncio
+    async def test_exponential_backoff_delay(self):
+        """_reconnect uses exponential backoff delay calculation."""
+        cfg = WebSocketConfig(
+            url="ws://localhost:9999/ws",
+            reconnect_delay=1.0,
+            exponential_base=2.0,
+            max_retry_delay=60.0,
+            max_reconnects=5,
+        )
+        adapter = PolymarketWebSocketAdapter(cfg)
+
+        # First reconnect: delay = min(1.0 * 2**0, 60.0) = 1.0
+        assert adapter._reconnect_count == 0
+        with (
+            patch("polymind.polymarket.websocket.ws_connect"),
+            patch("asyncio.sleep") as mock_sleep,
+        ):
+            await adapter._reconnect()
+            mock_sleep.assert_awaited_once_with(1.0)
+
+        # Second reconnect: delay = min(1.0 * 2**1, 60.0) = 2.0
+        with (
+            patch("polymind.polymarket.websocket.ws_connect"),
+            patch("asyncio.sleep") as mock_sleep,
+        ):
+            await adapter._reconnect()
+            mock_sleep.assert_awaited_once_with(2.0)
+
+        # Third reconnect: delay = min(1.0 * 2**2, 60.0) = 4.0
+        with (
+            patch("polymind.polymarket.websocket.ws_connect"),
+            patch("asyncio.sleep") as mock_sleep,
+        ):
+            await adapter._reconnect()
+            mock_sleep.assert_awaited_once_with(4.0)
+
+        await adapter.close()
+
+    @pytest.mark.asyncio
+    async def test_max_retry_delay_caps_backoff(self):
+        """Exponential backoff is capped by max_retry_delay."""
+        cfg = WebSocketConfig(
+            url="ws://localhost:9999/ws",
+            reconnect_delay=10.0,
+            exponential_base=2.0,
+            max_retry_delay=25.0,
+            max_reconnects=5,
+        )
+        adapter = PolymarketWebSocketAdapter(cfg)
+
+        # After enough attempts, delay should be capped at 25.0
+        # Attempt 3: min(10.0 * 2**2, 25.0) = min(40.0, 25.0) = 25.0
+        adapter._reconnect_count = 2
+        with (
+            patch("polymind.polymarket.websocket.ws_connect"),
+            patch("asyncio.sleep") as mock_sleep,
+        ):
+            await adapter._reconnect()
+            mock_sleep.assert_awaited_once_with(25.0)
+
+        await adapter.close()
+
+
+class TestHeartbeat:
+    """Tests for WebSocket heartbeat keepalive."""
+
+    @pytest.mark.asyncio
+    async def test_heartbeat_sends_pings(self, mock_ws: MagicMock):
+        """Heartbeat loop sends ping messages periodically."""
+        cfg = WebSocketConfig(url="ws://localhost:9999/ws", ping_interval=0.01)
+        mock_conn = AsyncMock()
+        mock_conn.__aenter__.return_value = mock_ws
+        with patch("polymind.polymarket.websocket.ws_connect", return_value=mock_conn):
+            adapter = PolymarketWebSocketAdapter(cfg)
+            await adapter.connect()
+
+            # Let heartbeat fire a couple of times
+            await asyncio.sleep(0.05)
+            await adapter.close()
+
+            # Should have sent at least one ping
+            ping_calls = [
+                call
+                for call in mock_ws.send.await_args_list
+                if json.loads(call[0][0]) == {"type": "ping"}
+            ]
+            assert len(ping_calls) >= 1
+
+    @pytest.mark.asyncio
+    async def test_heartbeat_stops_on_close(self, mock_ws: MagicMock):
+        """Heartbeat loop stops after close is called."""
+        cfg = WebSocketConfig(url="ws://localhost:9999/ws", ping_interval=0.01)
+        mock_conn = AsyncMock()
+        mock_conn.__aenter__.return_value = mock_ws
+        with patch("polymind.polymarket.websocket.ws_connect", return_value=mock_conn):
+            adapter = PolymarketWebSocketAdapter(cfg)
+            await adapter.connect()
+            await adapter.close()
+
+            # Clear calls made so far
+            mock_ws.send.reset_mock()
+
+            # Give time for heartbeat to fire if it were still running
+            await asyncio.sleep(0.05)
+
+            ping_calls = [
+                call
+                for call in mock_ws.send.await_args_list
+                if json.loads(call[0][0]) == {"type": "ping"}
+            ]
+            assert len(ping_calls) == 0
+
+
+class TestCallbacks:
+    """Tests for callback dispatch."""
+
+    @pytest.mark.asyncio
+    async def test_callback_dispatched_on_event(
+        self, adapter: PolymarketWebSocketAdapter, mock_ws: MagicMock
+    ):
+        """Callbacks registered for a channel are called when events arrive."""
+        calls = []
+
+        def my_cb(event):
+            calls.append(event)
+
+        adapter.add_callback(WebSocketChannel.BOOK, my_cb)
+
+        mock_ws.recv.side_effect = [
+            json.dumps({"type": "price_change", "channel": "book", "market_id": "0xabc"}),
+            ConnectionClosed(None, None),
+        ]
+
+        async for _ in adapter.on_events():
+            pass
+
+        assert len(calls) == 1
+        assert calls[0].market_id == "0xabc"
+        assert calls[0].channel == WebSocketChannel.BOOK
+
+    @pytest.mark.asyncio
+    async def test_remove_callback_stops_dispatch(
+        self, adapter: PolymarketWebSocketAdapter, mock_ws: MagicMock
+    ):
+        """Removed callbacks are no longer called on events."""
+        calls = []
+
+        def my_cb(event):
+            calls.append(event)
+
+        adapter.add_callback(WebSocketChannel.BOOK, my_cb)
+        adapter.remove_callback(WebSocketChannel.BOOK, my_cb)
+
+        mock_ws.recv.side_effect = [
+            json.dumps({"type": "price_change", "channel": "book", "market_id": "0xabc"}),
+            ConnectionClosed(None, None),
+        ]
+
+        async for _ in adapter.on_events():
+            pass
+
+        assert len(calls) == 0
+
+    @pytest.mark.asyncio
+    async def test_multiple_callbacks_on_same_channel(
+        self, adapter: PolymarketWebSocketAdapter, mock_ws: MagicMock
+    ):
+        """Multiple callbacks on the same channel are all called."""
+        calls1 = []
+        calls2 = []
+
+        def cb1(event):
+            calls1.append(event)
+
+        def cb2(event):
+            calls2.append(event)
+
+        adapter.add_callback(WebSocketChannel.BOOK, cb1)
+        adapter.add_callback(WebSocketChannel.BOOK, cb2)
+
+        mock_ws.recv.side_effect = [
+            json.dumps({"type": "price_change", "channel": "book", "market_id": "0xabc"}),
+            ConnectionClosed(None, None),
+        ]
+
+        async for _ in adapter.on_events():
+            pass
+
+        assert len(calls1) == 1
+        assert len(calls2) == 1
+
+    @pytest.mark.asyncio
+    async def test_bad_callback_does_not_kill_stream(
+        self, adapter: PolymarketWebSocketAdapter, mock_ws: MagicMock
+    ):
+        """A callback that raises an exception does not break the event stream."""
+        good_calls = []
+
+        def bad_cb(event):
+            raise RuntimeError("oops")
+
+        def good_cb(event):
+            good_calls.append(event)
+
+        adapter.add_callback(WebSocketChannel.BOOK, bad_cb)
+        adapter.add_callback(WebSocketChannel.BOOK, good_cb)
+
+        mock_ws.recv.side_effect = [
+            json.dumps({"type": "price_change", "channel": "book", "market_id": "0xabc"}),
+            ConnectionClosed(None, None),
+        ]
+
+        async for _ in adapter.on_events():
+            pass
+
+        assert len(good_calls) == 1
+
+    @pytest.mark.asyncio
+    async def test_callback_channel_isolation(
+        self, adapter: PolymarketWebSocketAdapter, mock_ws: MagicMock
+    ):
+        """Callbacks are only called for their registered channel."""
+        book_calls = []
+        ticker_calls = []
+
+        def book_cb(event):
+            book_calls.append(event)
+
+        def ticker_cb(event):
+            ticker_calls.append(event)
+
+        adapter.add_callback(WebSocketChannel.BOOK, book_cb)
+        adapter.add_callback(WebSocketChannel.TICKER, ticker_cb)
+
+        mock_ws.recv.side_effect = [
+            json.dumps({"type": "price_change", "channel": "book", "market_id": "m1"}),
+            json.dumps({"type": "tick", "channel": "ticker", "market_id": "m2"}),
+            ConnectionClosed(None, None),
+        ]
+
+        async for _ in adapter.on_events():
+            pass
+
+        assert len(book_calls) == 1
+        assert book_calls[0].market_id == "m1"
+        assert len(ticker_calls) == 1
+        assert ticker_calls[0].market_id == "m2"
+
+
+class TestUnknownChannel:
+    """Tests for handling unknown channels gracefully."""
+
+    @pytest.mark.asyncio
+    async def test_unknown_channel_skipped_gracefully(
+        self, adapter: PolymarketWebSocketAdapter, mock_ws: MagicMock
+    ):
+        """Unknown channels in on_events are skipped without crashing."""
+        mock_ws.recv.side_effect = [
+            json.dumps({"type": "price_change", "channel": "book", "market_id": "0xabc"}),
+            json.dumps({"type": "data", "channel": "unknown_channel", "market_id": "0xdef"}),
+            json.dumps({"type": "tick", "channel": "ticker", "market_id": "m3"}),
+            ConnectionClosed(None, None),
+        ]
+
+        events = [e async for e in adapter.on_events()]
+
+        # Only book and ticker events should be yielded, unknown channel skipped
+        assert len(events) == 2
+        assert events[0].channel == WebSocketChannel.BOOK
+        assert events[1].channel == WebSocketChannel.TICKER
+
+    @pytest.mark.asyncio
+    async def test_unknown_channel_no_subsequent_events_lost(
+        self, adapter: PolymarketWebSocketAdapter, mock_ws: MagicMock
+    ):
+        """Skipping an unknown channel does not lose subsequent events."""
+        mock_ws.recv.side_effect = [
+            json.dumps({"type": "data", "channel": "bogus", "market_id": "x"}),
+            json.dumps({"type": "tick", "channel": "ticker", "market_id": "m1"}),
+            ConnectionClosed(None, None),
+        ]
+
+        events = [e async for e in adapter.on_events()]
+        assert len(events) == 1
+        assert events[0].market_id == "m1"

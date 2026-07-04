@@ -14,6 +14,7 @@ from polymind.execution.fill_model import (
     FillResult,
     MarketSnapshot,
 )
+from polymind.execution.live_executor import LiveExecutor
 from polymind.execution.order_identity import OrderIdentity
 
 __all__ = [
@@ -25,6 +26,7 @@ __all__ = [
     "OrderIdentity",
     "OrderRecord",
     "OrderStatus",
+    "LiveExecutor",
     "PaperExecutor",
     "PositionRecord",
 ]

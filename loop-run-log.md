@@ -69,3 +69,21 @@ Append one entry per run. Prune entries older than 30 days.
 
 2026-07-04T02:30:00Z — dev-loop — fix-proposed — 分支恢复. 1017 tests.
 {"run_id":"2026-07-04T02:30:00Z","pattern":"dev-loop","duration_s":60,"items_found":1,"actions_taken":1,"escalations":0,"tokens_estimate":3000,"outcome":"fix-proposed","note":"本地 integration-tests 分支丢失(从main恢复). 从 origin 重建. 1017测试确认完好."}
+
+2026-07-04T07:50:00Z — dev-loop — fix-proposed — Phase 14 Plugin Integration 完成. 1044 tests.
+{"run_id":"2026-07-04T07:50:00Z","pattern":"dev-loop","duration_s":600,"items_found":3,"actions_taken":3,"escalations":0,"tokens_estimate":120000,"outcome":"fix-proposed","note":"Phase 14 Plugin System Integration: Wire PluginRegistry into strategies/factors/CLI. 27 new tests. 1044 total. integration-tests分支提交完成. 等待推送确认."}
+
+2026-07-04T07:57:00Z — dev-loop — fix-proposed — Phase 15 Adapter Errors & Signer 完成. 1092 tests.
+{"run_id":"2026-07-04T07:57:00Z","pattern":"dev-loop","duration_s":600,"items_found":2,"actions_taken":2,"escalations":0,"tokens_estimate":90000,"outcome":"fix-proposed","note":"Phase 15: Adapter error hierarchy (10 classes, 40 tests) + Signer real EIP-712 signing, hash signing, API key derivation (16 tests). integration-tests推送完成."}
+
+2026-07-04T08:00:00Z — dev-loop — fix-proposed — Phase 14-17 完成. 1142 tests.
+{"run_id":"2026-07-04T08:00:00Z","pattern":"dev-loop","duration_s":1200,"items_found":4,"actions_taken":4,"escalations":0,"tokens_estimate":400000,"outcome":"fix-proposed","note":"Phase 14 Plugin接线 + Phase 15 错误层次/Signer + Phase 16 真实CLOB客户端 + Phase 17 真实Web3合约网关. 98新测试. 1142总测试. integration-tests全部推送."}
+
+2026-07-04T08:55:00Z — dev-loop — fix-proposed — Phase 14-18 全部完成. 1153 tests.
+{"run_id":"2026-07-04T08:55:00Z","pattern":"dev-loop","duration_s":1800,"items_found":5,"actions_taken":5,"escalations":0,"tokens_estimate":600000,"outcome":"fix-proposed","note":"Phase 14 Plugin接线 + Phase 15 错误层次/Signer + Phase 16 真实CLOB + Phase 17 Web3合约 + Phase 18 WebSocket增强. 101新测试. 1153总测试. 全部推送integration-tests."}
+
+2026-07-04T08:54:00Z — dev-loop — fix-proposed — Phase 19 LiveExecutor + CLI接线完成. 1160 tests.
+{"run_id":"2026-07-04T08:54:00Z","pattern":"dev-loop","duration_s":900,"items_found":2,"actions_taken":2,"escalations":0,"tokens_estimate":180000,"outcome":"fix-proposed","note":"Phase 19 LiveExecutor + CLI paper/live mode选择. 7新测试. 1160总测试. integration-tests推送."}
+
+2026-07-04T09:07:00Z — dev-loop — fix-proposed — Phase 20 类型统一完成. 1160 tests.
+{"run_id":"2026-07-04T09:07:00Z","pattern":"dev-loop","duration_s":600,"items_found":2,"actions_taken":2,"escalations":0,"tokens_estimate":130000,"outcome":"fix-proposed","note":"Phase 20: 域类型统一 types.py + pyproject.toml入口点 + CLI executor接线. 1160总测试. integration-tests推送."}

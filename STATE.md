@@ -1,10 +1,10 @@
 # Loop State — Polymind
 
-**Last run:** 2026-07-04T01:20:00Z
+**Last run:** 2026-07-04T09:07:00Z
 
 ## Status: Architecture Complete
 
-**所有架构路线图阶段 (Phase 0-13) 全部实现。**
+**所有架构路线图阶段 (Phase 0-20) 全部实现。**
 
 | 阶段 | 内容 | 状态 |
 |------|------|------|
@@ -13,16 +13,23 @@
 | **Phase 11** | PyPI Release — Makefile, pre-commit, build 验证, CHANGELOG | ✅ |
 | **Phase 12** | Agent Providers — Anthropic/OpenAI/Gemini/Ensemble/Intelligence | ✅ |
 | **Phase 13** | Plugin System — PluginRegistry + entry point 发现 | ✅ |
+| **Phase 14** | Plugin System Integration — 注册表接线到 strategies/factors/CLI | ✅ |
+| **Phase 15** | Adapter Error Hierarchy + Signer EIP-712 签名 | ✅ |
+| **Phase 16** | Real CLOB Client — py-clob-client 异步封装 (43 tests) | ✅ |
+| **Phase 17** | Real Web3 Contracts Gateway — Web3.py 集成 (31 tests) | ✅ |
+| **Phase 18** | WebSocket 增强 — 指数回退/心跳/回调 (11 tests) | ✅ |
+| **Phase 19** | LiveExecutor — 真实 CLOB 订单执行 (7 tests) | ✅ |
+| **Phase 20** | Domain Type Unification — types.py + pyproject entry points | ✅ |
 
 ## 项目指标
 
 | 指标 | 数值 |
 |------|------|
-| **测试** | 1,017 ✅ |
+| **测试** | 1,160 ✅ |
 | **覆盖率** | 94% (目标 70%) ✅ |
-| **源文件** | 108 |
-| **测试文件** | 97 |
-| **代码行数** | ~20k |
+| **源文件** | 118 |
+| **测试文件** | 106 |
+| **代码行数** | ~23k |
 | **Lint/Format/Security** | 全部 clean ✅ |
 | **Pre-commit** | 全部 hook 通过 ✅ |
 

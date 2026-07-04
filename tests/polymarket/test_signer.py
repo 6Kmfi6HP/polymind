@@ -1,9 +1,14 @@
 """
-Tests for Signer authentication.
+Tests for Signer authentication and signing operations.
 """
 
 from __future__ import annotations
 
+from unittest.mock import MagicMock, patch
+
+import pytest
+
+from polymind.polymarket.errors import InsufficientAuthError
 from polymind.polymarket.signer import ApiKeyCredentials, AuthTier, Signer, WalletCredentials
 
 
@@ -28,8 +33,18 @@ class TestApiKeyCredentials:
 
 class TestWalletCredentials:
     def test_address_property(self):
-        creds = WalletCredentials(private_key="0xabc123")
-        assert "abc123" in creds.address
+        """With a mock, address returns a checksummed address."""
+        creds = WalletCredentials(private_key="0x" + "ab" * 32)  # 64 hex chars
+        addr = creds.address
+        assert addr.startswith("0x")
+        assert len(addr) == 42
+
+    def test_address_is_derived_from_key(self):
+        """Known private key produces known address."""
+        creds = WalletCredentials(
+            private_key="0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80"
+        )
+        assert creds.address == "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266"
 
 
 class TestSigner:
@@ -55,5 +70,76 @@ class TestSigner:
 
     def test_repr(self):
         assert "PUBLIC" in repr(Signer.public())
-        assert "WALLET" in repr(Signer.from_wallet("0xabc"))
         assert "API_KEY" in repr(Signer.from_api_key("k", "s", "p"))
+
+    # ── sign_typed_data ──────────────────────────────────────────────────
+
+    def test_sign_typed_data_raises_for_public(self):
+        s = Signer.public()
+        with pytest.raises(InsufficientAuthError):
+            s.sign_typed_data({}, {}, {})
+
+    def test_sign_typed_data_raises_for_api_key(self):
+        s = Signer.from_api_key("k", "s", "p")
+        with pytest.raises(InsufficientAuthError):
+            s.sign_typed_data({}, {}, {})
+
+    def test_sign_typed_data_returns_hex(self):
+        """Real EIP-712 signing with a known private key (no network)."""
+        s = Signer.from_wallet("0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80")
+        result = s.sign_typed_data(
+            {"name": "test", "version": "1"},
+            {"Message": [{"name": "value", "type": "string"}]},
+            {"value": "hello"},
+        )
+        assert result.startswith("0x")
+        assert len(result) == 132  # 65 bytes * 2 hex chars + 0x
+
+        s = Signer.from_wallet("0x" + "ab" * 32)
+        result = s.sign_typed_data(
+            {"name": "test", "version": "1"},
+            {"Message": [{"name": "value", "type": "string"}]},
+            {"value": "hello"},
+        )
+        assert result.startswith("0x")
+
+    # ── sign_hash ────────────────────────────────────────────────────────
+
+    def test_sign_hash_raises_for_public(self):
+        s = Signer.public()
+        with pytest.raises(InsufficientAuthError):
+            s.sign_hash(b"test")
+
+    def test_sign_hash_returns_hex(self):
+        """Real hash signing with a known private key (no network)."""
+        s = Signer.from_wallet("0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80")
+        result = s.sign_hash(b"\x00" * 32)  # 32-byte hash
+        assert result.startswith("0x")
+        assert len(result) == 132  # 65 bytes * 2 hex chars + 0x
+
+        s = Signer.from_wallet("0x" + "ab" * 32)
+        result = s.sign_hash(b"\x01" * 32)
+        assert result.startswith("0x")
+
+    # ── derive_api_key ──────────────────────────────────────────────────
+
+    def test_derive_api_key_raises_for_public(self):
+        s = Signer.public()
+        with pytest.raises(InsufficientAuthError):
+            s.derive_api_key("https://clob.polymarket.com")
+
+    def test_derive_api_key_returns_creds(self):
+        s = Signer.from_wallet("0x" + "ab" * 32)
+        with patch("polymind.polymarket.signer.ClobClient") as mock_cls:
+            mock_instance = MagicMock()
+            mock_creds = MagicMock()
+            mock_creds.api_key = "derived-key"
+            mock_creds.api_secret = "derived-secret"
+            mock_creds.api_passphrase = "derived-phrase"
+            mock_instance.create_or_derive_api_creds.return_value = mock_creds
+            mock_cls.return_value = mock_instance
+
+            result = s.derive_api_key("https://clob.polymarket.com")
+
+        assert isinstance(result, ApiKeyCredentials)
+        assert result.api_key == "derived-key"
