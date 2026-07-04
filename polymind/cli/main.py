@@ -214,7 +214,137 @@ def list_strategies():
     console.print(table)
     console.print()
     console.print('[dim]Use [bold]polymind run "<strategy description>"[/bold] to execute.[/dim]')
+    console.print(
+        "[dim]Use [bold]polymind templates[/bold] to see ready-to-deploy templates.[/dim]"
+    )
     console.print()
+
+
+@cli.group()
+def templates():
+    """List and deploy pre-configured strategy templates."""
+    pass
+
+
+@templates.command(name="list")
+def list_templates():
+    """Show all available strategy templates."""
+    from rich.table import Table
+
+    from polymind.templates import TemplateLibrary
+
+    lib = TemplateLibrary()
+    all_templates = lib.list_templates()
+
+    console.print("\n[bold]Available Strategy Templates[/bold]\n")
+    table = Table(show_header=True, header_style="bold")
+    table.add_column("Template", style="cyan", width=22)
+    table.add_column("Description", width=55)
+    table.add_column("Type", width=14)
+    table.add_column("Tags")
+
+    for t in all_templates:
+        tags_str = ", ".join(t.tags[:3])
+        table.add_row(t.name, t.description, t.strategy_type, tags_str)
+
+    console.print(table)
+    console.print()
+    console.print("[dim]Use [bold]polymind template show <name>[/bold] for details.[/dim]")
+    console.print()
+
+
+@templates.command(name="show")
+@click.argument("name")
+def show_template(name: str):
+    """Show details for a specific template."""
+    from polymind.templates import TemplateLibrary
+
+    lib = TemplateLibrary()
+    info = lib.get_template(name)
+    if info is None:
+        console.print(f"[red]Template '{name}' not found.[/red]")
+        return
+
+    console.print(f"\n[bold]{info.name}[/bold]")
+    console.print(f"  [dim]{info.description}[/dim]")
+    console.print(f"  Type: [green]{info.strategy_type}[/green]")
+    console.print()
+    console.print("[bold]Parameters:[/bold]")
+    for key, val in info.params.items():
+        console.print(f"  {key}: {val}")
+    console.print()
+    console.print("[bold]Risk Limits:[/bold]")
+    for key, val in info.risk_limits.items():
+        console.print(f"  {key}: {val}")
+    console.print()
+    console.print(f"Tags: {', '.join(info.tags)}")
+    console.print()
+
+
+@templates.command(name="run")
+@click.argument("name")
+@click.option("--paper", is_flag=True, help="Paper trading mode")
+@click.option("--once", is_flag=True, help="Run once and exit")
+def run_template(name: str, paper: bool, once: bool):
+    """Deploy a pre-configured strategy template."""
+    from polymind.templates import TemplateLibrary
+
+    lib = TemplateLibrary()
+    info = lib.get_template(name)
+    if info is None:
+        console.print(f"[red]Template '{name}' not found.[/red]")
+        return
+
+    console.print(f"[green]Deploying template:[/green] {info.name}")
+    console.print(f"  {info.description}")
+    console.print(f"  Type: {info.strategy_type}")
+    console.print()
+
+    from polymind.core.strategy import StrategyConfig
+    from polymind.strategies import get_strategy
+
+    cfg = StrategyConfig(
+        name=info.name,
+        params=info.params,
+    )
+    strategy = get_strategy(info.strategy_type, cfg)
+
+    from polymind.execution.executor import PaperExecutor
+    from polymind.execution.fill_model import FillModel, FillModelConfig
+
+    fill_model = FillModel(FillModelConfig())
+    executor = PaperExecutor(fill_model=fill_model, initial_cash=1000.0)
+
+    from polymind.core.engine import TradingEngine, TradingEngineConfig
+
+    engine = TradingEngine(
+        strategy=strategy,
+        executor=executor,
+        config=TradingEngineConfig(
+            strategy_name=info.name,
+            dry_run=not paper,
+        ),
+    )
+
+    if once:
+        console.print("[dim]Running single tick...[/dim]")
+        from datetime import datetime
+
+        from polymind.execution.fill_model import MarketSnapshot
+
+        dummy = MarketSnapshot(
+            market_id="",
+            timestamp=datetime.now(),
+            bid_price=0.0,
+            ask_price=0.0,
+            mid_price=0.0,
+            bid_size=0.0,
+            ask_size=0.0,
+        )
+        result = _run_async(engine.run_tick(dummy))
+        console.print(f"[dim]Orders proposed: {result.orders_proposed}[/dim]")
+    else:
+        console.print(f"[green]✓[/green] {info.name} engine ready. Use --once for single tick.")
 
 
 @cli.command()
