@@ -63,13 +63,23 @@ This file records repository state separately from the target architecture in
 
 ## Not yet implemented
 
-- CLOB SDK v2/unified SDK adapter validation.
-- Order manager integration layer.
-- Native DuckDB research panels.
-- Executable-price backtesting with CLOB bid/ask (execution models exist, need full pipeline demo).
-- AI factor discovery (studio enhancement).
-- Strategy templates gallery.
-- Kalshi, Limitless, other venue adapters.
+- CLOB SDK v2/unified SDK adapter conformance validation.
+- Native DuckDB research panels (JSONL price store works; DuckDB is a future optimization).
+- AI factor discovery (studio enhancement — NL→config exists, auto-factor discovery is next).
+- Strategy templates gallery (10+ Enum templates exist; web gallery is future).
+- Kalshi, Limitless, other venue adapters (multi-venue is Phase 9+ extension).
+
+## Delivered in v0.2.x (no longer on the not-yet list)
+
+- **OrderManager** — centralized order lifecycle tracking (Phase 28).
+- **Executable-price backtesting** — FactorBacktester uses CLOB bid/ask, not mid-price (Phase 27).
+- **Strategy backends** — all 7 strategies (AMM, Bands, Classic MM, Maker Rebate, Event MM,
+  Sniper, Copy Trade) with real analyze() → StrategyIntent pipeline.
+- **WorkflowRunner** — state machine command routing engine.
+- **PairLifecycleManager** — YES/NO pair lifecycle (split/merge/redeem).
+- **TradingEngine** — strategy → risk → executor orchestration.
+- **CLOB SnapshotCollector** — live CLOB data ingestion pipeline.
+- **Integration Test Suite** — 69+ end-to-end tests covering full pipeline.
 
 ## Documentation policy
 
