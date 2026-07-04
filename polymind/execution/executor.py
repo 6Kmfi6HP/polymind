@@ -201,6 +201,10 @@ class PaperExecutor(IntentExecutor):
         )
         self.orders[oid_str] = record
 
+        # Track in OrderManager if configured
+        if self._order_manager is not None:
+            self._order_manager.add_order(identity, order)
+
         market = order.market_id
         if market not in results:
             results[market] = {"orders_placed": 0, "fills": 0, "filled_size": 0.0, "cancelled": 0}
@@ -261,6 +265,10 @@ class PaperExecutor(IntentExecutor):
             source=FillSource.SIMULATED,
         )
         self.fills.append(event)
+
+        # Track fill in OrderManager if configured
+        if self._order_manager is not None:
+            self._order_manager.add_fill(event)
 
         # Update cash
         trade_value = fill_result.fill_price * fill_result.fill_size
