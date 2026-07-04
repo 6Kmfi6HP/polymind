@@ -444,23 +444,137 @@ class TestContractsGatewayErrors:
             await gateway.approve_usdc(100)
 
 
-class TestContractsGatewayNotImplemented:
-    """split / merge / redeem still raise NotImplementedError."""
+class TestContractsGatewaySplitMergeRedeem:
+    """Tests for split / merge / redeem — mock-based."""
 
     @pytest.mark.asyncio
-    async def test_split_not_implemented(self) -> None:
-        gateway = _make_patched_gateway()
-        with pytest.raises(NotImplementedError):
-            await gateway.split("0xcond", 100.0)
+    async def test_split_no_account_raises(self) -> None:
+        gateway = ContractsGateway(ContractsConfig())
+        gateway._w3 = MagicMock()
+        with pytest.raises(RuntimeError, match="private key"):
+            await gateway.split("0xabcd", 1000)
 
     @pytest.mark.asyncio
-    async def test_merge_not_implemented(self) -> None:
+    async def test_split_builds_and_sends(self) -> None:
+        """split should build a tx, sign, send, and return SplitResult."""
         gateway = _make_patched_gateway()
-        with pytest.raises(NotImplementedError):
-            await gateway.merge("0xcond", 100.0)
+
+        mock_contract = MagicMock()
+        mock_split_func = MagicMock()
+        mock_split_func.build_transaction = MagicMock(return_value={"to": "0xCTF", "data": "0x"})
+        mock_contract.functions.split.return_value = mock_split_func
+        gateway._w3.eth.contract.return_value = mock_contract
+
+        gateway._w3.to_wei.return_value = 50_000_000_000
+        gateway._w3.eth.get_transaction_count.return_value = 5
+
+        gateway._account.sign_transaction.return_value = MagicMock(raw_transaction=b"0xsigned")
+        gateway._w3.eth.send_raw_transaction.return_value = b"\xab\xcd"
+        gateway._w3.eth.wait_for_transaction_receipt.return_value = _make_mock_receipt()
+
+        with patch("asyncio.to_thread", new=_run_in_thread):
+            result = await gateway.split("0xabcd", 1_000_000)
+
+        assert isinstance(result, SplitResult)
+        assert result.tx_hash == "010203"
+        assert result.outcome_a_amount == 0.5  # 1_000_000 / 2 / 1e6
+        assert result.outcome_b_amount == 0.5
+        assert result.timestamp is not None
 
     @pytest.mark.asyncio
-    async def test_redeem_not_implemented(self) -> None:
+    async def test_split_wraps_exceptions(self) -> None:
+        """Build failure should be wrapped in ContractError."""
         gateway = _make_patched_gateway()
-        with pytest.raises(NotImplementedError):
-            await gateway.redeem("0xcond", 0, 100)
+        mock_contract = MagicMock()
+        mock_contract.functions.split.side_effect = Exception("split failed")
+        gateway._w3.eth.contract.return_value = mock_contract
+
+        with pytest.raises(ContractError, match="Split failed"):
+            await gateway.split("0xabcd", 1000)
+
+    @pytest.mark.asyncio
+    async def test_merge_no_account_raises(self) -> None:
+        gateway = ContractsGateway(ContractsConfig())
+        gateway._w3 = MagicMock()
+        with pytest.raises(RuntimeError, match="private key"):
+            await gateway.merge("0xabcd", 1000)
+
+    @pytest.mark.asyncio
+    async def test_merge_builds_and_sends(self) -> None:
+        """merge should build a tx, sign, send, and return MergeResult."""
+        gateway = _make_patched_gateway()
+
+        mock_contract = MagicMock()
+        mock_merge_func = MagicMock()
+        mock_merge_func.build_transaction = MagicMock(return_value={"to": "0xCTF", "data": "0x"})
+        mock_contract.functions.merge.return_value = mock_merge_func
+        gateway._w3.eth.contract.return_value = mock_contract
+
+        gateway._w3.to_wei.return_value = 50_000_000_000
+        gateway._w3.eth.get_transaction_count.return_value = 5
+
+        gateway._account.sign_transaction.return_value = MagicMock(raw_transaction=b"0xsigned")
+        gateway._w3.eth.send_raw_transaction.return_value = b"\xab\xcd"
+        gateway._w3.eth.wait_for_transaction_receipt.return_value = _make_mock_receipt()
+
+        with patch("asyncio.to_thread", new=_run_in_thread):
+            result = await gateway.merge("0xabcd", 1_000_000)
+
+        assert isinstance(result, MergeResult)
+        assert result.tx_hash == "010203"
+        assert result.outcome_a_amount == 0.5
+        assert result.outcome_b_amount == 0.5
+        assert result.timestamp is not None
+
+    @pytest.mark.asyncio
+    async def test_merge_wraps_exceptions(self) -> None:
+        gateway = _make_patched_gateway()
+        mock_contract = MagicMock()
+        mock_contract.functions.merge.side_effect = Exception("merge failed")
+        gateway._w3.eth.contract.return_value = mock_contract
+
+        with pytest.raises(ContractError, match="Merge failed"):
+            await gateway.merge("0xabcd", 1000)
+
+    @pytest.mark.asyncio
+    async def test_redeem_no_account_raises(self) -> None:
+        gateway = ContractsGateway(ContractsConfig())
+        gateway._w3 = MagicMock()
+        with pytest.raises(RuntimeError, match="private key"):
+            await gateway.redeem("0xabcd", 0, 100)
+
+    @pytest.mark.asyncio
+    async def test_redeem_builds_and_sends(self) -> None:
+        """redeem should build a tx, sign, send, and return RedeemResult."""
+        gateway = _make_patched_gateway()
+
+        mock_contract = MagicMock()
+        mock_redeem_func = MagicMock()
+        mock_redeem_func.build_transaction = MagicMock(return_value={"to": "0xCTF", "data": "0x"})
+        mock_contract.functions.redeem.return_value = mock_redeem_func
+        gateway._w3.eth.contract.return_value = mock_contract
+
+        gateway._w3.to_wei.return_value = 50_000_000_000
+        gateway._w3.eth.get_transaction_count.return_value = 5
+
+        gateway._account.sign_transaction.return_value = MagicMock(raw_transaction=b"0xsigned")
+        gateway._w3.eth.send_raw_transaction.return_value = b"\xab\xcd"
+        gateway._w3.eth.wait_for_transaction_receipt.return_value = _make_mock_receipt()
+
+        with patch("asyncio.to_thread", new=_run_in_thread):
+            result = await gateway.redeem("0xabcd", 1, 100_000_000)
+
+        assert isinstance(result, RedeemResult)
+        assert result.tx_hash == "010203"
+        assert result.proceeds_usdc == 100.0  # 100_000_000 / 1e6
+        assert result.timestamp is not None
+
+    @pytest.mark.asyncio
+    async def test_redeem_wraps_exceptions(self) -> None:
+        gateway = _make_patched_gateway()
+        mock_contract = MagicMock()
+        mock_contract.functions.redeem.side_effect = Exception("redeem failed")
+        gateway._w3.eth.contract.return_value = mock_contract
+
+        with pytest.raises(ContractError, match="Redeem failed"):
+            await gateway.redeem("0xabcd", 0, 100)

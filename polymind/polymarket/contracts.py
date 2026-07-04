@@ -130,6 +130,43 @@ ERC20_ABI = [
     },
 ]
 
+# Minimal CTF Exchange ABI for split, merge, redeem
+CTF_EXCHANGE_ABI = [
+    {
+        "constant": False,
+        "inputs": [
+            {"name": "conditionId", "type": "bytes32"},
+            {"name": "collateralAmount", "type": "uint256"},
+            {"name": "parentCollectionId", "type": "bytes32"},
+        ],
+        "name": "split",
+        "outputs": [],
+        "type": "function",
+    },
+    {
+        "constant": False,
+        "inputs": [
+            {"name": "conditionId", "type": "bytes32"},
+            {"name": "parentCollectionId", "type": "bytes32"},
+            {"name": "amount", "type": "uint256"},
+        ],
+        "name": "merge",
+        "outputs": [],
+        "type": "function",
+    },
+    {
+        "constant": False,
+        "inputs": [
+            {"name": "conditionId", "type": "bytes32"},
+            {"name": "indexSet", "type": "uint256"},
+            {"name": "redeemedTokenIds", "type": "uint256[]"},
+        ],
+        "name": "redeem",
+        "outputs": [],
+        "type": "function",
+    },
+]
+
 
 class ContractsGateway:
     """Gateway for Polymarket on-chain operations.
@@ -216,32 +253,99 @@ class ContractsGateway:
     # ── On-chain operations ───────────────────────────────────────────────
 
     async def split(
-        self, condition_id: str, amount: float, outcomes: list | None = None
+        self, condition_id: str, amount: int, outcomes: list | None = None
     ) -> SplitResult:
-        """Split parent collateral into outcome tokens.
+        """Split *amount* of USDC (6 decimals) into outcome tokens for *condition_id*."""
+        self._require_account()
+        w3 = self._require_w3()
 
-        .. note::
-            Not yet implemented in the base gateway.
-        """
-        raise NotImplementedError
+        exchange = w3.eth.contract(
+            address=Web3.to_checksum_address(CTF_EXCHANGE_ADDRESS), abi=CTF_EXCHANGE_ABI
+        )
+        condition_bytes = (
+            Web3.to_bytes(hexstr=condition_id)
+            if condition_id.startswith("0x")
+            else Web3.to_bytes(hexstr="0x" + condition_id)
+        )
+
+        try:
+            tx = await asyncio.to_thread(
+                exchange.functions.split(condition_bytes, amount, b"\x00" * 32).build_transaction,
+                self._build_tx_params(),
+            )
+            result = await self._send_transaction(tx)
+        except Exception as exc:
+            raise ContractError(f"Split failed for condition {condition_id}: {exc}") from exc
+
+        return SplitResult(
+            tx_hash=result.tx_hash,
+            outcome_a_amount=float(amount) / 2 / 1e6,
+            outcome_b_amount=float(amount) / 2 / 1e6,
+            timestamp=datetime.utcnow(),
+        )
 
     async def merge(
-        self, condition_id: str, amount: float, outcomes: list | None = None
+        self, condition_id: str, amount: int, outcomes: list | None = None
     ) -> MergeResult:
-        """Merge outcome tokens back into parent collateral.
+        """Merge *amount* of outcome tokens back into USDC for *condition_id*."""
+        self._require_account()
+        w3 = self._require_w3()
 
-        .. note::
-            Not yet implemented in the base gateway.
-        """
-        raise NotImplementedError
+        exchange = w3.eth.contract(
+            address=Web3.to_checksum_address(CTF_EXCHANGE_ADDRESS), abi=CTF_EXCHANGE_ABI
+        )
+        condition_bytes = (
+            Web3.to_bytes(hexstr=condition_id)
+            if condition_id.startswith("0x")
+            else Web3.to_bytes(hexstr="0x" + condition_id)
+        )
+
+        try:
+            tx = await asyncio.to_thread(
+                exchange.functions.merge(condition_bytes, b"\x00" * 32, amount).build_transaction,
+                self._build_tx_params(),
+            )
+            result = await self._send_transaction(tx)
+        except Exception as exc:
+            raise ContractError(f"Merge failed for condition {condition_id}: {exc}") from exc
+
+        return MergeResult(
+            tx_hash=result.tx_hash,
+            outcome_a_amount=float(amount) / 2 / 1e6,
+            outcome_b_amount=float(amount) / 2 / 1e6,
+            timestamp=datetime.utcnow(),
+        )
 
     async def redeem(self, condition_id: str, outcome_index: int, amount: int) -> RedeemResult:
-        """Redeem winning outcome tokens for USDC after market resolution.
+        """Redeem *amount* of winning outcome tokens for USDC after resolution."""
+        self._require_account()
+        w3 = self._require_w3()
 
-        .. note::
-            Not yet implemented in the base gateway.
-        """
-        raise NotImplementedError
+        exchange = w3.eth.contract(
+            address=Web3.to_checksum_address(CTF_EXCHANGE_ADDRESS), abi=CTF_EXCHANGE_ABI
+        )
+        condition_bytes = (
+            Web3.to_bytes(hexstr=condition_id)
+            if condition_id.startswith("0x")
+            else Web3.to_bytes(hexstr="0x" + condition_id)
+        )
+
+        try:
+            tx = await asyncio.to_thread(
+                exchange.functions.redeem(
+                    condition_bytes, outcome_index, [amount]
+                ).build_transaction,
+                self._build_tx_params(),
+            )
+            result = await self._send_transaction(tx)
+        except Exception as exc:
+            raise ContractError(f"Redeem failed for condition {condition_id}: {exc}") from exc
+
+        return RedeemResult(
+            tx_hash=result.tx_hash,
+            proceeds_usdc=float(amount) / 1e6,
+            timestamp=datetime.utcnow(),
+        )
 
     # ── Approvals ─────────────────────────────────────────────────────────
 
