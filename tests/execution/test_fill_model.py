@@ -237,3 +237,45 @@ class TestFillModel:
         )
         result = await model.simulate(intent, snap)
         assert result.filled is False
+
+    @pytest.mark.asyncio
+    async def test_passive_sell_crossed(self):
+        """PASSIVE SELL fills when price ≤ bid (line 149)."""
+        cfg = FillModelConfig(mode=FillMode.PASSIVE)
+        model = FillModel(cfg)
+        intent = OrderIntent(
+            market_id="0xabc",
+            side=OrderSide.SELL,
+            price=0.80,  # <= bid=0.80 → crossed
+            size=10.0,
+        )
+        snap = MarketSnapshot(
+            market_id="0xabc",
+            bid_price=0.80,
+            bid_size=100.0,
+            ask_price=0.85,
+            ask_size=200.0,
+            mid_price=0.825,
+            timestamp=datetime.now(),
+        )
+        result = await model.simulate(intent, snap)
+        assert result.filled is True
+        assert result.fill_price == 0.80
+
+    @pytest.mark.asyncio
+    async def test_estimate_execution_price_sell_with_slippage(self):
+        """SELL side with slippage (line 94)."""
+        cfg = FillModelConfig(mode=FillMode.TAKER, slippage_bps=10.0)  # 0.1%
+        model = FillModel(cfg)
+        snap = MarketSnapshot(
+            market_id="0xabc",
+            bid_price=0.80,
+            bid_size=100.0,
+            ask_price=0.85,
+            ask_size=200.0,
+            mid_price=0.825,
+            timestamp=datetime.now(),
+        )
+        price = model.estimate_execution_price(OrderSide.SELL, snap)
+        # Bid 0.80 - 0.1% = 0.7992
+        assert price == pytest.approx(0.7992)

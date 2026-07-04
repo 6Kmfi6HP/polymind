@@ -4,6 +4,8 @@ from __future__ import annotations
 
 from datetime import datetime
 
+import pytest
+
 from polymind.core.exchange import (
     ExchangeAdapter,
     MarketInfo,
@@ -103,3 +105,71 @@ class TestExchangeAdapter:
         adapter = MockAdapter()
         assert adapter.name == "mock"
         assert adapter.connected is True
+
+    @pytest.mark.asyncio
+    async def test_abstract_methods_ellipsis_body(self):
+        """Class-dispatch to ExchangeAdapter hits each abstract ellipsis body (lines 81-143)."""
+
+        class _Minimal(ExchangeAdapter):
+            @property
+            def name(self) -> str:
+                return "min"
+
+            @property
+            def connected(self) -> bool:
+                return False
+
+            async def connect(self):
+                return await ExchangeAdapter.connect(self)
+
+            async def close(self):
+                return await ExchangeAdapter.close(self)
+
+            async def get_markets(self, active: bool = True, limit: int = 50):
+                return await ExchangeAdapter.get_markets(self, active, limit)
+
+            async def get_order_book(self, market_id: str):
+                return await ExchangeAdapter.get_order_book(self, market_id)
+
+            async def place_order(self, market_id, side, price, size, **kwargs):
+                return await ExchangeAdapter.place_order(
+                    self, market_id, side, price, size, **kwargs
+                )
+
+            async def cancel_order(self, order_id):
+                return await ExchangeAdapter.cancel_order(self, order_id)
+
+            async def cancel_all_orders(self, market_id=None):
+                return await ExchangeAdapter.cancel_all_orders(self, market_id)
+
+            async def get_positions(self):
+                return await ExchangeAdapter.get_positions(self)
+
+            async def get_balance(self):
+                return await ExchangeAdapter.get_balance(self)
+
+        a = _Minimal()
+
+        # connect / close
+        assert await a.connect() is None
+        assert await a.close() is None
+
+        # market data
+        markets = await a.get_markets()
+        assert markets is None
+        ob = await a.get_order_book("x")
+        assert ob is None
+
+        # trading
+        result = await a.place_order("x", "buy", 1.0, 10)
+        assert result is None
+        assert await a.cancel_order("o") is None
+        assert await a.cancel_all_orders() is None
+
+        # account
+        assert await a.get_positions() is None
+        assert await a.get_balance() is None
+
+        # properties — class-dispatch via .fget to cover abstract body lines
+        assert ExchangeAdapter.name.fget(a) is None
+        assert ExchangeAdapter.connected.fget(a) is None

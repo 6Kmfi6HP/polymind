@@ -84,11 +84,11 @@ class TestBaseAgent:
 
     @pytest.mark.asyncio
     async def test_decide_abstract_body(self):
-        """Line 58: calling BaseAgent.decide directly hits the abstract ellipsis body."""
+        """Line 58: class-dispatch to BaseAgent.decide hits the abstract ellipsis body."""
         agent = self._TestAgent()
         obs = Observation(timestamp=datetime.now())
-        with pytest.raises(NotImplementedError):
-            await BaseAgent.decide(agent, obs)
+        result = await BaseAgent.decide(agent, obs)
+        assert result is None  # ellipsis body returns None
 
     @pytest.mark.asyncio
     async def test_act_non_hold_not_dry(self):
