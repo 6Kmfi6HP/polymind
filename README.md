@@ -54,9 +54,10 @@ Polymind merges **eight existing Polymarket projects** into one unified, AI-nati
 |--------|-------|-------------|
 | ✅ **Complete** | **Core** | agent loop, config, intents, fills, ledger, portfolio, risk gates, workflows |
 | ✅ **Complete** | **Strategies** | AMM (pricing/sizing), Bands (pricing/sizing), Classic MM |
-| ✅ **Complete** | **Workflows** | Maker Rebate, Event MM, Sniper, Copy Trade — all state machines |
-| ✅ **Complete** | **Execution** | PaperExecutor, FillModel, OrderIdentity, OrderSerializer |
-| ✅ **Complete** | **Polymarket** | CLOB client, WebSocket adapter, Data API, Contracts gateway, Signer, Metrics |
+| ✅ **Complete** | **Workflows** | Maker Rebate, Event MM, Sniper, Copy Trade — state machines + WorkflowRunner engine |
+| ✅ **Complete** | **Pair Lifecycle** | PairLifecycleManager — split/merge/redeem/sell remainder/one-sided halt |
+| ✅ **Complete** | **Execution** | PaperExecutor, LiveExecutor, FillModel, OrderIdentity, OrderSerializer |
+| ✅ **Complete** | **Polymarket** | CLOB client, WebSocket adapter, Data API, Contracts gateway, Signer, Metrics, PairLifecycleManager |
 | ✅ **Complete** | **Reconciliation** | Fill reconciliation, balance verification, recovery manager |
 | ✅ **Complete** | **Storage** | AsyncDatabase (aiosqlite), ORM models, LedgerStore, PriceStore (JSONL), DataWarehouse |
 | ✅ **Complete** | **Risk** | Kelly manager, position/exposure limits, drawdown tracker, exposure manager |
@@ -69,7 +70,7 @@ Polymind merges **eight existing Polymarket projects** into one unified, AI-nati
 | 🔜 **Next** | **Docs Site** | Comprehensive documentation site |
 | 🔜 **Next** | **E2E Tests** | Full integration and end-to-end test suite |
 
-**1,017 tests passing · 61 architecture modules implemented · 97 test files · 108 source files · 94% coverage**
+**1,237 tests passing · 70+ architecture modules implemented · 100+ test files · 115+ source files**
 
 ---
 
