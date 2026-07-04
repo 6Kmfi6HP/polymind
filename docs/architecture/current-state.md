@@ -1,7 +1,7 @@
 # Current State
 
 **Status:** Documentation truth source
-**Date:** 2026-07-04
+**Date:** 2026-07-04 16:30
 
 This file records repository state separately from the target architecture in
 `../architecture.md`.
@@ -66,12 +66,17 @@ This file records repository state separately from the target architecture in
   3 tables (market_prices, market_metadata, factor_scores), summary analytics.
 - **Phase 32: CLOB SDK Conformance** — adapter validation framework covering client,
   gateway, WebSocket, and signer interfaces.
+- **Phase 33: Factor CLI** — `polymind factor discover` / `polymind factor backtest` commands.
+- **Phase 34: Kalshi Adapter** — ExchangeAdapter implementation for Kalshi prediction markets.
+- **Phase 35: LLM Factor Discovery** — Anthropic/OpenAI-powered factor definition parsing.
+- **Phase 36: HTML Gallery** — self-contained static web gallery for strategy templates.
 
-## Not yet implemented
+## Delivered in v0.4.x
 
-- AI factor discovery (studio enhancement — NL→config exists, auto-factor discovery is next).
-- Strategy templates gallery (10+ Enum templates exist; web gallery is future).
-- Kalshi, Limitless, other venue adapters (multi-venue is Phase 9+ extension).
+- **Kalshi Adapter** — multi-venue support with Polymarket + Kalshi.
+- **LLM-powered Factor Discovery** — Anthropic/OpenAI integration.
+- **Strategy Templates Gallery** — static HTML page with all 7 templates.
+- **Factor CLI** — `polymind factor discover` and `factor backtest` commands.
 
 ## Delivered in v0.2.x (no longer on the not-yet list)
 
