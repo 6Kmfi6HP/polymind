@@ -9,6 +9,7 @@ from datetime import datetime
 from polymind.backtesting.factor_bt import (
     FactorBacktestConfig,
     FactorBacktester,
+    FactorBacktestResult,
     _compute_max_drawdown,
     _compute_sharpe,
     _compute_sortino,
@@ -135,3 +136,123 @@ class TestMetricHelpers:
     def test_compute_max_drawdown_positive(self):
         """All positive returns → zero drawdown."""
         assert _compute_max_drawdown([1.0, 2.0, 3.0]) == 0.0
+
+    def test_compute_sortino_short_series(self):
+        """Line 246-247: Sortino with < 2 returns → 0."""
+        assert _compute_sortino([1.0]) == 0.0
+
+    def test_compute_sortino_no_downside(self):
+        """Line 250-251: Sortino with no negative returns → 0."""
+        assert _compute_sortino([1.0, 2.0, 3.0]) == 0.0
+
+    def test_compute_sortino_zero_downside_std(self):
+        """Line 254-255: Sortino with zero downside std → 0."""
+        assert _compute_sortino([0.0, 0.0, 0.0]) == 0.0
+
+
+class TestConfigProperties:
+    def test_factor_backtest_config_defaults(self):
+        cfg = FactorBacktestConfig()
+        assert cfg.initial_capital == 10000.0
+        assert cfg.lookback_days == 30
+        assert cfg.top_n == 5
+
+    def test_result_num_winners(self):
+        res = FactorBacktestResult(total_trades=10, win_rate=0.6)
+        assert res.num_winners == 6
+        assert res.num_losers == 4
+
+    def test_result_num_winners_zero_trades(self):
+        res = FactorBacktestResult()
+        assert res.num_winners == 0
+
+
+class TestBacktesterEdgeCases:
+    def test_close_position_without_snapshot(self):
+        """Closing positions without closing snapshot skips trades."""
+        bt = FactorBacktester(FactorBacktestConfig(top_n=1))
+        bt._positions["mkt1"] = 0.50  # entry price as float
+        result = bt.run({}, {})  # no snapshot for mkt1
+        assert result.total_trades == 0
+        assert "mkt1" in bt._positions  # not closed
+
+    def test_line_135_peak_update(self):
+        """Line 135: peak cumulative update in close-all path."""
+        bt = FactorBacktester(FactorBacktestConfig(top_n=1))
+        # Open mkt1 via main flow
+        r1 = bt.run({"mkt1": 1.0}, {"mkt1": _snap("mkt1", 0.45, 0.55)})
+        assert r1.total_trades == 1
+        # Close mkt1 with profit in close-all path (empty scores)
+        r2 = bt.run({}, {"mkt1": _snap("mkt1", 0.60, 0.70)})
+        assert r2.total_trades == 2
+        assert r2.total_return > 0  # profit pushes peak up
+
+    def test_reopen_closed_position(self):
+        """Position closed in step 1 can be re-opened later."""
+        bt = FactorBacktester(FactorBacktestConfig(top_n=1))
+        r1 = bt.run({"mkt1": 1.0}, {"mkt1": _snap("mkt1", 0.45, 0.55)})
+        assert r1.total_trades == 1  # opened mkt1
+        # Step 2: rotate to mkt2 → close mkt1, open mkt2
+        r2 = bt.run(
+            {"mkt2": 1.0},
+            {
+                "mkt1": _snap("mkt1", 0.44, 0.54),
+                "mkt2": _snap("mkt2", 0.50, 0.60),
+            },
+        )
+        assert r2.total_trades >= 2  # at least close + open
+        # Step 3: rotate back to mkt1 → close mkt2, open mkt1
+        r3 = bt.run(
+            {"mkt1": 1.0},
+            {
+                "mkt2": _snap("mkt2", 0.49, 0.59),
+                "mkt1": _snap("mkt1", 0.46, 0.56),
+            },
+        )
+        assert r3.total_trades >= 4  # cumulative
+
+    def test_new_peak_cumulative(self):
+        """Line 170: peak cumulative PnL update in main flow (active scores)."""
+        bt = FactorBacktester(FactorBacktestConfig(top_n=1))
+        # Step 1: open mkt1 at ask 0.55
+        r1 = bt.run({"mkt1": 1.0}, {"mkt1": _snap("mkt1", 0.45, 0.55)})
+        assert r1.total_trades == 1
+        # Step 2: rotate to mkt2 — closes mkt1 at bid 0.60 = +0.05 profit
+        r2 = bt.run(
+            {"mkt2": 1.0},
+            {
+                "mkt1": _snap("mkt1", 0.60, 0.70),
+                "mkt2": _snap("mkt2", 0.50, 0.60),
+            },
+        )
+        assert r2.total_trades >= 2
+        assert r2.total_return > 0  # profitable close pushes peak
+
+    def test_selected_no_snapshot_skipped(self):
+        """Line 159: selected market with no snapshot is skipped."""
+        bt = FactorBacktester(FactorBacktestConfig(top_n=2))
+        # mkt1 and mkt2 selected, but only mkt1 has a snapshot
+        r = bt.run({"mkt1": 1.0, "mkt2": 0.5}, {"mkt1": _snap("mkt1", 0.45, 0.55)})
+        # mkt2 skipped due to no snapshot → only mkt1 opened
+        assert r.total_trades == 1
+
+    def test_max_drawdown_in_result(self):
+        """Result.max_drawdown is populated after 2+ trades (line 210)."""
+        bt = FactorBacktester(FactorBacktestConfig(top_n=1))
+        bt._positions["mkt1"] = 0.60
+        bt.run({}, {"mkt1": _snap("mkt1", 0.40, 0.50)})
+        bt._positions["mkt2"] = 0.50
+        r2 = bt.run({}, {"mkt2": _snap("mkt2", 0.60, 0.70)})
+        # pnl_hist now has 2 entries → max_dd computed
+        assert r2.max_drawdown > 0
+
+    def test_sortino_in_result(self):
+        """Result.sortino is populated after enough trades."""
+        bt = FactorBacktester(FactorBacktestConfig(top_n=1))
+        bt._positions["mkt1"] = 0.50
+        bt.run({}, {"mkt1": _snap("mkt1", 0.40, 0.50)})
+        bt._positions["mkt2"] = 0.50
+        r2 = bt.run({}, {"mkt2": _snap("mkt2", 0.60, 0.70)})
+        # Sortino requires 2+ entries in pnl_history
+        assert r2.total_trades == 2
+        assert isinstance(r2.sortino, float)
