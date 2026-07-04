@@ -54,6 +54,10 @@ _TEMPLATE_PARAMS = {
         "required": ["lookback"],
         "defaults": {"lookback": "24h", "top_n": 5, "total_exposure": 500.0},
     },
+    StrategyTemplate.FACTOR: {
+        "required": ["lookback", "top_n"],
+        "defaults": {"lookback": "24h", "top_n": 5, "rebal_freq_hours": 4},
+    },
     StrategyTemplate.CUSTOM: {
         "required": [],
         "defaults": {},
@@ -89,6 +93,7 @@ class StrategyGenerator:
     """Maps natural language descriptions to strategy configurations.
 
     Keyword-based matching for Phase 8 MVP.
+    Supports factor discovery descriptions via FactorDiscoveryAgent.
     """
 
     def __init__(self):
@@ -99,7 +104,41 @@ class StrategyGenerator:
             (re.compile(r"\bmaker\b.*\brebate\b|\brebate\b", re.I), self._match_maker_rebate),
             (re.compile(r"\bmomentum\b", re.I), self._match_momentum),
             (re.compile(r"\bfactor\b", re.I), self._match_momentum),
+            (
+                re.compile(r"\b(cross.sectional|volatility|sentiment|fair.value|discover)\b", re.I),
+                self._match_factor_discovery,
+            ),
         ]
+
+    def _match_factor_discovery(self, description: str) -> GeneratedConfig:
+        """Route factor-discovery descriptions to FactorDiscoveryAgent."""
+        from polymind.studio.factor_discovery import FactorDiscoveryAgent
+
+        agent = FactorDiscoveryAgent()
+        # Run the discover step synchronously within a new event loop
+        import asyncio
+
+        try:
+            loop = asyncio.new_event_loop()
+            asyncio.set_event_loop(loop)
+            fd = loop.run_until_complete(agent.discover(description))
+            loop.close()
+        except Exception:
+            # Fallback to momentum matching
+            return self._match_momentum(description)
+
+        params = dict(fd.params)
+        # Use discovery params for strategy config
+        top_n = getattr(fd, "top_n", 5)
+        params["top_n"] = top_n
+        params["lookback"] = getattr(fd, "lookback", "24h")
+
+        return GeneratedConfig(
+            template=StrategyTemplate.FACTOR,
+            strategy_name=fd.name or "factor_discovery",
+            params=params,
+            confidence=0.75,
+        )
 
     def generate(self, description: str) -> GeneratedConfig:
         """Parse a NL description and return a GeneratedConfig."""
