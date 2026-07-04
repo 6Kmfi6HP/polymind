@@ -19,6 +19,19 @@ This file records repository state separately from the target architecture in
   - `WorkflowCommand` / `CommandType`
   - `OrderIntent` / `CancelIntent` / `StrategyIntent`
 - **Phase 4: AMM + Bands strategies** — pricing, sizing, full strategy modules.
+- **Phase 5: All 7 strategies** — AMM, Bands, Classic MM, Maker Rebate, Event MM, Sniper,
+  Copy Trade — each with config, analyze() producing StrategyIntent, full test coverage.
+- **Phase 21: WorkflowRunner** — routes WorkflowCommand to state machines, type
+  inference, PluginRegistry integration, lifecycle management (START/STOP/PAUSE/RESUME/
+  RESTART), pair command delegation.
+- **Phase 22: PairLifecycleManager** — YES/NO token pair lifecycle (split/merge/redeem/
+  sell remainder/one-sided halt), inventory tracking, on-chain sync.
+- **Phase 24: SnapshotCollector** — CLOB data collector, polls PolymarketDataAPI,
+  stores in PriceStore, configurable poll interval and market limit.
+- **Phase 25: TradingEngine** — central orchestrator wiring strategy→risk→executor,
+  run_tick/run_forever, background task support.
+- **Phase 26: Integration Test Suite** — full pipeline, workflow, risk, multi-strategy
+  end-to-end tests. 69 integration tests.
 - **Phase 5: Workflow state machines** — Maker Rebate, Event MM, Sniper, Copy Trade,
   each with full state machine, transitions, and unit tests.
 - **Phase 21: WorkflowRunner** — routes WorkflowCommand to state machines, type
@@ -50,12 +63,10 @@ This file records repository state separately from the target architecture in
 
 ## Not yet implemented
 
-- PairLifecycleManager (high-level YES/NO pair management — split/merge/redeem).
-- Executable strategy backends for Maker Rebate, Event MM, Sniper, Copy Trade.
 - CLOB SDK v2/unified SDK adapter validation.
 - Order manager integration layer.
 - Native DuckDB research panels.
-- Executable-price backtesting with CLOB bid/ask.
+- Executable-price backtesting with CLOB bid/ask (execution models exist, need full pipeline demo).
 - AI factor discovery (studio enhancement).
 - Strategy templates gallery.
 - Kalshi, Limitless, other venue adapters.
