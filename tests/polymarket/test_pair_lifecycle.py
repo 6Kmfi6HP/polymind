@@ -257,6 +257,26 @@ class TestPairLifecycleManagerRedeem:
         # NO side preserved
         assert result.updated_position.no_balance == 75.0
 
+    async def test_redeem_no_outcome(self, manager: PairLifecycleManager, mock_gateway: MagicMock):
+        """Line 366-368: redeem with NO outcome zeros the NO side."""
+        manager.register_market(C1, YES_ID, NO_ID, initial_yes=10.0, initial_no=25.0)
+        manager.mark_resolved(C1, "NO")
+
+        mock_gateway.redeem.return_value = RedeemResult(
+            tx_hash="0xtx",
+            proceeds_usdc=25.0,
+        )
+
+        result = await manager.redeem(C1)
+
+        assert result.outcome == "NO"
+        # NO side zeroed
+        assert result.updated_position.no_balance == 0.0
+        assert result.updated_position.no_cost_basis == 0.0
+        assert result.updated_position.no_avg_entry == 0.0
+        # YES side preserved
+        assert result.updated_position.yes_balance == 10.0
+
     async def test_redeem_unresolved(self, manager: PairLifecycleManager):
         manager.register_market(C1, YES_ID, NO_ID, initial_yes=10.0, initial_no=10.0)
 

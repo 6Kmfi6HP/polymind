@@ -526,3 +526,34 @@ class TestPolymarketDataAPI:
 
     def test_parse_timestamp_bad_string(self) -> None:
         assert PolymarketDataAPI._parse_timestamp("not-a-date") is None
+
+    def test_parse_timestamp_unknown_type(self) -> None:
+        """Line 111: non-standard type returns None."""
+        assert PolymarketDataAPI._parse_timestamp([1, 2, 3]) is None
+        assert PolymarketDataAPI._parse_timestamp({"key": "val"}) is None
+
+
+class TestGetCandlesEdgeCoverage:
+    """Cover lines 169-172 (candle timestamp fallback) and 191-193 (trade timestamp fallback)."""
+
+    @pytest.mark.asyncio
+    async def test_get_candles_timestamp_fallback(self) -> None:
+        """Line 172: candle with missing/invalid timestamp gets datetime.now."""
+        api = _api()
+        raw = [{"t": None, "o": "0.50", "h": "0.55", "l": "0.48", "c": "0.52", "v": "5000"}]
+        with patch.object(api, "_request", AsyncMock(return_value=raw)):
+            candles = await api.get_candles("0xabc", interval_hours=1, limit=1)
+        assert len(candles) == 1
+        assert isinstance(candles[0].timestamp, datetime)
+        await api.close()
+
+    @pytest.mark.asyncio
+    async def test_get_trades_timestamp_fallback(self) -> None:
+        """Line 193: trade with missing/invalid timestamp gets datetime.now."""
+        api = _api()
+        raw = [{"id": "t1", "side": "BUY", "price": "0.50", "size": "100.0", "t": None}]
+        with patch.object(api, "_request", AsyncMock(return_value=raw)):
+            trades = await api.get_trades("0xabc", limit=1)
+        assert len(trades) == 1
+        assert isinstance(trades[0].timestamp, datetime)
+        await api.close()

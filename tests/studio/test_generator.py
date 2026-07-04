@@ -120,6 +120,17 @@ class TestStrategyGenerator:
         result = gen.generate("discover volatility signal 30d lookback top 5")
         assert result.template == StrategyTemplate.FACTOR
 
+    def test_factor_discovery_exception_fallback(self):
+        """_match_factor_discovery except handler (lines 126-128) falls back to momentum."""
+        from unittest.mock import patch
+
+        gen = StrategyGenerator()
+        with patch("polymind.studio.factor_discovery.FactorDiscoveryAgent") as mock_agent_cls:
+            mock_agent = mock_agent_cls.return_value
+            mock_agent.discover.side_effect = RuntimeError("discovery failed")
+            result = gen.generate("discover factor momentum 7d")
+            assert result.template == StrategyTemplate.MOMENTUM
+
     def test_bands_no_pct_defaults(self):
         """Bands without percentage values uses default spreads."""
         gen = StrategyGenerator()

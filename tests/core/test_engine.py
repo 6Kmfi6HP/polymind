@@ -281,6 +281,40 @@ class TestTradingEngine:
         assert status["total_ticks"] == 2
         assert status["last_tick"] is not None
 
+    async def test_run_forever_exception_caught(self, strategy, executor):
+        """Line 215-216: run_forever catches generic Exception from provider."""
+        engine = TradingEngine(
+            strategy=strategy,
+            executor=executor,
+            config=TradingEngineConfig(strategy_name="test", loop_interval=0.01),
+        )
+        strategy.analyze.return_value = None
+
+        class FailingProvider:
+            call_count = 0
+
+            async def __call__(self):
+                self.call_count += 1
+                if self.call_count == 1:
+                    return MarketSnapshot(
+                        market_id="mkt1",
+                        timestamp=datetime(2026, 7, 4),
+                        bid_price=0.5,
+                        ask_price=0.6,
+                        mid_price=0.55,
+                        bid_size=100.0,
+                        ask_size=100.0,
+                    )
+                raise ValueError("provider error")
+
+        provider = FailingProvider()
+        loop_task = asyncio.create_task(engine.run_forever(provider))
+        await asyncio.sleep(0.05)
+        await engine.stop()
+        await loop_task
+        # Exception was caught, engine stopped cleanly
+        assert engine._running is False
+
     async def test_risk_gate_approved_line_174(self, strategy, executor, market):
         """Execute result dict with 'status' key not matching any known status."""
         risk = AsyncMock(spec=RiskGate)
