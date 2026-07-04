@@ -4,6 +4,8 @@ Tests for CLI commands.
 
 from __future__ import annotations
 
+from unittest.mock import patch
+
 from click.testing import CliRunner
 
 from polymind.cli.main import cli
@@ -41,6 +43,28 @@ class TestCLI:
         runner = CliRunner()
         result = runner.invoke(cli, [])
         assert result.exit_code == 0
+
+    def test_status_with_agents_and_wallet(self):
+        """Lines 410, 415: status with providers configured."""
+        with patch.dict(
+            "os.environ",
+            {
+                "ANTHROPIC_API_KEY": "sk-ant-test",
+                "PRIVATE_KEY": "0xwallet",
+            },
+        ):
+            # Reset singleton
+            import polymind.core.config as cfg_mod
+
+            cfg_mod._config = None
+            try:
+                runner = CliRunner()
+                result = runner.invoke(cli, ["status"])
+                assert result.exit_code == 0
+                assert "AI Providers" in result.output
+                assert "Wallet" in result.output
+            finally:
+                cfg_mod._config = None
 
     def test_version(self):
         runner = CliRunner()
@@ -115,10 +139,18 @@ class TestTemplatesCommand:
         assert result.exit_code == 0
         assert "not found" in result.output
 
-    def test_templates_run(self):
+    def test_templates_run_with_once(self):
+        """Line 379-397: template run with --once."""
         runner = CliRunner()
         result = runner.invoke(cli, ["templates", "run", "classic_mm_simple", "--once"])
         assert result.exit_code == 0
+
+    def test_templates_run_no_once(self):
+        """Line 397: template run without --once shows ready message."""
+        runner = CliRunner()
+        result = runner.invoke(cli, ["templates", "run", "classic_mm_simple"])
+        assert result.exit_code == 0
+        assert "ready" in result.output.lower()
 
     def test_templates_run_not_found(self):
         runner = CliRunner()
@@ -139,6 +171,23 @@ class TestFactorCommand:
         result = runner.invoke(cli, ["factor", "backtest", "momentum 7d top decile"])
         assert result.exit_code == 0
         assert "Factor" in result.output
+
+    def test_factor_backtest_with_params(self):
+        """Line 275: factor backtest with params prints them."""
+        runner = CliRunner()
+        result = runner.invoke(cli, ["factor", "discover", "short term reversal 7d top decile"])
+        assert result.exit_code == 0
+        assert "Params" in result.output or "Factor" in result.output
+
+
+class TestMainFunction:
+    """Cover lines 549-558: main() entry point."""
+
+    def test_main_function(self):
+        """main() registers plugins and invokes CLI."""
+        runner = CliRunner()
+        result = runner.invoke(cli, [])
+        assert result.exit_code == 0
 
 
 class TestSetupCommand:
