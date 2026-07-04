@@ -10,6 +10,11 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 from enum import Enum, auto
+from typing import Any
+
+from py_clob_client.client import ClobClient
+
+from polymind.polymarket.errors import InsufficientAuthError
 
 
 class AuthTier(Enum):
@@ -37,11 +42,17 @@ class WalletCredentials:
     """Wallet-level credentials for on-chain operations."""
 
     private_key: str
+    _address: str | None = None
 
     @property
     def address(self) -> str:
-        """Return the checksummed Ethereum address (placeholder)."""
-        return f"0x...{self.private_key[-6:]}"
+        """Return the checksummed Ethereum address derived from private_key."""
+        if self._address is None:
+            from eth_account import Account
+
+            acct = Account.from_key(self.private_key)
+            object.__setattr__(self, "_address", acct.address)
+        return self._address  # type: ignore[return-value]
 
     def __repr__(self) -> str:
         return f"WalletCredentials(address='{self.address}')"
@@ -96,6 +107,55 @@ class Signer:
     def can_authenticate(self) -> bool:
         """True if this signer can authenticate to L2 endpoints (tier >= API_KEY)."""
         return self.tier in (AuthTier.API_KEY, AuthTier.WALLET)
+
+    def sign_typed_data(
+        self, domain: dict[str, Any], message_types: dict[str, Any], message: dict[str, Any]
+    ) -> str:
+        """Sign an EIP-712 typed data payload with the wallet private key.
+
+        Returns the hex-encoded signature (0x-prefixed).
+        Raises ``InsufficientAuthError`` if tier < WALLET.
+        """
+        if self.tier != AuthTier.WALLET or self.wallet_creds is None:
+            raise InsufficientAuthError("EIP-712 signing requires wallet-tier signer")
+
+        from eth_account import Account
+        from eth_account.messages import encode_typed_data
+
+        encoded = encode_typed_data(domain, message_types, message)
+        signed = Account.sign_message(encoded, self.wallet_creds.private_key)
+        return "0x" + signed.signature.hex()
+
+    def sign_hash(self, message_hash: bytes) -> str:
+        """Sign an arbitrary hash with the wallet private key.
+
+        Used for on-chain contract interactions.
+        Raises ``InsufficientAuthError`` if tier < WALLET.
+        """
+        if self.tier != AuthTier.WALLET or self.wallet_creds is None:
+            raise InsufficientAuthError("Hash signing requires wallet-tier signer")
+
+        from eth_account import Account
+
+        signed = Account.unsafe_sign_hash(message_hash, self.wallet_creds.private_key)
+        return "0x" + signed.signature.hex()
+
+    def derive_api_key(self, host: str, chain_id: int | None = None) -> ApiKeyCredentials:
+        """Derive (or re-derive) API key credentials from the wallet.
+
+        This wraps the SDK's ``ClobClient.create_or_derive_api_creds``
+        flow.  Raises ``InsufficientAuthError`` if tier < WALLET.
+        """
+        if self.tier != AuthTier.WALLET or self.wallet_creds is None:
+            raise InsufficientAuthError("API key derivation requires wallet-tier signer")
+
+        client = ClobClient(host=host, chain_id=chain_id or 137, key=self.wallet_creds.private_key)
+        creds = client.create_or_derive_api_creds()
+        return ApiKeyCredentials(
+            api_key=creds.api_key,  # type: ignore[union-attr]
+            api_secret=creds.api_secret,  # type: ignore[union-attr]
+            api_passphrase=creds.api_passphrase,  # type: ignore[union-attr]
+        )
 
     def __repr__(self) -> str:
         if self.tier == AuthTier.WALLET and self.wallet_creds:

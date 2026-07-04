@@ -1,4 +1,4 @@
-"""Polymarket CLOB integration — client, orders, WebSocket, contracts, data, signing, metrics."""
+"""Polymarket CLOB integration — client, orders, WebSocket, contracts, data, signing, metrics, errors."""
 
 from polymind.polymarket.client import PolymarketClient
 from polymind.polymarket.contracts import (
@@ -18,6 +18,18 @@ from polymind.polymarket.data_api import (
     PolymarketDataAPI,
     Trade,
     VolumeInfo,
+)
+from polymind.polymarket.errors import (
+    AuthenticationError,
+    ConnectionError,
+    ContractError,
+    InsufficientAuthError,
+    InsufficientGasError,
+    MarketNotFoundError,
+    NonceTooLowError,
+    OrderRejectedError,
+    PolymarketError,
+    RateLimitError,
 )
 from polymind.polymarket.metrics import AdapterMetrics, Counter, Histogram, MetricsSummary
 from polymind.polymarket.signer import (
@@ -61,4 +73,14 @@ __all__ = [
     "Counter",
     "Histogram",
     "MetricsSummary",
+    "AuthenticationError",
+    "ConnectionError",
+    "ContractError",
+    "InsufficientAuthError",
+    "InsufficientGasError",
+    "MarketNotFoundError",
+    "NonceTooLowError",
+    "OrderRejectedError",
+    "PolymarketError",
+    "RateLimitError",
 ]
