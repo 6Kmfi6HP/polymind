@@ -60,11 +60,15 @@ This file records repository state separately from the target architecture in
   official MM keeper, terminal, probablyprofit, warproxxx patterns and anti-patterns.
 - **Template project files** — Makefile, MANIFEST.in, .pre-commit-config.yaml,
   pyproject.toml with PyPI metadata, entry points.
+- **Phase 30: Strategy Templates Library** — 7 pre-configured templates (AMM, Bands,
+  Classic MM, Maker Rebate, Event MM, Sniper, Momentum Factor), CLI integration.
+- **Phase 31: DuckDB Research Panels** — SQL-queryable market price warehouse with
+  3 tables (market_prices, market_metadata, factor_scores), summary analytics.
+- **Phase 32: CLOB SDK Conformance** — adapter validation framework covering client,
+  gateway, WebSocket, and signer interfaces.
 
 ## Not yet implemented
 
-- CLOB SDK v2/unified SDK adapter conformance validation.
-- Native DuckDB research panels (JSONL price store works; DuckDB is a future optimization).
 - AI factor discovery (studio enhancement — NL→config exists, auto-factor discovery is next).
 - Strategy templates gallery (10+ Enum templates exist; web gallery is future).
 - Kalshi, Limitless, other venue adapters (multi-venue is Phase 9+ extension).
