@@ -152,3 +152,62 @@ class TestFactorDiscoveryAgent:
         """Verify approval threshold constants are reasonable."""
         assert FACTOR_APPROVAL_MIN_SHARPE > 0
         assert FACTOR_APPROVAL_MAX_DRAWDOWN > 0 and FACTOR_APPROVAL_MAX_DRAWDOWN < 1
+
+    # ── LLM branch coverage (no API keys → fallback to keyword) ────────
+
+    @pytest.mark.asyncio
+    async def test_discover_with_llm_no_keys(self):
+        """When use_llm=True but no API keys set, falls back to keyword parsing."""
+        agent = FactorDiscoveryAgent()
+        fd = await agent.discover("momentum 7d top decile", use_llm=True)
+        assert fd.lookback == "7d"
+        assert fd.top_n == 10
+
+    @pytest.mark.asyncio
+    async def test_discover_with_llm_anthropic_key_no_openai(self):
+        """Anthropic key set → _discover_with_anthropic runs (fails → fallback)."""
+        agent = FactorDiscoveryAgent(anthropic_api_key="sk-ant-test")
+        fd = await agent.discover("sentiment 30d top quintile", use_llm=True)
+        assert fd.scoring_fn == "sentiment"
+        assert fd.lookback == "30d"
+        assert fd.top_n == 5
+
+    @pytest.mark.asyncio
+    async def test_discover_with_llm_openai_key_only(self):
+        """OpenAI key set → _discover_with_openai runs (fails → fallback)."""
+        agent = FactorDiscoveryAgent(openai_api_key="sk-openai-test")
+        fd = await agent.discover("volatility 14d top 3", use_llm=True)
+        assert fd.scoring_fn == "volatility"
+        assert fd.lookback == "14d"
+        assert fd.top_n == 3
+
+    def test_factor_card_summary_includes_name(self):
+        """Summary includes the factor name (error field tested elsewhere)."""
+        fd = FactorDefinition(name="my_factor")
+        card = FactorCard(definition=fd, error="")
+        assert "my_factor" in card.summary
+
+    def test_factor_definition_fields(self):
+        """Verify all FactorDefinition fields are accessible."""
+        fd = FactorDefinition(
+            name="test_factor",
+            description="my factor",
+            lookback="7d",
+            scoring_fn="momentum",
+            top_n=5,
+            rebal_freq_hours=4,
+            params={"direction": "long"},
+        )
+        assert fd.name == "test_factor"
+        assert fd.lookback == "7d"
+        assert fd.scoring_fn == "momentum"
+        assert fd.top_n == 5
+
+    @pytest.mark.asyncio
+    async def test_discover_volatility_30d(self):
+        """Volatility detection with 30d (supported lookback)."""
+        agent = FactorDiscoveryAgent()
+        fd = await agent.discover("rolling window volatility 30d, top 10")
+        assert fd.scoring_fn == "volatility"
+        assert fd.lookback == "30d"
+        assert fd.top_n == 10

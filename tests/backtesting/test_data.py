@@ -266,3 +266,162 @@ class TestDataLoader:
         # After load_in_memory
         ids2 = await loader.get_market_ids(BacktestDataConfig(source=DataSource.IN_MEMORY))
         assert ids2 == ["0x222"]
+
+    # ------------------------------------------------------------------
+    # File-based data source tests (raise coverage on data.py)
+    # ------------------------------------------------------------------
+
+    @pytest.mark.asyncio
+    async def test_load_snapshots_jsonl(self, tmp_path):
+        """Load from a newline-delimited JSON file."""
+        f = tmp_path / "data.jsonl"
+        f.write_text(
+            '{"market_id":"m1","timestamp":"2025-06-01T10:00:00","bid_price":0.4,"ask_price":0.5,"mid_price":0.45,"bid_size":100,"ask_size":100,"volume":1000}\n'
+            '{"market_id":"m2","timestamp":"2025-06-01T11:00:00","bid_price":0.6,"ask_price":0.7,"mid_price":0.65,"bid_size":200,"ask_size":200,"volume":2000}\n'
+        )
+        loader = DataLoader()
+        config = BacktestDataConfig(source=DataSource.JSONL, path=str(f))
+        results = await loader.load_snapshots_batch(config)
+        assert len(results) == 2
+        assert results[0].market_id == "m1"
+        assert results[1].market_id == "m2"
+
+    @pytest.mark.asyncio
+    async def test_load_snapshots_jsonl_with_filter(self, tmp_path):
+        """Load from JSONL with date and market filtering."""
+        f = tmp_path / "data.jsonl"
+        f.write_text(
+            '{"market_id":"m1","timestamp":"2025-06-01T10:00:00","bid_price":0.4,"ask_price":0.5,"mid_price":0.45,"bid_size":100,"ask_size":100,"volume":1000}\n'
+            '{"market_id":"m2","timestamp":"2025-06-02T10:00:00","bid_price":0.6,"ask_price":0.7,"mid_price":0.65,"bid_size":200,"ask_size":200,"volume":2000}\n'
+            '{"market_id":"m1","timestamp":"2025-07-01T10:00:00","bid_price":0.4,"ask_price":0.5,"mid_price":0.45,"bid_size":100,"ask_size":100,"volume":1000}\n'
+        )
+        loader = DataLoader()
+        config = BacktestDataConfig(
+            source=DataSource.JSONL,
+            path=str(f),
+            start_date="2025-06-01",
+            end_date="2025-06-30",
+            market_ids=["m1"],
+        )
+        results = await loader.load_snapshots_batch(config)
+        assert len(results) == 1
+        assert results[0].market_id == "m1"
+
+    @pytest.mark.asyncio
+    async def test_load_snapshots_jsonl_empty_lines(self, tmp_path):
+        """JSONL with blank lines should be skipped."""
+        f = tmp_path / "data.jsonl"
+        f.write_text(
+            '{"market_id":"m1","timestamp":"2025-06-01T10:00:00","bid_price":0.4,"ask_price":0.5,"mid_price":0.45,"bid_size":100,"ask_size":100,"volume":1000}\n'
+            "\n"
+            '{"market_id":"m2","timestamp":"2025-06-01T11:00:00","bid_price":0.6,"ask_price":0.7,"mid_price":0.65,"bid_size":200,"ask_size":200,"volume":2000}\n'
+        )
+        loader = DataLoader()
+        config = BacktestDataConfig(source=DataSource.JSONL, path=str(f))
+        results = await loader.load_snapshots_batch(config)
+        assert len(results) == 2
+
+    @pytest.mark.asyncio
+    async def test_load_snapshots_csv(self, tmp_path):
+        """Load from a CSV file."""
+        f = tmp_path / "data.csv"
+        f.write_text(
+            "market_id,timestamp,bid_price,ask_price,mid_price,bid_size,ask_size,volume\n"
+            "m1,2025-06-01T10:00:00,0.4,0.5,0.45,100,100,1000\n"
+            "m2,2025-06-01T11:00:00,0.6,0.7,0.65,200,200,2000\n"
+        )
+        loader = DataLoader()
+        config = BacktestDataConfig(source=DataSource.CSV, path=str(f))
+        results = await loader.load_snapshots_batch(config)
+        assert len(results) == 2
+        assert results[0].market_id == "m1"
+        assert results[1].market_id == "m2"
+
+    @pytest.mark.asyncio
+    async def test_load_snapshots_csv_with_filter(self, tmp_path):
+        """Load from CSV with market filter."""
+        f = tmp_path / "data.csv"
+        f.write_text(
+            "market_id,timestamp,bid_price,ask_price,mid_price,bid_size,ask_size,volume\n"
+            "m1,2025-06-01T10:00:00,0.4,0.5,0.45,100,100,1000\n"
+            "m2,2025-06-01T11:00:00,0.6,0.7,0.65,200,200,2000\n"
+        )
+        loader = DataLoader()
+        config = BacktestDataConfig(
+            source=DataSource.CSV,
+            path=str(f),
+            market_ids=["m2"],
+        )
+        results = await loader.load_snapshots_batch(config)
+        assert len(results) == 1
+        assert results[0].market_id == "m2"
+
+    @pytest.mark.asyncio
+    async def test_load_snapshots_duckdb(self, tmp_path):
+        """Load data from a DuckDB database."""
+        pytest.importorskip("duckdb")
+        import duckdb
+
+        db = tmp_path / "test.duckdb"
+        conn = duckdb.connect(str(db))
+        conn.execute(
+            "CREATE TABLE market_data ("
+            "  market_id VARCHAR, timestamp TIMESTAMP, bid_price DOUBLE, ask_price DOUBLE,"
+            "  mid_price DOUBLE, bid_size DOUBLE, ask_size DOUBLE, volume DOUBLE)"
+        )
+        conn.execute(
+            "INSERT INTO market_data VALUES "
+            "('m1', '2025-06-01 10:00:00', 0.4, 0.5, 0.45, 100, 100, 1000),"
+            "('m2', '2025-06-01 11:00:00', 0.6, 0.7, 0.65, 200, 200, 2000)"
+        )
+        conn.close()
+
+        loader = DataLoader()
+        config = BacktestDataConfig(source=DataSource.DUCKDB, path=str(db))
+        results = await loader.load_snapshots_batch(config)
+        assert len(results) == 2
+        assert results[0].market_id == "m1"
+        assert results[1].market_id == "m2"
+
+    @pytest.mark.asyncio
+    async def test_load_snapshots_duckdb_with_filter(self, tmp_path):
+        """Load from DuckDB with date filter."""
+        pytest.importorskip("duckdb")
+        import duckdb
+
+        db = tmp_path / "test.duckdb"
+        conn = duckdb.connect(str(db))
+        conn.execute(
+            "CREATE TABLE market_data ("
+            "  market_id VARCHAR, timestamp TIMESTAMP, bid_price DOUBLE, ask_price DOUBLE,"
+            "  mid_price DOUBLE, bid_size DOUBLE, ask_size DOUBLE, volume DOUBLE)"
+        )
+        conn.execute(
+            "INSERT INTO market_data VALUES "
+            "('m1', '2025-06-01 10:00:00', 0.4, 0.5, 0.45, 100, 100, 1000),"
+            "('m2', '2025-07-01 10:00:00', 0.6, 0.7, 0.65, 200, 200, 2000)"
+        )
+        conn.close()
+
+        loader = DataLoader()
+        config = BacktestDataConfig(
+            source=DataSource.DUCKDB,
+            path=str(db),
+            start_date="2025-06-15",
+        )
+        results = await loader.load_snapshots_batch(config)
+        assert len(results) == 1
+        assert results[0].market_id == "m2"
+
+    @pytest.mark.asyncio
+    async def test_get_market_ids_jsonl(self, tmp_path):
+        """get_market_ids from JSONL source."""
+        f = tmp_path / "data.jsonl"
+        f.write_text(
+            '{"market_id":"m1","timestamp":"2025-06-01T10:00:00","bid_price":0.4,"ask_price":0.5,"mid_price":0.45,"bid_size":100,"ask_size":100,"volume":1000}\n'
+            '{"market_id":"m2","timestamp":"2025-06-01T11:00:00","bid_price":0.6,"ask_price":0.7,"mid_price":0.65,"bid_size":200,"ask_size":200,"volume":2000}\n'
+        )
+        loader = DataLoader()
+        config = BacktestDataConfig(source=DataSource.JSONL, path=str(f))
+        ids = await loader.get_market_ids(config)
+        assert ids == ["m1", "m2"]

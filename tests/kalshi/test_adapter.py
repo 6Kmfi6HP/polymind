@@ -169,3 +169,116 @@ class TestKalshiAdapter:
     async def test_get_markets_without_connect_raises(self, adapter: KalshiAdapter):
         with pytest.raises(RuntimeError, match="Not connected"):
             await adapter.get_markets()
+
+    # ── Missing coverage: properties, edge cases, error paths ──────────
+
+    def test_name_property(self, adapter: KalshiAdapter):
+        assert adapter.name == "kalshi"
+
+    def test_connected_property(self, adapter: KalshiAdapter):
+        assert adapter.connected is False
+
+    async def test_connected_property_after_connect(self, adapter: KalshiAdapter):
+        mock_http = MagicMock(spec=httpx.AsyncClient)
+        mock_http.post = AsyncMock()
+        mock_http.post.return_value = MagicMock(status_code=200)
+        mock_http.post.return_value.json = MagicMock(return_value={})
+        with patch("httpx.AsyncClient", return_value=mock_http):
+            await adapter.connect()
+            assert adapter.connected is True
+
+    async def test_get_market_success(self, adapter: KalshiAdapter):
+        """Success path for get_market (previously only 404 was tested)."""
+        mock_client = MagicMock(spec=httpx.AsyncClient)
+        mock_client.get = AsyncMock()
+        mock_client.get.return_value = MagicMock(status_code=200)
+        mock_client.get.return_value.json = MagicMock(
+            return_value={
+                "market": {
+                    "id": "mkt-abc",
+                    "title": "Will it rain?",
+                    "status": "active",
+                },
+            },
+        )
+        adapter._client = mock_client
+
+        market = await adapter.get_market("mkt-abc")
+        assert market is not None
+        assert market.market_id == "mkt-abc"
+        assert market.title == "Will it rain?"
+
+    async def test_cancel_all_orders_success(self, adapter: KalshiAdapter):
+        """cancel_all_orders with a success response."""
+        mock_client = MagicMock(spec=httpx.AsyncClient)
+        mock_client.delete = AsyncMock()
+        mock_client.delete.return_value = MagicMock(status_code=200)
+        mock_client.delete.return_value.json = MagicMock(
+            return_value={"cancelled_count": 5},
+        )
+        adapter._client = mock_client
+
+        count = await adapter.cancel_all_orders()
+        assert count == 5
+
+    async def test_cancel_all_orders_with_market(self, adapter: KalshiAdapter):
+        """cancel_all_orders filtered by market_id."""
+        mock_client = MagicMock(spec=httpx.AsyncClient)
+        mock_client.delete = AsyncMock()
+        mock_client.delete.return_value = MagicMock(status_code=200)
+        mock_client.delete.return_value.json = MagicMock(
+            return_value={"cancelled_count": 3},
+        )
+        adapter._client = mock_client
+
+        count = await adapter.cancel_all_orders(market_id="mkt1")
+        assert count == 3
+        # Ensure market_id was passed as a query param
+        _, kwargs = mock_client.delete.call_args
+        assert kwargs.get("params") == {"market_id": "mkt1"}
+
+    async def test_cancel_all_orders_failure(self, adapter: KalshiAdapter):
+        """cancel_all_orders with a non-200 response."""
+        mock_client = MagicMock(spec=httpx.AsyncClient)
+        mock_client.delete = AsyncMock()
+        mock_client.delete.return_value = MagicMock(status_code=400)
+        adapter._client = mock_client
+
+        count = await adapter.cancel_all_orders()
+        assert count == 0
+
+    async def test_cancel_all_orders_without_connect_raises(self, adapter: KalshiAdapter):
+        with pytest.raises(RuntimeError, match="Not connected"):
+            await adapter.cancel_all_orders()
+
+    async def test_login_guard_no_client(self, adapter: KalshiAdapter):
+        """_login should silently return when client is None."""
+        adapter._client = None
+        await adapter._login()  # should not raise
+
+    async def test_place_order_error(self, adapter: KalshiAdapter):
+        """place_order with a non-200 response includes error field."""
+        mock_client = MagicMock(spec=httpx.AsyncClient)
+        mock_client.post = AsyncMock()
+        mock_client.post.return_value = MagicMock(status_code=400)
+        mock_client.post.return_value.json = MagicMock(
+            return_value={"order": {}, "error": "insufficient balance"},
+        )
+        adapter._client = mock_client
+
+        result = await adapter.place_order("mkt1", "yes", 0.50, 100, outcome="YES")
+        assert result.error == "insufficient balance"
+
+    async def test_place_order_no_outcome_kwarg(self, adapter: KalshiAdapter):
+        """place_order without outcome kwarg defaults to side."""
+        mock_client = MagicMock(spec=httpx.AsyncClient)
+        mock_client.post = AsyncMock()
+        mock_client.post.return_value = MagicMock(status_code=200)
+        mock_client.post.return_value.json = MagicMock(
+            return_value={"order": {"id": "ord1", "status": "open", "filled_count": 0}},
+        )
+        adapter._client = mock_client
+
+        result = await adapter.place_order("mkt1", "NO", 0.50, 100)
+        assert result.side == "no"
+        assert result.order_id == "ord1"
