@@ -72,3 +72,6 @@ Append one entry per run. Prune entries older than 30 days.
 
 2026-07-04T07:50:00Z — dev-loop — fix-proposed — Phase 14 Plugin Integration 完成. 1044 tests.
 {"run_id":"2026-07-04T07:50:00Z","pattern":"dev-loop","duration_s":600,"items_found":3,"actions_taken":3,"escalations":0,"tokens_estimate":120000,"outcome":"fix-proposed","note":"Phase 14 Plugin System Integration: Wire PluginRegistry into strategies/factors/CLI. 27 new tests. 1044 total. integration-tests分支提交完成. 等待推送确认."}
+
+2026-07-04T07:57:00Z — dev-loop — fix-proposed — Phase 15 Adapter Errors & Signer 完成. 1092 tests.
+{"run_id":"2026-07-04T07:57:00Z","pattern":"dev-loop","duration_s":600,"items_found":2,"actions_taken":2,"escalations":0,"tokens_estimate":90000,"outcome":"fix-proposed","note":"Phase 15: Adapter error hierarchy (10 classes, 40 tests) + Signer real EIP-712 signing, hash signing, API key derivation (16 tests). integration-tests推送完成."}
