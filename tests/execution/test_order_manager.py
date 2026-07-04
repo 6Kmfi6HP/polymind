@@ -269,3 +269,100 @@ class TestOrderManager:
         assert s["filled"] == 1
         assert s["open"] == 0  # c2 is PENDING, not yet OPEN
         assert s["total_fills"] == 3
+
+    def test_update_status_with_exchange_id(self):
+        """Line 108-109: update_status sets exchange_order_id."""
+        mgr = OrderManager()
+        mgr.add_order(_identity(client_id="c1"), _intent(), "exch1")
+        key = _identity(client_id="c1").to_identity_string()
+        updated = mgr.update_status(key, OrderStatus.PARTIALLY_FILLED, exchange_order_id="exch2")
+        assert updated is not None
+        assert updated.exchange_order_id == "exch2"
+
+    def test_update_status_skips_zero_values(self):
+        """Line 107: filled_value > 0 guard skips zero."""
+        mgr = OrderManager()
+        mgr.add_order(_identity(client_id="c1"), _intent(), "exch1")
+        key = _identity(client_id="c1").to_identity_string()
+        updated = mgr.update_status(key, OrderStatus.FILLED, filled_size=0, filled_value=0)
+        assert updated is not None
+        assert updated.filled_size == 0.0
+
+    def test_update_status_with_filled_value(self):
+        """Line 107: filled_value > 0 guard updates when positive."""
+        mgr = OrderManager()
+        mgr.add_order(_identity(client_id="c1"), _intent(), "exch1")
+        key = _identity(client_id="c1").to_identity_string()
+        updated = mgr.update_status(key, OrderStatus.FILLED, filled_size=5.0, filled_value=2.5)
+        assert updated is not None
+        assert updated.filled_value == 2.5
+
+    def test_cancel_all_skips_non_open(self):
+        """Line 154-155: cancel_all skips orders that are not OPEN/PARTIALLY_FILLED."""
+        mgr = OrderManager()
+        o1 = mgr.add_order(_identity(client_id="c1"), _intent(), "e1")
+        mgr.update_status(_identity(client_id="c1").to_identity_string(), OrderStatus.FILLED)
+        mgr.add_order(_identity(client_id="c2"), _intent(), "e2")
+        count = mgr.cancel_all()
+        # Only c2 was OPEN, c1 is FILLED
+        assert count == 1
+        assert mgr.get_order(o1.identity.to_identity_string()).status == OrderStatus.FILLED
+
+    def test_cancel_all_with_market_filter_mismatch(self):
+        """Line 156-157: cancel_all skips orders not matching market filter."""
+        mgr = OrderManager()
+        mgr.add_order(_identity(market="mkt1", client_id="c1"), _intent(market="mkt1"), "e1")
+        mgr.add_order(_identity(market="mkt2", client_id="c2"), _intent(market="mkt2"), "e2")
+        count = mgr.cancel_all(market_id="mkt3")
+        assert count == 0
+
+    def test_get_fills_unfiltered_returns_copy(self):
+        """Line 171-172: get_fills without filter returns copy."""
+        mgr = OrderManager()
+        mgr.add_fill(
+            FillEvent(
+                fill_id="f1",
+                market_id="mkt1",
+                outcome="YES",
+                side=OrderSide.BUY,
+                price=0.5,
+                size=10.0,
+                fee=0.0,
+                timestamp=datetime(2026, 7, 4),
+                source=FillSource.SIMULATED,
+            )
+        )
+        fills = mgr.get_fills()
+        assert len(fills) == 1
+
+    def test_get_all_positions_empty(self):
+        """No fills → empty dict."""
+        mgr = OrderManager()
+        assert mgr.get_all_positions() == {}
+
+    def test_get_all_positions_sell_side(self):
+        """Line 198-199: sell side decrements position."""
+        mgr = OrderManager()
+        mgr.add_fill(
+            FillEvent(
+                fill_id="f1",
+                market_id="mkt1",
+                outcome="YES",
+                side=OrderSide.SELL,
+                price=0.5,
+                size=10.0,
+                fee=0.0,
+                timestamp=datetime(2026, 7, 4),
+                source=FillSource.SIMULATED,
+            )
+        )
+        positions = mgr.get_all_positions()
+        assert positions["mkt1"]["YES"] == -10.0
+
+    def test_summary_cancelled_count(self):
+        """Line 213: cancelled count in summary."""
+        mgr = OrderManager()
+        mgr.add_order(_identity(client_id="c1"), _intent(), "e1")
+        mgr.cancel_order(_identity(client_id="c1").to_identity_string())
+        s = mgr.summary()
+        assert s["cancelled"] == 1
