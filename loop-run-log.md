@@ -66,3 +66,6 @@ Append one entry per run. Prune entries older than 30 days.
 
 2026-07-04T01:30:00Z — dev-loop — no-op — CI成功, 无待修复. 1017 tests.
 {"run_id":"2026-07-04T01:30:00Z","pattern":"dev-loop","duration_s":30,"items_found":0,"actions_taken":0,"escalations":0,"tokens_estimate":2000,"outcome":"no-op","note":"CI修复确认成功(after:[dev,db]) Makefile恢复. 架构完成, 项目绿色. 等待用户输入."}
+
+2026-07-04T02:30:00Z — dev-loop — fix-proposed — 分支恢复. 1017 tests.
+{"run_id":"2026-07-04T02:30:00Z","pattern":"dev-loop","duration_s":60,"items_found":1,"actions_taken":1,"escalations":0,"tokens_estimate":3000,"outcome":"fix-proposed","note":"本地 integration-tests 分支丢失(从main恢复). 从 origin 重建. 1017测试确认完好."}
