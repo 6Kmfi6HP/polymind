@@ -115,11 +115,13 @@ class FactorDiscoveryAgent:
     async def discover(
         self,
         description: str,
+        use_llm: bool = False,
     ) -> FactorDefinition:
         """Parse a natural language description into a FactorDefinition.
 
         Uses keyword matching as the default parser (no API key required).
-        When an API key is configured, an LLM is used for richer extraction.
+        When *use_llm* is True and an API key is configured, an LLM is
+        used for richer extraction.
         """
         desc_lower = description.lower()
 
@@ -133,7 +135,80 @@ class FactorDiscoveryAgent:
             params=self._infer_params(desc_lower),
         )
 
+        if use_llm and self._anthropic_key:
+            definition = await self._discover_with_anthropic(description, definition)
+        elif use_llm and self._openai_key:
+            definition = await self._discover_with_openai(description, definition)
+
         return definition
+
+    async def _discover_with_anthropic(
+        self,
+        description: str,
+        fallback: FactorDefinition,
+    ) -> FactorDefinition:
+        """Use Anthropic Claude to parse a richer factor definition."""
+        try:
+            import anthropic
+
+            client = anthropic.AsyncAnthropic(api_key=self._anthropic_key)
+            response = await client.messages.create(
+                model="claude-sonnet-5-20251001",
+                max_tokens=300,
+                system="Extract factor strategy parameters from the description. "
+                "Return valid JSON with keys: name, lookback, scoring_fn, top_n, rebal_freq_hours.",
+                messages=[{"role": "user", "content": description}],
+            )
+            import json
+
+            data = json.loads(response.content[0].text)
+            return FactorDefinition(
+                description=description,
+                name=data.get("name", fallback.name),
+                lookback=data.get("lookback", fallback.lookback),
+                scoring_fn=data.get("scoring_fn", fallback.scoring_fn),
+                top_n=int(data.get("top_n", fallback.top_n)),
+                rebal_freq_hours=int(data.get("rebal_freq_hours", fallback.rebal_freq_hours)),
+                params=fallback.params,
+            )
+        except Exception:
+            return fallback
+
+    async def _discover_with_openai(
+        self,
+        description: str,
+        fallback: FactorDefinition,
+    ) -> FactorDefinition:
+        """Use OpenAI to parse a richer factor definition."""
+        try:
+            from openai import AsyncOpenAI
+
+            client = AsyncOpenAI(api_key=self._openai_key)
+            response = await client.chat.completions.create(
+                model="gpt-4",
+                messages=[
+                    {
+                        "role": "system",
+                        "content": "Extract factor strategy parameters. "
+                        "Return JSON with: name, lookback, scoring_fn, top_n, rebal_freq_hours.",
+                    },
+                    {"role": "user", "content": description},
+                ],
+            )
+            import json
+
+            data = json.loads(response.choices[0].message.content or "{}")
+            return FactorDefinition(
+                description=description,
+                name=data.get("name", fallback.name),
+                lookback=data.get("lookback", fallback.lookback),
+                scoring_fn=data.get("scoring_fn", fallback.scoring_fn),
+                top_n=int(data.get("top_n", fallback.top_n)),
+                rebal_freq_hours=int(data.get("rebal_freq_hours", fallback.rebal_freq_hours)),
+                params=fallback.params,
+            )
+        except Exception:
+            return fallback
 
     async def backtest(
         self,
