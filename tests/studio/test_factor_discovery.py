@@ -204,6 +204,11 @@ class TestFactorDiscoveryAgent:
         assert fd.top_n == 5
 
     @pytest.mark.asyncio
+    async def test_infer_lookback_default(self):
+        """_infer_lookback returns 24h when no pattern matches (line 329)."""
+        assert FactorDiscoveryAgent._infer_lookback("no pattern here") == "24h"
+
+    @pytest.mark.asyncio
     async def test_discover_volatility_30d(self):
         """Volatility detection with 30d (supported lookback)."""
         agent = FactorDiscoveryAgent()
@@ -211,3 +216,236 @@ class TestFactorDiscoveryAgent:
         assert fd.scoring_fn == "volatility"
         assert fd.lookback == "30d"
         assert fd.top_n == 10
+
+    # ── LLM mock tests (cover _discover_with_anthropic / _discover_with_openai) ─
+
+    @pytest.mark.asyncio
+    async def test_discover_with_anthropic_success(self):
+        """Mock Anthropic API via module-level import in factor_discovery."""
+        from unittest.mock import AsyncMock, MagicMock, patch
+
+        agent = FactorDiscoveryAgent(anthropic_api_key="sk-ant-real")
+        fd_fallback = FactorDefinition(
+            name="fallback",
+            lookback="24h",
+            scoring_fn="momentum",
+            top_n=5,
+        )
+
+        mock_content = MagicMock()
+        mock_content.text = '{"name":"ai_factor","lookback":"7d","scoring_fn":"volatility","top_n":10,"rebal_freq_hours":6}'
+        mock_response = MagicMock()
+        mock_response.content = [mock_content]
+
+        mock_client = AsyncMock()
+        mock_client.messages.create = AsyncMock(return_value=mock_response)
+        mock_module = MagicMock()
+        mock_module.AsyncAnthropic.return_value = mock_client
+
+        with patch.dict("sys.modules", {"anthropic": mock_module}):
+            # Clear module-level import cache
+            import polymind.studio.factor_discovery as fd_mod
+
+            # Force re-import by deleting the cached import
+            fd_mod.anthropic = mock_module  # type: ignore[attr-defined]
+            result = await agent._discover_with_anthropic("test description", fd_fallback)
+            assert result.name == "ai_factor"
+            assert result.lookback == "7d"
+            assert result.top_n == 10
+
+    @pytest.mark.asyncio
+    async def test_discover_with_anthropic_failure(self):
+        """Anthropic API raises → returns fallback."""
+        from unittest.mock import AsyncMock, MagicMock, patch
+
+        agent = FactorDiscoveryAgent(anthropic_api_key="sk-ant-real")
+        fd_fallback = FactorDefinition(name="fb", lookback="24h", scoring_fn="momentum", top_n=5)
+
+        mock_client = AsyncMock()
+        mock_client.messages.create = AsyncMock(side_effect=ValueError("API error"))
+        mock_module = MagicMock()
+        mock_module.AsyncAnthropic.return_value = mock_client
+
+        with patch.dict("sys.modules", {"anthropic": mock_module}):
+            import polymind.studio.factor_discovery as fd_mod
+
+            fd_mod.anthropic = mock_module  # type: ignore[attr-defined]
+            result = await agent._discover_with_anthropic("test", fd_fallback)
+            assert result is fd_fallback
+
+    @pytest.mark.asyncio
+    async def test_discover_with_openai_success(self):
+        """Mock OpenAI API via module-level import in factor_discovery."""
+        from unittest.mock import AsyncMock, MagicMock, patch
+
+        agent = FactorDiscoveryAgent(openai_api_key="sk-openai-real")
+        fd_fallback = FactorDefinition(
+            name="fb",
+            lookback="24h",
+            scoring_fn="momentum",
+            top_n=5,
+        )
+
+        mock_choice = MagicMock()
+        mock_choice.message.content = '{"name":"gpt_factor","lookback":"14d","scoring_fn":"sentiment","top_n":3,"rebal_freq_hours":8}'
+        mock_response = MagicMock()
+        mock_response.choices = [mock_choice]
+
+        mock_client = AsyncMock()
+        mock_client.chat.completions.create = AsyncMock(return_value=mock_response)
+        mock_module = MagicMock()
+        mock_module.AsyncOpenAI.return_value = mock_client
+
+        with patch.dict("sys.modules", {"openai": mock_module}):
+            import polymind.studio.factor_discovery as fd_mod
+
+            fd_mod.openai = mock_module  # type: ignore[attr-defined]
+            result = await agent._discover_with_openai("test", fd_fallback)
+            assert result.name == "gpt_factor"
+            assert result.lookback == "14d"
+            assert result.top_n == 3
+
+    @pytest.mark.asyncio
+    async def test_discover_with_openai_failure(self):
+        """OpenAI API raises → returns fallback."""
+        from unittest.mock import AsyncMock, MagicMock, patch
+
+        agent = FactorDiscoveryAgent(openai_api_key="sk-openai-real")
+        fd_fallback = FactorDefinition(name="fb", lookback="24h", scoring_fn="momentum", top_n=5)
+
+        mock_client = AsyncMock()
+        mock_client.chat.completions.create = AsyncMock(side_effect=RuntimeError("OpenAI down"))
+        mock_module = MagicMock()
+        mock_module.AsyncOpenAI.return_value = mock_client
+
+        with patch.dict("sys.modules", {"openai": mock_module}):
+            import polymind.studio.factor_discovery as fd_mod
+
+            fd_mod.openai = mock_module  # type: ignore[attr-defined]
+            result = await agent._discover_with_openai("test", fd_fallback)
+            assert result is fd_fallback
+
+    # ── Static helper coverage ───────────────────────────────────────────
+
+    def test_mock_scores(self):
+        scores = FactorDiscoveryAgent._mock_scores()
+        assert isinstance(scores, dict)
+        assert len(scores) == 10
+
+    def test_mock_snapshots(self):
+        snaps = FactorDiscoveryAgent._mock_snapshots()
+        assert isinstance(snaps, dict)
+        assert len(snaps) == 10
+
+    def test_parse_lookback_days(self):
+        assert FactorDiscoveryAgent._parse_lookback_days("7d") == 7
+        assert FactorDiscoveryAgent._parse_lookback_days("4h") == 1
+        assert FactorDiscoveryAgent._parse_lookback_days("24h") == 1
+        assert FactorDiscoveryAgent._parse_lookback_days("x") == 1
+
+    def test_infer_rebal_freq(self):
+        assert FactorDiscoveryAgent._infer_rebal_freq("every 6 hours") == 6
+        assert FactorDiscoveryAgent._infer_rebal_freq("2 days") == 48
+        assert FactorDiscoveryAgent._infer_rebal_freq("no number here") == 4  # default
+
+    def test_infer_params_long(self):
+        params = FactorDiscoveryAgent._infer_params("long bias bullish signal")
+        assert params.get("direction") == "long"
+
+    def test_infer_params_none(self):
+        params = FactorDiscoveryAgent._infer_params("neutral signal")
+        assert params == {}
+
+    def test_infer_name_fallback(self):
+        name = FactorDiscoveryAgent._infer_name("a an the on in of for to with and or is are")
+        assert name == "custom_factor"
+
+    def test_infer_name_with_filler(self):
+        name = FactorDiscoveryAgent._infer_name("the momentum using daily returns")
+        assert name is not None
+
+    def test_factor_discovery_error(self):
+        from polymind.studio.factor_discovery import FactorDiscoveryError
+
+        err = FactorDiscoveryError("test error")
+        assert str(err) == "test error"
+
+    # ── backtest edge cases ──────────────────────────────────────────────
+
+    @pytest.mark.asyncio
+    async def test_backtest_custom_data(self):
+        """backtest with custom snapshots and scores."""
+        from datetime import datetime
+
+        from polymind.execution.fill_model import MarketSnapshot
+
+        agent = FactorDiscoveryAgent()
+        fd = FactorDefinition(name="test", lookback="7d", top_n=2)
+        snapshots = {
+            "mkt1": [
+                MarketSnapshot(
+                    market_id="mkt1",
+                    timestamp=datetime(2026, 7, 4),
+                    bid_price=0.45,
+                    ask_price=0.55,
+                    mid_price=0.50,
+                    bid_size=1000,
+                    ask_size=1000,
+                ),
+            ],
+            "mkt2": [
+                MarketSnapshot(
+                    market_id="mkt2",
+                    timestamp=datetime(2026, 7, 4),
+                    bid_price=0.40,
+                    ask_price=0.50,
+                    mid_price=0.45,
+                    bid_size=1000,
+                    ask_size=1000,
+                ),
+            ],
+        }
+        scores = {"mkt1": 1.0, "mkt2": 0.5}
+        card = await agent.backtest(fd, snapshots=snapshots, scores=scores)
+        assert isinstance(card, FactorCard)
+
+    @pytest.mark.asyncio
+    async def test_backtest_exception(self):
+        """backtest triggers exception handler line 258-259."""
+        from unittest.mock import patch
+
+        agent = FactorDiscoveryAgent()
+        fd = FactorDefinition(name="bad", lookback="7d", top_n=1)
+        with patch("polymind.studio.factor_discovery.FactorBacktester") as mock_bt_cls:
+            mock_bt = mock_bt_cls.return_value
+            mock_bt.run.side_effect = ValueError("backtest crashed")
+            card = await agent.backtest(fd)
+            assert isinstance(card, FactorCard)
+            assert card.error != ""
+
+    @pytest.mark.asyncio
+    async def test_discover_and_backtest_custom(self):
+        """discover_and_backtest with custom data."""
+        from datetime import datetime
+
+        from polymind.execution.fill_model import MarketSnapshot
+
+        agent = FactorDiscoveryAgent()
+        snapshots = {
+            "mkt1": [
+                MarketSnapshot(
+                    market_id="mkt1",
+                    timestamp=datetime(2026, 7, 4),
+                    bid_price=0.45,
+                    ask_price=0.55,
+                    mid_price=0.50,
+                    bid_size=1000,
+                    ask_size=1000,
+                ),
+            ],
+        }
+        scores = {"mkt1": 0.8}
+        card = await agent.discover_and_backtest(
+            "momentum 7d top quintile", snapshots=snapshots, scores=scores
+        )
+        assert isinstance(card, FactorCard)
