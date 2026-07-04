@@ -689,3 +689,149 @@ class TestLazyConnection:
 
             assert result == []
             m.assert_called_once()
+
+
+# ---------------------------------------------------------------------------
+# Edge coverage for uncovered lines
+# ---------------------------------------------------------------------------
+
+
+class TestEdgeCoverage:
+    """Target gap lines: 124, 205, 295, 377, 475, 477, 479, 481, 510, 551, 553, 555."""
+
+    @pytest.mark.asyncio
+    async def test_connect_double_checked_lock(self, mock_sdk):
+        """Line 124: second connection check inside the lock."""
+        client = PolymarketClient(signer=Signer.public())
+        # Acquire the lock externally so connect() enters the lock block
+        # but _client is already set when the inner check runs.
+        await client._lock.acquire()
+        client._client = MagicMock()
+        client._lock.release()
+        await client.connect()
+        assert client._client is not None
+
+    @pytest.mark.asyncio
+    async def test_order_book_empty_response(self, mock_sdk):
+        """Line 205: get_order_book returns None when SDK returns falsy book."""
+        mock_sdk.get_order_book.return_value = None
+
+        client = PolymarketClient(signer=Signer.public())
+        await client.connect()
+        result = await client.get_order_book("111")
+        assert result is None
+
+    @pytest.mark.asyncio
+    async def test_get_order_empty_data(self, mock_sdk):
+        """Line 295: get_order returns None when SDK returns falsy data."""
+        mock_sdk.get_order.return_value = None
+
+        client = PolymarketClient(signer=Signer.from_api_key("a", "b", "c"))
+        await client.connect()
+        result = await client.get_order("ord-missing")
+        assert result is None
+
+    @pytest.mark.asyncio
+    async def test_get_balance_non_dict_response(self, mock_sdk):
+        """Line 377: balance allowance returns non-dict."""
+        mock_sdk.get_balance_allowance.return_value = "not_a_dict"
+
+        client = PolymarketClient(signer=Signer.from_api_key("a", "b", "c"))
+        await client.connect()
+        result = await client.get_balance()
+        assert result == 0.0
+
+    @pytest.mark.asyncio
+    async def test_run_rate_limit_error(self, mock_sdk):
+        """Line 475: 429 status raises RateLimitError."""
+        from py_clob_client.exceptions import PolyApiException
+
+        exc = PolyApiException(error_msg="rate limited")
+        exc.status_code = 429
+        mock_sdk.get_midpoint.side_effect = exc
+
+        client = PolymarketClient(signer=Signer.public())
+        await client.connect()
+        from polymind.polymarket.errors import RateLimitError
+
+        with pytest.raises(RateLimitError):
+            await client._run("get_midpoint", "111")
+
+    @pytest.mark.asyncio
+    async def test_run_poly_exception(self, mock_sdk):
+        """Line 477-478: PolyException wraps to PolymarketError."""
+        from py_clob_client.exceptions import PolyException
+
+        mock_sdk.get_midpoint.side_effect = PolyException("poly error")
+
+        client = PolymarketClient(signer=Signer.public())
+        await client.connect()
+
+        with pytest.raises(PolymarketError):
+            await client._run("get_midpoint", "111")
+
+    @pytest.mark.asyncio
+    async def test_run_connection_error_mapped(self, mock_sdk):
+        """Line 479-482: ConnectionError maps to ConnectionError."""
+        from polymind.polymarket.errors import ConnectionError as PolymarketConnectionError
+
+        mock_sdk.get_midpoint.side_effect = ConnectionError("connect failed")
+
+        client = PolymarketClient(signer=Signer.public())
+        await client.connect()
+
+        with pytest.raises(PolymarketConnectionError):
+            await client._run("get_midpoint", "111")
+
+    @pytest.mark.asyncio
+    async def test_run_generic_exception(self, mock_sdk):
+        """Line 483: generic Exception maps to PolymarketError."""
+        mock_sdk.get_midpoint.side_effect = ValueError("weird")
+
+        client = PolymarketClient(signer=Signer.public())
+        await client.connect()
+
+        with pytest.raises(PolymarketError):
+            await client._run("get_midpoint", "111")
+
+    @pytest.mark.asyncio
+    async def test_parse_market_no_tokens(self, mock_sdk):
+        """Line 510-521: market without tokens list."""
+        client = PolymarketClient(signer=Signer.public())
+        data = {
+            "condition_id": "0xabc",
+            "closed": False,
+            "neg_risk": True,
+            "minimum_tick_size": 0.01,
+            "minimum_order_size": 1,
+            "token_id": "111",
+            "outcome": "Yes",
+            "price": "0.55",
+        }
+        result = client._parse_market(data)
+        assert result.condition_id == "0xabc"
+        assert result.token_id == "111"
+        assert result.neg_risk is True
+
+    def test_parse_timestamp_none(self):
+        """Line 551: _parse_timestamp(None) returns None."""
+        from polymind.polymarket.client import _parse_timestamp
+
+        assert _parse_timestamp(None) is None
+
+    def test_parse_timestamp_datetime(self):
+        """Line 553: _parse_timestamp(datetime) returns as-is."""
+        from datetime import datetime as dt
+
+        from polymind.polymarket.client import _parse_timestamp
+
+        now = dt.now()
+        assert _parse_timestamp(now) is now
+
+    def test_parse_timestamp_int(self):
+        """Line 555: _parse_timestamp(int) converts from epoch."""
+        from polymind.polymarket.client import _parse_timestamp
+
+        result = _parse_timestamp(1700000000)
+        assert result is not None
+        assert result.year == 2023
