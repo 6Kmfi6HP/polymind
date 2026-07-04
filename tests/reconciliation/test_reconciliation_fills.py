@@ -211,6 +211,47 @@ class TestFillReconcilerReconcileSingle:
         assert record.discrepancy == 10.0
         assert record.actual_fill_size == 0.0
 
+    # ── Coverage: match by order_id when fill_id differs (lines 130-131) ──
+
+    @pytest.mark.asyncio
+    async def test_reconcile_single_matches_by_order_id(self):
+        """When fill_id does not match but order_id and price match, it should match."""
+        now = datetime.now()
+        expected = FillEvent(
+            fill_id="fill-001",
+            market_id="0xabc",
+            outcome="YES",
+            side=OrderSide.BUY,
+            price=0.85,
+            size=10.0,
+            fee=0.01,
+            timestamp=now,
+            source=FillSource.SIMULATED,
+            order_id="ord-001",
+        )
+        # Different fill_id, same order_id and same price
+        actual = FillEvent(
+            fill_id="fill-999",
+            market_id="0xabc",
+            outcome="YES",
+            side=OrderSide.BUY,
+            price=0.85,
+            size=10.0,
+            fee=0.01,
+            timestamp=now,
+            source=FillSource.CLOB_API,
+            order_id="ord-001",
+        )
+
+        clob = AsyncMock(spec=PolymarketClient)
+        clob.get_fills = AsyncMock(return_value=[actual])
+        reconciler = FillReconciler(clob_client=clob)
+
+        record = await reconciler.reconcile_single(expected)
+        # Even though fill_id differs, the order_id + price check in lines 125-131 matches
+        assert record.status == ReconciliationStatus.MATCHED
+        assert record.discrepancy == 0.0
+
 
 class TestFillReconcilerReconcileFills:
     @pytest.mark.asyncio
@@ -464,3 +505,53 @@ class TestFillReconcilerClose:
         reconciler = FillReconciler()
         # Should not raise
         await reconciler.close()
+
+
+# ── Coverage: _fetch_actual_fills exception handling (lines 254-256) ──
+
+
+class TestFetchActualFills:
+    @pytest.mark.asyncio
+    async def test_fetch_actual_fills_handles_attribute_error(self):
+        """_fetch_actual_fills returns [] when CLOB client raises AttributeError."""
+        now = datetime.now()
+        clob = AsyncMock(spec=PolymarketClient)
+        clob.get_fills.side_effect = AttributeError("no such method")
+        reconciler = FillReconciler(clob_client=clob)
+
+        expected = FillEvent(
+            fill_id="fill-001",
+            market_id="0xabc",
+            outcome="YES",
+            side=OrderSide.BUY,
+            price=0.85,
+            size=10.0,
+            fee=0.01,
+            timestamp=now,
+            source=FillSource.SIMULATED,
+        )
+        # reconcile_single internally calls _fetch_actual_fills
+        record = await reconciler.reconcile_single(expected)
+        assert record.status == ReconciliationStatus.MISSING
+
+    @pytest.mark.asyncio
+    async def test_fetch_actual_fills_handles_not_implemented_error(self):
+        """_fetch_actual_fills returns [] when CLOB client raises NotImplementedError."""
+        now = datetime.now()
+        clob = AsyncMock(spec=PolymarketClient)
+        clob.get_fills.side_effect = NotImplementedError("not available")
+        reconciler = FillReconciler(clob_client=clob)
+
+        expected = FillEvent(
+            fill_id="fill-002",
+            market_id="0xabc",
+            outcome="YES",
+            side=OrderSide.BUY,
+            price=0.85,
+            size=10.0,
+            fee=0.01,
+            timestamp=now,
+            source=FillSource.SIMULATED,
+        )
+        record = await reconciler.reconcile_single(expected)
+        assert record.status == ReconciliationStatus.MISSING

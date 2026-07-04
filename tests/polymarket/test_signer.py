@@ -46,6 +46,14 @@ class TestWalletCredentials:
         )
         assert creds.address == "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266"
 
+    # ── Coverage: WalletCredentials.__repr__ (line 58) ──
+
+    def test_wallet_credentials_repr(self):
+        creds = WalletCredentials(private_key="0x" + "ab" * 32)
+        r = repr(creds)
+        assert r.startswith("WalletCredentials(address='0x")
+        assert creds.address in r
+
 
 class TestSigner:
     def test_public_tier(self):
@@ -71,6 +79,14 @@ class TestSigner:
     def test_repr(self):
         assert "PUBLIC" in repr(Signer.public())
         assert "API_KEY" in repr(Signer.from_api_key("k", "s", "p"))
+
+    # ── Coverage: Signer.__repr__ with wallet tier (line 162) ──
+
+    def test_repr_wallet_tier(self):
+        s = Signer.from_wallet("0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80")
+        r = repr(s)
+        assert "WALLET" in r
+        assert "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266" in r
 
     # ── sign_typed_data ──────────────────────────────────────────────────
 

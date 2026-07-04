@@ -23,6 +23,15 @@ async def store() -> DuckDBPanelStore:
 
 
 class TestDuckDBPanelStore:
+    # ── Coverage: _require_conn when not connected (line 102) ──
+
+    async def test_require_conn_raises_when_not_connected(self):
+        """Calling any method before connect() raises RuntimeError."""
+        s = DuckDBPanelStore(DuckDBConfig(path=":memory:"))
+        with pytest.raises(RuntimeError, match="not connected"):
+            await s.append_price("mkt1", datetime.now(), 0.45, 0.55, 0.50)
+        await s.close()
+
     async def test_connect_creates_tables(self, store: DuckDBPanelStore):
         """Connect should create the schema without error."""
         result = await store.get_market_list()
@@ -120,6 +129,32 @@ class TestDuckDBPanelStore:
     async def test_empty_query(self, store: DuckDBPanelStore):
         prices = await store.query_prices("nonexistent")
         assert prices == []
+
+    async def test_query_with_end_filter(self, store: DuckDBPanelStore):
+        """query_prices with end parameter filters correctly (lines 183-184)."""
+        ts1 = datetime(2026, 7, 4, 12, 0, 0, tzinfo=timezone.utc)
+        ts2 = datetime(2026, 7, 4, 13, 0, 0, tzinfo=timezone.utc)
+        await store.append_price("mkt1", ts1, 0.45, 0.55, 0.50)
+        await store.append_price("mkt1", ts2, 0.46, 0.56, 0.51)
+
+        filtered = await store.query_prices("mkt1", end="2026-07-04T12:30:00Z")
+        assert len(filtered) == 1
+        assert filtered[0]["bid_price"] == 0.45
+
+    async def test_query_with_start_and_end(self, store: DuckDBPanelStore):
+        """query_prices with both start and end filters."""
+        ts1 = datetime(2026, 7, 4, 12, 0, 0, tzinfo=timezone.utc)
+        ts2 = datetime(2026, 7, 4, 13, 0, 0, tzinfo=timezone.utc)
+        ts3 = datetime(2026, 7, 4, 14, 0, 0, tzinfo=timezone.utc)
+        await store.append_price("mkt1", ts1, 0.45, 0.55, 0.50)
+        await store.append_price("mkt1", ts2, 0.46, 0.56, 0.51)
+        await store.append_price("mkt1", ts3, 0.47, 0.57, 0.52)
+
+        filtered = await store.query_prices(
+            "mkt1", start="2026-07-04T12:30:00Z", end="2026-07-04T13:30:00Z"
+        )
+        assert len(filtered) == 1
+        assert filtered[0]["bid_price"] == 0.46
 
     async def test_empty_summary(self, store: DuckDBPanelStore):
         summary = await store.get_market_summary("nonexistent")

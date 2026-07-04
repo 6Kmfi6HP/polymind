@@ -227,3 +227,15 @@ class TestPriceStoreJsonl:
         for i in range(3):
             await store.append_snapshot(_snap("m1", f"2026-01-15T12:{i:02d}:00"))
         assert await store.count_snapshots("m1") == 3
+
+    # ── Coverage: file not exists paths (lines 79, 108) ──
+
+    async def test_read_batch_nonexistent_market_jsonl(self, store: PriceStore) -> None:
+        """read_snapshots_batch for a market with no JSONL file returns []."""
+        snaps = await store.read_snapshots_batch("nonexistent")
+        assert snaps == []
+
+    async def test_count_snapshots_nonexistent_market_jsonl(self, store: PriceStore) -> None:
+        """count_snapshots for a market with no JSONL file returns 0."""
+        count = await store.count_snapshots("nonexistent")
+        assert count == 0
