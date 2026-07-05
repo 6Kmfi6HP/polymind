@@ -37,7 +37,7 @@ class StrategyTemplate(Enum):
         return _TEMPLATE_PARAMS[self]["defaults"]
 
 
-_TEMPLATE_PARAMS = {
+_TEMPLATE_PARAMS: dict[StrategyTemplate, dict[str, Any]] = {
     StrategyTemplate.AMM: {
         "required": ["min_spread", "num_levels"],
         "defaults": {"min_spread": 0.01, "max_spread": 0.05, "num_levels": 5, "tick_size": 0.001},

@@ -62,6 +62,7 @@ def setup_logging(config: LogConfig) -> logging.Logger:
     logger.setLevel(getattr(logging, config.level.upper(), logging.INFO))
     logger.propagate = False
 
+    handler: logging.Handler
     if config.log_file is not None:
         log_path = Path(config.log_file)
         log_path.parent.mkdir(parents=True, exist_ok=True)

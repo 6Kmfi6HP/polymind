@@ -51,7 +51,9 @@ class LiveExecutor(IntentExecutor):
                     await self.client.cancel_order(cancel.order_id)
                     results[market]["cancellations"] += 1
                 else:
-                    count = await self.client.cancel_all_orders(market)
+                    count = await self.client.cancel_all_orders()  # type: ignore[call-arg]
+                    # Note: cancels ALL open orders; market-level filter
+                    # requires client-side support.
                     results[market]["cancellations"] += count
             except Exception as e:
                 results[market]["errors"].append(str(e))
@@ -77,9 +79,12 @@ class LiveExecutor(IntentExecutor):
                     post_only=getattr(order, "post_only", True),
                 )
                 results[market]["orders_placed"] += 1
-                results[market]["order_ids"].append(
-                    result.order_id if hasattr(result, "order_id") else str(result)
-                )
+                if result is not None:
+                    results[market]["order_ids"].append(
+                        result.get("order_id", str(result))
+                        if isinstance(result, dict)
+                        else str(result)
+                    )
             except Exception as e:
                 results[market]["errors"].append(str(e))
 

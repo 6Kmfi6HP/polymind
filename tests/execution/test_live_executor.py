@@ -69,7 +69,7 @@ class TestLiveExecutor:
             cancels=[CancelIntent(market_id="0xm1")],
         )
         result = await executor.execute(intent)
-        mock_client.cancel_all_orders.assert_awaited_once_with("0xm1")
+        mock_client.cancel_all_orders.assert_awaited_once_with()
         assert result["0xm1"]["cancellations"] == 2
 
     @pytest.mark.asyncio

@@ -202,7 +202,7 @@ class KalshiAdapter(ExchangeAdapter):
             order_id=order.get("id", ""),
             status=order.get("status", "failed"),
             market_id=market_id,
-            side=payload["side"],
+            side=str(payload["side"]),
             price=price,
             size=size,
             filled_size=float(order.get("filled_count", 0)),

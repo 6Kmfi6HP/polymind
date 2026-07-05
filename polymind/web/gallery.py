@@ -12,10 +12,10 @@ Usage::
 
 from __future__ import annotations
 
-from polymind.templates import TemplateLibrary
+from polymind.templates import TemplateInfo, TemplateLibrary
 
 
-def _template_card_html(info: object) -> str:
+def _template_card_html(info: TemplateInfo) -> str:
     """Render a single template card as HTML."""
     tags_html = " ".join(f'<span class="tag">{t}</span>' for t in info.tags[:4])
     params_items = "".join(
@@ -38,7 +38,7 @@ def _template_card_html(info: object) -> str:
     """
 
 
-def _detail_modal_html(info: object) -> str:
+def _detail_modal_html(info: TemplateInfo) -> str:
     """Render a detail modal for a single template."""
     params_items = "".join(
         f'<li><span class="key">{k}:</span> {v}</li>' for k, v in info.params.items()

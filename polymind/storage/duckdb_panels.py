@@ -205,7 +205,8 @@ class DuckDBPanelStore:
             "SELECT COUNT(*) FROM market_prices WHERE market_id = ?",
             [market_id],
         )
-        return result.fetchone()[0]
+        row = result.fetchone()
+        return row[0] if row is not None else 0
 
     # ── Metadata ──────────────────────────────────────────────────────
 

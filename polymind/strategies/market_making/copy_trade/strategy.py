@@ -100,7 +100,7 @@ class CopyTradeStrategy(BaseMMStrategy):
 
         remaining: list[TrackedTrade] = []
         for trade in self._pending_trades:
-            dedup_key = f"{trade.tx_hash}:{trade.outcome}" if trade.tx_hash else id(trade)
+            dedup_key = f"{trade.tx_hash}:{trade.outcome}" if trade.tx_hash else str(id(trade))
             if dedup_key in self._processed:
                 continue
 
