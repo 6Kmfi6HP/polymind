@@ -8,7 +8,7 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow?style=for-the-badge)](https://opensource.org/licenses/MIT)
 [![CI](https://github.com/6Kmfi6HP/polymind/actions/workflows/ci.yml/badge.svg)](https://github.com/6Kmfi6HP/polymind/actions/workflows/ci.yml)
 [![Tests](https://github.com/6Kmfi6HP/polymind/actions/workflows/test.yml/badge.svg)](https://github.com/6Kmfi6HP/polymind/actions/workflows/test.yml)
-[![Coverage](https://img.shields.io/badge/coverage-1648%20tests-brightgreen?style=for-the-badge)]()
+[![Coverage](https://img.shields.io/badge/coverage-97%20tests-brightgreen?style=for-the-badge)]()
 
 **Write market-making strategies in natural language. Let AI assemble, tune, and execute them.**
 
@@ -74,7 +74,7 @@ Polymind merges **eight existing Polymarket projects** into one unified, AI-nati
 | ✅ **Complete** | **Plugin System** | Entry-point based plugin discovery with `polymind plugin` CLI |
 | ✅ **Complete** | **Daemon Mode** | Continuous TradingEngine operation with file logging |
 
-**1,648 tests passing · 98% coverage · 3 exchange adapters · 7 strategies · AI factor discovery · Full CLI**
+**1,715 tests passing · 97% coverage · 0 mypy errors · 3 exchange adapters · 7 strategies · AI factor discovery · Full CLI**
 
 ---
 
@@ -177,7 +177,7 @@ polymind/
 │   └── utils/                    # Logging, secrets, kill switch, preflight
 │
 ├── docs/                         # Architecture decisions & reference evidence
-└── tests/                        # 44 test files, 1,648+ tests
+└── tests/                        # 44 test files, 1,715+ tests
 ```
 
 ---
