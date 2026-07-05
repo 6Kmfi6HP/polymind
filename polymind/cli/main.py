@@ -689,6 +689,79 @@ def _run_async(coro):
 
 
 @cli.group()
+def plugin():
+    """Manage polymind plugins (strategies, factors, workflows)."""
+    pass
+
+
+@plugin.command(name="list")
+def plugin_list():
+    """List all installed plugins grouped by type."""
+    from rich.table import Table
+
+    from polymind.core.discover import discover_all
+
+    all_plugins = discover_all()
+
+    console.print("\n[bold]Installed Plugins[/bold]\n")
+
+    for kind, items in all_plugins.items():
+        if not items:
+            continue
+        table = Table(show_header=True, header_style="bold")
+        table.add_column("Name", style="cyan", width=24)
+        table.add_column("Type", width=16)
+        table.add_column("Module", width=40)
+        for name, cls in items.items():
+            table.add_row(
+                name,
+                kind.rstrip("s").capitalize(),
+                f"{cls.__module__}.{cls.__qualname__}",
+            )
+        console.print(table)
+        console.print()
+
+    total = sum(len(v) for v in all_plugins.values())
+    if total == 0:
+        console.print("  [dim]No plugins found.[/dim]")
+        console.print()
+    console.print(
+        f"[dim]Total: {total} plugin(s) across {sum(1 for v in all_plugins.values() if v)} type(s)[/dim]"
+    )
+    console.print()
+    console.print("[dim]Use [bold]pip install <package>[/bold] to install more plugins.[/dim]")
+    console.print()
+
+
+@plugin.command(name="info")
+@click.argument("name")
+def plugin_info(name: str):
+    """Show details for a specific plugin by name.
+
+    Scans all plugin groups (strategies, factors, workflows) for
+    the given name and shows the first match.
+    """
+    from polymind.core.discover import discover_all
+
+    all_plugins = discover_all()
+    for kind, items in all_plugins.items():
+        if name in items:
+            cls = items[name]
+            console.print(f"\n[bold]{name}[/bold]")
+            console.print(f"  Type:   {kind.rstrip('s').capitalize()}")
+            console.print(f"  Module: {cls.__module__}")
+            console.print(f"  Class:  {cls.__qualname__}")
+            doc = cls.__doc__ or "No documentation"
+            console.print(f"  Doc:    {doc.strip()}")
+            console.print()
+            return
+
+    console.print(f"[red]Plugin '{name}' not found.[/red]")
+    console.print("[dim]Use [bold]polymind plugin list[/bold] to see all installed plugins.[/dim]")
+    console.print()
+
+
+@cli.group()
 def report():
     """Generate operator reports."""
     pass

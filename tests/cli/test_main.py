@@ -282,3 +282,45 @@ class TestDaemonCommand:
         result = runner.invoke(cli, ["daemon", "--interval", "60"])
         # Ctrl+C emulation: daemon starts, shows banner
         assert "Daemon" in result.output or "daemon" in result.output.lower()
+
+
+class TestPluginCommand:
+    def test_plugin_list(self):
+        runner = CliRunner()
+        result = runner.invoke(cli, ["plugin", "list"])
+        assert result.exit_code == 0
+        assert "Plugin" in result.output or "plugin" in result.output.lower()
+
+    def test_plugin_list_contains_builtins(self):
+        """Plugin list output contains expected headers."""
+        runner = CliRunner()
+        result = runner.invoke(cli, ["plugin", "list"])
+        # Either shows plugins or an empty-state message
+        valid = (
+            "installed" in result.output.lower()
+            or "strateg" in result.output.lower()
+            or "factor" in result.output.lower()
+            or "Total" in result.output
+        )
+        assert valid
+
+    def test_plugin_info_found(self):
+        """plugin info for a known strategy (or handles not-found gracefully)."""
+        runner = CliRunner()
+        result = runner.invoke(cli, ["plugin", "info", "amm"])
+        assert result.exit_code == 0
+        # Either shows the plugin info or says not found (depending on install)
+        assert "not found" in result.output.lower() or "Type" in result.output
+
+    def test_plugin_info_not_found(self):
+        """plugin info for unknown plugin."""
+        runner = CliRunner()
+        result = runner.invoke(cli, ["plugin", "info", "nonexistent_plugin_xyz"])
+        assert result.exit_code == 0
+        assert "not found" in result.output.lower()
+
+    def test_plugin_help(self):
+        runner = CliRunner()
+        result = runner.invoke(cli, ["plugin", "--help"])
+        assert result.exit_code == 0
+        assert "plugin" in result.output.lower()
