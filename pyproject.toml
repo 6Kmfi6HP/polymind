@@ -81,9 +81,12 @@ db = [
     "duckdb>=1.0.0",
 ]
 
+# Limitless exchange adapter
+limitless = ["limitless-sdk>=1.0.0"]
+
 # Full install
 full = [
-    "polymind[ai,data,db]",
+    "polymind[ai,data,db,limitless]",
 ]
 
 # Development
