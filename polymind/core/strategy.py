@@ -117,7 +117,7 @@ class BaseMMStrategy(ABC):
            Execution is now owned by :class:`IntentExecutor`.
            This method exists for backward compatibility.
         """
-        ...
+        return []
 
     async def manage_positions(self) -> None:
         """Manage existing positions (take profit, stop loss, merge)."""

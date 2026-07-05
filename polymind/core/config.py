@@ -86,11 +86,13 @@ def load_config() -> Config:
     config.google_api_key = os.getenv("GOOGLE_API_KEY")
     config.private_key = os.getenv("PRIVATE_KEY")
 
-    if os.getenv("INITIAL_CAPITAL"):
-        config.initial_capital = float(os.getenv("INITIAL_CAPITAL"))
+    init_capital = os.getenv("INITIAL_CAPITAL")
+    if init_capital:
+        config.initial_capital = float(init_capital)
 
-    if os.getenv("MAX_POSITION_SIZE"):
-        config.risk.max_position_size = float(os.getenv("MAX_POSITION_SIZE"))
+    max_pos = os.getenv("MAX_POSITION_SIZE")
+    if max_pos:
+        config.risk.max_position_size = float(max_pos)
 
     # User config file
     if CONFIG_FILE.exists():

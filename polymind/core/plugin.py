@@ -6,7 +6,10 @@ from __future__ import annotations
 class PluginRegistry:
     """Global registry for strategies, factors, and workflow plugins."""
 
-    _instance = None
+    _instance: PluginRegistry | None = None
+    _strategies: dict[str, type]
+    _factors: dict[str, type]
+    _workflows: dict[str, type]
 
     def __new__(cls):
         if cls._instance is None:
