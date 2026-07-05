@@ -159,6 +159,18 @@ class TestMomentumFromHistory:
         assert result is not None
         assert result > 0.0
 
+    def test_zero_past_price_returns_none(self) -> None:
+        """Line 173: past price is 0 → return None."""
+        result = momentum_from_history([5.0, 0.0, 5.0], lookback=1)
+        # `past = prices[-(1+1)] = prices[-2] = 0.0` → returns None
+        assert result is None
+
+    def test_lookback_of_one_requires_two_prices(self) -> None:
+        """Exactly lookback+1 prices should work."""
+        result = momentum_from_history([10.0, 12.0], lookback=1)
+        assert result is not None
+        assert result == pytest.approx(0.20, rel=1e-3)
+
 
 class TestVolatilityFromHistory:
     def test_constant_prices_zero_volatility(self) -> None:
@@ -179,6 +191,19 @@ class TestVolatilityFromHistory:
 
     def test_empty_list_returns_none(self) -> None:
         result = volatility_from_history([])
+        assert result is None
+
+    def test_window_too_small_returns_none(self) -> None:
+        """Lookback that results in < 2 prices returns None."""
+        result = volatility_from_history([10.0, 12.0], lookback=1)
+        # window = prices[-1:] = [12.0], len < 2 → None
+        assert result is None
+
+    def test_all_negative_prices_returns_none(self) -> None:
+        """When all log returns are invalid, volatility returns None."""
+        prices = [-1.0, -2.0, -3.0, -4.0, -5.0]
+        result = volatility_from_history(prices)
+        # All prices are non-positive → no valid log returns → None
         assert result is None
 
 
@@ -269,3 +294,37 @@ class TestFeatureComputer:
         mf = computer.compute("0xm1", 0.47, 0.57, 1000.0, 1000.0, 50000.0, timestamp=ts)
         assert mf.volatility_24h is not None
         assert mf.volatility_24h > 0.0
+
+    def test_history_property(self, computer: FeatureComputer) -> None:
+        """History property returns a copy of internal state."""
+        ts = datetime.now(timezone.utc)
+        computer.compute("0xm1", 0.45, 0.55, 1000.0, 1000.0, 50000.0, timestamp=ts)
+        h = computer.history
+        assert "0xm1" in h
+        assert len(h["0xm1"]) == 1
+        assert h["0xm1"][0] == pytest.approx(0.50, rel=1e-3)
+        # Mutating returned dict should not affect internal state
+        h["0xm2"] = [0.99]
+        assert "0xm2" not in computer.history
+
+    def test_clear_history_all(self, computer: FeatureComputer) -> None:
+        ts = datetime.now(timezone.utc)
+        computer.compute("0xm1", 0.45, 0.55, 1000.0, 1000.0, 50000.0, timestamp=ts)
+        computer.compute("0xm2", 0.65, 0.75, 1000.0, 1000.0, 50000.0, timestamp=ts)
+        assert len(computer.history) == 2
+        computer.clear_history()
+        assert len(computer.history) == 0
+
+    def test_clear_history_one_market(self, computer: FeatureComputer) -> None:
+        ts = datetime.now(timezone.utc)
+        computer.compute("0xm1", 0.45, 0.55, 1000.0, 1000.0, 50000.0, timestamp=ts)
+        computer.compute("0xm2", 0.65, 0.75, 1000.0, 1000.0, 50000.0, timestamp=ts)
+        assert len(computer.history) == 2
+        computer.clear_history("0xm1")
+        assert "0xm1" not in computer.history
+        assert "0xm2" in computer.history
+
+    def test_clear_history_unknown_market(self, computer: FeatureComputer) -> None:
+        """Clearing history for an unknown market does nothing."""
+        computer.clear_history("nonexistent")
+        assert len(computer.history) == 0
