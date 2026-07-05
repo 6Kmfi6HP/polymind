@@ -40,9 +40,17 @@ factor research/backtesting frameworks) into one coherent system where:
 
 ## Project Status
 
-Polymind is in **Phase 0/1** development — documentation, provenance alignment,
-and Polymarket adapter validation. See [Architecture](architecture.md) for the
-full roadmap.
+Polymind has completed **44+ development phases** covering the full architecture:
+
+- **Core Framework**: Agent loop, domain contracts, strategy engine, risk gates, plugin system
+- **7 Trading Strategies**: AMM, Bands, Classic MM, Maker Rebate, Event MM, Sniper, Copy Trade
+- **Factor Framework**: Cross-sectional momentum, volatility, sentiment, fair-value, regime detection
+- **Multi-Venue**: Polymarket CLOB, Kalshi, Limitless adapters (ExchangeAdapter ABC)
+- **AI Studio**: NL-to-strategy generation, factor discovery with LLM, parameter optimization
+- **Operations**: CLI, daemon mode, reports dashboard, HTML gallery, plugin management
+- **QA**: 1685+ tests, 97% coverage, 0 mypy errors, CI/CD with pre-commit
+
+See [Architecture](architecture.md) for the full roadmap and [Current State](architecture/current-state.md) for detailed status.
 
 ## Quick Start
 
