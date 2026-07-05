@@ -5,7 +5,7 @@ Write market-making strategies in natural language. Let AI assemble,
 tune, and execute them on Polymarket's CLOB.
 """
 
-__version__ = "0.1.0"
+__version__ = "0.7.0"
 
 
 def __getattr__(name):
