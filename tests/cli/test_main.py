@@ -231,3 +231,39 @@ class TestReportCommands:
         runner = CliRunner()
         result = runner.invoke(cli, ["report", "risk"])
         assert result.exit_code == 0
+
+    def test_report_dashboard_error(self):
+        """Dashboard error handler prints Error."""
+        with patch("polymind.storage.ledger.LedgerStore") as mock:
+            mock.side_effect = ValueError("test error")
+            runner = CliRunner()
+            result = runner.invoke(cli, ["report", "dashboard"])
+            assert result.exit_code == 0
+            assert "Error" in result.output
+
+    def test_report_positions_error(self):
+        """Positions error handler prints Error."""
+        with patch("polymind.storage.ledger.LedgerStore") as mock:
+            mock.side_effect = ValueError("test error")
+            runner = CliRunner()
+            result = runner.invoke(cli, ["report", "positions"])
+            assert result.exit_code == 0
+            assert "Error" in result.output
+
+    def test_report_pnl_error(self):
+        """P&L error handler prints Error."""
+        with patch("polymind.storage.ledger.LedgerStore") as mock:
+            mock.side_effect = ValueError("test error")
+            runner = CliRunner()
+            result = runner.invoke(cli, ["report", "pnl"])
+            assert result.exit_code == 0
+            assert "Error" in result.output
+
+    def test_report_risk_error(self):
+        """Risk error handler prints Error."""
+        with patch("polymind.risk.manager.RiskManager") as mock:
+            mock.side_effect = ValueError("test error")
+            runner = CliRunner()
+            result = runner.invoke(cli, ["report", "risk"])
+            assert result.exit_code == 0
+            assert "Error" in result.output

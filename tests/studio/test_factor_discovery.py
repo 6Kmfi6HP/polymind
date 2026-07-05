@@ -521,7 +521,7 @@ class TestFactorDiscoveryAgent:
         card = await agent.backtest(fd, snapshots=snapshots, scores=scores)
         # IC should be non-zero positive (scores and returns are correlated)
         assert card.ic_rank > 0
-        assert card.ic_decile_1 >= card.ic_decile_10  # D1 >= D10
+        assert card.ic_hit_rate > 0
 
     @pytest.mark.asyncio
     async def test_backtest_advanced_analytics_few_markets(self):

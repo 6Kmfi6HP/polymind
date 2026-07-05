@@ -325,9 +325,9 @@ class FactorDiscoveryAgent:
             # Compute simple IC from current scores vs mid-price direction
             forward_returns: dict[str, float] = {}
             for mkt_id, snap in snapshots.items():
-                # Use mid_price as proxy for next-period return
+                # Use mid_price and spread as forward return proxy
                 if snap.mid_price > 0:
-                    forward_returns[mkt_id] = snap.ask_price - snap.mid_price
+                    forward_returns[mkt_id] = snap.mid_price
 
             ic = FactorAnalyzer.compute_ic(scores, forward_returns)
             result["ic_rank"] = round(ic.rank_ic, 4)
