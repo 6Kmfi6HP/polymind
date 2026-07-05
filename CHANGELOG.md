@@ -1,5 +1,20 @@
 # Changelog
 
+## [v0.7.0] — 2026-07-05
+
+### Added
+- Factor features module (`polymind/factors/features.py`) — micro-price, weighted mid, depth imbalance, momentum/volatility from history, FeatureComputer with per-market price history tracking (37→45 tests, 100% coverage)
+- Standalone scripts: `scripts/collect_snapshots.py` (CLOB data collection daemon) and `scripts/backtest_factor.py` (factor backtest runner with text/JSON output)
+- Monitoring module (`polymind/monitoring/metrics.py`) — MetricsCollector + MetricsSnapshot for tracking orders, fills, cancellations, errors, P&L, and latency (22 tests)
+- MyPy configuration (pyproject.toml) — suppresses third-party stub errors, project-wide mypy now at 0 errors
+
+### Fixed
+- 39 mypy type errors across 11 files → 0 errors
+- `classic_mm/__init__.py` — export ClassicMMStrategy for broken entry point
+- `web/__init__.py` — create missing package init
+- `mkdocs.yml` — fix incomplete repo_url
+- `docs/index.md` — outdated "Phase 0/1" status
+
 ## [v0.6.0] — 2026-07-05
 
 ### Added
