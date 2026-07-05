@@ -1,9 +1,19 @@
 # Changelog
 
-## [Unreleased]
+## [v0.6.0] — 2026-07-05
 
-### Infrastructure
-- CHANGELOG.md created
+### Added
+- Limitless exchange adapter (Phase 37) — implements ExchangeAdapter ABC
+- Advanced factor analysis (Phase 38) — IC, decay, walk-forward
+- IC analytics integrated into FactorCard + CLI display (Phase 39-40)
+- `factor recommend` command — tests 6 variations, reports best (Phase 41)
+- `polymind daemon` command — continuous TradingEngine loop (Phase 43)
+- `polymind plugin` CLI — plugin ecosystem management (Phase 44)
+- README updated with current stats: 1648 tests, 98% coverage
+
+### Changed
+- CLI coverage 90% → 92%
+- FactorBacktestConfig → FactorAnalyzer integration improves IC computation
 
 ## [v0.5.0] — 2026-07-04
 

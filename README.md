@@ -8,7 +8,7 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow?style=for-the-badge)](https://opensource.org/licenses/MIT)
 [![CI](https://github.com/6Kmfi6HP/polymind/actions/workflows/ci.yml/badge.svg)](https://github.com/6Kmfi6HP/polymind/actions/workflows/ci.yml)
 [![Tests](https://github.com/6Kmfi6HP/polymind/actions/workflows/test.yml/badge.svg)](https://github.com/6Kmfi6HP/polymind/actions/workflows/test.yml)
-[![Coverage](https://img.shields.io/badge/coverage-1017%20tests-brightgreen?style=for-the-badge)]()
+[![Coverage](https://img.shields.io/badge/coverage-1648%20tests-brightgreen?style=for-the-badge)]()
 
 **Write market-making strategies in natural language. Let AI assemble, tune, and execute them.**
 
@@ -67,10 +67,14 @@ Polymind merges **eight existing Polymarket projects** into one unified, AI-nati
 | ✅ **Complete** | **Agents** | Base agent ABC (observe→decide→act→reflect) |
 | ✅ **Complete** | **Utils** | Logging, secrets management, kill switch, preflight checks |
 | ✅ **Complete** | **CI** | GitHub Actions: lint (ruff), test (pytest+coverage), security (bandit), 3.10/3.11 matrix |
-| 🔜 **Next** | **Docs Site** | Comprehensive documentation site |
-| 🔜 **Next** | **E2E Tests** | Full integration and end-to-end test suite |
+| ✅ **Complete** | **Docs Site** | Comprehensive documentation site with Mkdocs + GitHub Pages |
+| ✅ **Complete** | **Kalshi** | ExchangeAdapter implementation for Kalshi prediction markets |
+| ✅ **Complete** | **Limitless** | ExchangeAdapter implementation for Limitless exchange |
+| ✅ **Complete** | **Factor CLI** | AI factor discovery, backtesting, IC analysis, variation recommendation |
+| ✅ **Complete** | **Plugin System** | Entry-point based plugin discovery with `polymind plugin` CLI |
+| ✅ **Complete** | **Daemon Mode** | Continuous TradingEngine operation with file logging |
 
-**1,237 tests passing · 70+ architecture modules implemented · 100+ test files · 115+ source files**
+**1,648 tests passing · 98% coverage · 3 exchange adapters · 7 strategies · AI factor discovery · Full CLI**
 
 ---
 
@@ -152,25 +156,28 @@ polymind/
 ├── README.md                     # This file
 ├── LICENSE                       # MIT
 │
-├── polymind/                     # Main package (61 modules)
+├── polymind/                     # Main package
 │   ├── core/                     # Base contracts — intents, ledger, risk, workflows
 │   ├── strategies/               # Strategy policies — AMM, Bands, Classic MM, factors
 │   ├── workflows/                # State machines — MakerRebate, EventMM, Sniper, CopyTrade
 │   ├── execution/                # Paper executor, fill model, order identity, serializer
 │   ├── factors/                  # Pipeline, registry, filters, execution bridge
 │   ├── polymarket/               # CLOB, WebSocket, Data API, contracts, signer, metrics
+│   ├── kalshi/                   # Kalshi exchange adapter
+│   ├── limitless/                # Limitless exchange adapter
 │   ├── reconciliation/           # Fill/balance/recovery reconciliation
 │   ├── agents/                   # AI provider base
 │   ├── risk/                     # Limits, drawdown, exposure, Kelly sizing
 │   ├── backtesting/              # Engine, data, execution models, factor BT
-│   ├── studio/                   # NL generator, optimizer
+│   ├── studio/                   # NL generator, optimizer, factor analysis
 │   ├── storage/                  # DB, models, price store, ledger, warehouse
+│   ├── templates/                # Strategy template library
 │   ├── alerts/                   # Telegram notifications
 │   ├── cli/                      # CLI entry point
 │   └── utils/                    # Logging, secrets, kill switch, preflight
 │
 ├── docs/                         # Architecture decisions & reference evidence
-└── tests/                        # 97 test files, 1,017+ tests
+└── tests/                        # 44 test files, 1,648+ tests
 ```
 
 ---
