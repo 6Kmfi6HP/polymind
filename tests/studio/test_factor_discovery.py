@@ -449,3 +449,153 @@ class TestFactorDiscoveryAgent:
             "momentum 7d top quintile", snapshots=snapshots, scores=scores
         )
         assert isinstance(card, FactorCard)
+
+    # ── Advanced analytics integration tests ────────────────────────────────
+
+    def test_factor_card_summary_includes_ic(self):
+        """Summary includes IC and WF metrics when available."""
+        fd = FactorDefinition(name="ic_factor", lookback="7d", top_n=5)
+        card = FactorCard(
+            definition=fd,
+            sharpe=1.2,
+            ic_rank=0.45,
+            ic_hit_rate=0.75,
+            wf_sharpe_mean=0.80,
+            wf_sharpe_std=0.30,
+        )
+        summary = card.summary
+        assert "IC=0.45" in summary
+        assert "WF_Sharpe=0.80" in summary
+
+    def test_factor_card_summary_no_ic(self):
+        """Summary without IC uses basic fields."""
+        fd = FactorDefinition(name="plain")
+        card = FactorCard(definition=fd, sharpe=0.5)
+        assert "IC=" not in card.summary
+        assert "WF_Sharpe" not in card.summary
+
+    def test_factor_card_new_fields_default(self):
+        """All new advanced fields default to 0.0."""
+        fd = FactorDefinition(name="test")
+        card = FactorCard(definition=fd)
+        assert card.ic_rank == 0.0
+        assert card.ic_ir == 0.0
+        assert card.ic_hit_rate == 0.0
+        assert card.ic_decile_1 == 0.0
+        assert card.ic_decile_10 == 0.0
+        assert card.decay_half_life == 0.0
+        assert card.wf_sharpe_mean == 0.0
+        assert card.wf_sharpe_std == 0.0
+        assert card.wf_sharpe_consistency == 0.0
+        assert card.wf_avg_drawdown == 0.0
+
+    @pytest.mark.asyncio
+    async def test_backtest_populates_ic_rank(self):
+        """backtest with custom data should populate IC metrics."""
+        from datetime import datetime
+
+        from polymind.execution.fill_model import MarketSnapshot
+
+        agent = FactorDiscoveryAgent()
+        fd = FactorDefinition(name="momentum_bt", lookback="7d", top_n=3)
+
+        # Create 15 markets where scores and mid prices are positively correlated
+        snapshots: dict[str, list[MarketSnapshot]] = {}
+        scores: dict[str, float] = {}
+        for i in range(15):
+            mid = 0.30 + i * 0.03  # ascending mid prices
+            mkt_id = f"mkt{i}"
+            snapshots[mkt_id] = [
+                MarketSnapshot(
+                    market_id=mkt_id,
+                    timestamp=datetime(2026, 7, 4),
+                    bid_price=mid - 0.02,
+                    ask_price=mid + 0.02,
+                    mid_price=mid,
+                    bid_size=1000,
+                    ask_size=1000,
+                ),
+            ]
+            scores[mkt_id] = i * 0.05 + 0.10  # ascending scores (positive correlation)
+
+        card = await agent.backtest(fd, snapshots=snapshots, scores=scores)
+        # IC should be non-zero positive (scores and returns are correlated)
+        assert card.ic_rank > 0
+        assert card.ic_decile_1 >= card.ic_decile_10  # D1 >= D10
+
+    @pytest.mark.asyncio
+    async def test_backtest_advanced_analytics_few_markets(self):
+        """With only 2 markets, IC analysis returns defaults."""
+        from datetime import datetime
+
+        from polymind.execution.fill_model import MarketSnapshot
+
+        agent = FactorDiscoveryAgent()
+        fd = FactorDefinition(name="tiny", lookback="7d", top_n=1)
+
+        snapshots = {
+            "m1": [
+                MarketSnapshot(
+                    market_id="m1",
+                    timestamp=datetime(2026, 7, 4),
+                    bid_price=0.45,
+                    ask_price=0.55,
+                    mid_price=0.50,
+                    bid_size=100,
+                    ask_size=100,
+                ),
+            ],
+            "m2": [
+                MarketSnapshot(
+                    market_id="m2",
+                    timestamp=datetime(2026, 7, 4),
+                    bid_price=0.35,
+                    ask_price=0.45,
+                    mid_price=0.40,
+                    bid_size=100,
+                    ask_size=100,
+                ),
+            ],
+        }
+        scores = {"m1": 0.9, "m2": 0.1}
+        card = await agent.backtest(fd, snapshots=snapshots, scores=scores)
+        # Fewer than 3 overlapping markets -> IC defaults to 0
+        assert card.ic_rank == 0.0
+
+    def test_compute_advanced_analytics(self):
+        """_compute_advanced_analytics returns expected keys."""
+        from datetime import datetime
+
+        from polymind.execution.fill_model import MarketSnapshot
+        from polymind.studio.factor_discovery import FactorDiscoveryAgent
+
+        agent = FactorDiscoveryAgent()
+        # Scores and forward returns (ask - mid) should vary to get meaningful IC
+        scores = {f"m{i}": i * 0.06 + 0.10 for i in range(15)}  # ascending scores
+        snapshots = {
+            f"m{i}": MarketSnapshot(
+                market_id=f"m{i}",
+                timestamp=datetime(2026, 7, 4),
+                bid_price=0.40 + i * 0.02,
+                ask_price=0.50 + i * 0.03,  # non-constant spread
+                mid_price=0.45 + i * 0.02,
+                bid_size=1000,
+                ask_size=1000,
+            )
+            for i in range(15)
+        }
+
+        result = agent._compute_advanced_analytics(scores, snapshots)
+        assert "ic_rank" in result
+        assert "ic_hit_rate" in result
+        assert "decay_half_life" in result
+        assert result["ic_rank"] != 0.0  # Correlation should exist
+
+    def test_compute_advanced_analytics_empty(self):
+        """With empty data, all analytics return 0."""
+        from polymind.studio.factor_discovery import FactorDiscoveryAgent
+
+        agent = FactorDiscoveryAgent()
+        result = agent._compute_advanced_analytics({}, {})
+        assert result["ic_rank"] == 0.0
+        assert result["wf_sharpe_mean"] == 0.0

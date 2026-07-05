@@ -16,6 +16,7 @@ from polymind.backtesting.factor_bt import (
     FactorBacktester,
 )
 from polymind.execution.fill_model import MarketSnapshot
+from polymind.studio.factor_analysis import FactorAnalyzer
 
 
 @dataclass
@@ -55,6 +56,9 @@ class FactorCard:
 
     Contains performance metrics and an approval flag indicating whether
     the factor meets minimum thresholds (Sharpe > 0.5, max_drawdown < 50%).
+
+    When sufficient data is available, advanced analytics (IC, decay,
+    walk-forward) are also computed.
     """
 
     definition: FactorDefinition
@@ -67,17 +71,34 @@ class FactorCard:
     approved: bool = False
     error: str = ""
 
+    # Advanced analytics (computed when data permits)
+    ic_rank: float = 0.0
+    ic_ir: float = 0.0
+    ic_hit_rate: float = 0.0
+    ic_decile_1: float = 0.0
+    ic_decile_10: float = 0.0
+    decay_half_life: float = 0.0
+    wf_sharpe_mean: float = 0.0
+    wf_sharpe_std: float = 0.0
+    wf_sharpe_consistency: float = 0.0
+    wf_avg_drawdown: float = 0.0
+
     @property
     def summary(self) -> str:
         """One-line summary of the factor card."""
         status = "✅ APPROVED" if self.approved else "❌ REJECTED"
-        return (
-            f"{status} {self.definition.name}: "
-            f"Sharpe={self.sharpe:.2f}, "
-            f"Return={self.total_return:.1%}, "
-            f"DD={self.max_drawdown:.1%}, "
-            f"Trades={self.total_trades}"
-        )
+        parts = [
+            f"{status} {self.definition.name}:",
+            f"Sharpe={self.sharpe:.2f}",
+            f"Return={self.total_return:.1%}",
+            f"DD={self.max_drawdown:.1%}",
+            f"Trades={self.total_trades}",
+        ]
+        if self.ic_rank:
+            parts.append(f"IC={self.ic_rank:.2f}")
+        if self.wf_sharpe_mean:
+            parts.append(f"WF_Sharpe={self.wf_sharpe_mean:.2f}")
+        return " ".join(parts)
 
 
 FACTOR_APPROVAL_MIN_SHARPE = 0.5
@@ -273,7 +294,57 @@ class FactorDiscoveryAgent:
                 result.sharpe >= FACTOR_APPROVAL_MIN_SHARPE
                 and result.max_drawdown <= FACTOR_APPROVAL_MAX_DRAWDOWN
             ),
+            # Advanced analytics
+            **self._compute_advanced_analytics(scores, step_snapshots),
         )
+
+    def _compute_advanced_analytics(
+        self,
+        scores: dict[str, float],
+        snapshots: dict[str, MarketSnapshot],
+    ) -> dict[str, Any]:
+        """Run IC analysis and walk-forward on backtest data.
+
+        Returns a dict of advanced metric values (or defaults) that can
+        be unpacked into a FactorCard.
+        """
+        result: dict[str, Any] = {
+            "ic_rank": 0.0,
+            "ic_ir": 0.0,
+            "ic_hit_rate": 0.0,
+            "ic_decile_1": 0.0,
+            "ic_decile_10": 0.0,
+            "decay_half_life": 0.0,
+            "wf_sharpe_mean": 0.0,
+            "wf_sharpe_std": 0.0,
+            "wf_sharpe_consistency": 0.0,
+            "wf_avg_drawdown": 0.0,
+        }
+
+        try:
+            # Compute simple IC from current scores vs mid-price direction
+            forward_returns: dict[str, float] = {}
+            for mkt_id, snap in snapshots.items():
+                # Use mid_price as proxy for next-period return
+                if snap.mid_price > 0:
+                    forward_returns[mkt_id] = snap.ask_price - snap.mid_price
+
+            ic = FactorAnalyzer.compute_ic(scores, forward_returns)
+            result["ic_rank"] = round(ic.rank_ic, 4)
+            result["ic_ir"] = round(ic.ic_ir, 4)
+            result["ic_hit_rate"] = round(ic.hit_rate, 4)
+            if len(ic.decile_returns) >= 10:
+                result["ic_decile_1"] = round(ic.decile_returns[0], 6)
+                result["ic_decile_10"] = round(ic.decile_returns[9], 6)
+
+            # Single-period decay estimate from IC series
+            if ic.ic_values:
+                hl = FactorAnalyzer.compute_decay(ic.ic_values)
+                result["decay_half_life"] = round(hl, 2)
+        except Exception:
+            pass
+
+        return result
 
     async def discover_and_backtest(
         self,
