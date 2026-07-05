@@ -298,6 +298,73 @@ def factor_backtest(description: str):
     console.print()
 
 
+@factor.command(name="recommend")
+@click.argument("idea")
+def factor_recommend(idea: str):
+    """Discover, compare variations, and recommend the best factor.
+
+    IDEA is a natural language description of the factor idea.
+    The agent tests multiple lookback/top_n variations and reports
+    the configuration with the highest Sharpe ratio.
+    """
+    from polymind.studio.factor_discovery import FactorDiscoveryAgent
+
+    agent = FactorDiscoveryAgent()
+
+    # Generate variations to test
+    variations = [
+        f"{idea}, top 5, 7d lookback",
+        f"{idea}, top 10, 7d lookback",
+        f"{idea}, top 5, 14d lookback",
+        f"{idea}, top 10, 14d lookback",
+        f"{idea}, top 5, 30d lookback",
+        f"{idea}, top 10, 30d lookback",
+    ]
+
+    console.print("\n[bold]Factor Recommendation Engine[/bold]")
+    console.print(f"  Idea: {idea}")
+    console.print(f"  Testing {len(variations)} variations...")
+    console.print()
+
+    best_card = None
+    best_sharpe = -float("inf")
+    results: list[tuple[str, float, str]] = []
+
+    for i, desc in enumerate(variations):
+        console.print(f"  [{i + 1}/{len(variations)}] {desc[:50]}...", end=" ")
+        try:
+            card = _run_async(agent.discover_and_backtest(desc))
+            sharpe = card.sharpe
+            status = "[green]✓[/green]" if card.approved else "[yellow]○[/yellow]"
+            results.append((desc, sharpe, card.definition.name))
+            if sharpe > best_sharpe:
+                best_sharpe = sharpe
+                best_card = card
+            console.print(f"{status} Sharpe={sharpe:.2f}")
+        except Exception as e:
+            console.print(f"[red]✗ {e}[/red]")
+
+    if best_card:
+        console.print()
+        console.print("[bold green]🏆 Recommended Factor[/bold green]")
+        console.print(f"  Name:      [green]{best_card.definition.name}[/green]")
+        console.print(f"  Lookback:  {best_card.definition.lookback}")
+        console.print(f"  Top N:     {best_card.definition.top_n}")
+        console.print(f"  Sharpe:    {best_card.sharpe:.2f}")
+        console.print(f"  Sortino:   {best_card.sortino:.2f}")
+        console.print(f"  Max DD:    {best_card.max_drawdown:.1%}")
+        console.print(f"  Return:    {best_card.total_return:.1%}")
+        console.print(
+            f"  Approved:  {'[green]YES[/green]' if best_card.approved else '[red]NO[/red]'}"
+        )
+        if best_card.ic_rank:
+            console.print(f"  IC Rank:   {best_card.ic_rank:.4f}")
+        console.print()
+    else:
+        console.print("[red]No viable factor found.[/red]")
+    console.print()
+
+
 @templates.command(name="list")
 def list_templates():
     """Show all available strategy templates."""

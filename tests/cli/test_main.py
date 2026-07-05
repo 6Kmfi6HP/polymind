@@ -179,6 +179,19 @@ class TestFactorCommand:
         assert result.exit_code == 0
         assert "Params" in result.output or "Factor" in result.output
 
+    def test_factor_recommend(self):
+        """factor recommend tests multiple variations."""
+        runner = CliRunner()
+        result = runner.invoke(cli, ["factor", "recommend", "momentum on 7d returns"])
+        assert result.exit_code == 0
+        assert "Recommended" in result.output or "variation" in result.output.lower()
+
+    def test_factor_recommend_no_query(self):
+        """factor recommend with empty idea."""
+        runner = CliRunner()
+        result = runner.invoke(cli, ["factor", "recommend", ""])
+        assert result.exit_code == 0
+
 
 class TestMainFunction:
     """Cover lines 549-558: main() entry point."""
