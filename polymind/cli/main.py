@@ -265,6 +265,8 @@ def factor_backtest(description: str):
     status = "[green]✅ APPROVED[/green]" if card.approved else "[red]❌ REJECTED[/red]"
     console.print(f"  Name:      [green]{card.definition.name}[/green]")
     console.print(f"  Status:    {status}")
+    console.print()
+    console.print("[bold]Performance:[/bold]")
     console.print(f"  Sharpe:    {card.sharpe:.2f}")
     console.print(f"  Sortino:   {card.sortino:.2f}")
     console.print(f"  Max DD:    {card.max_drawdown:.1%}")
@@ -273,6 +275,26 @@ def factor_backtest(description: str):
     console.print(f"  Trades:    {card.total_trades}")
     if card.error:
         console.print(f"  Error:     [red]{card.error}[/red]")
+    console.print()
+    if card.ic_rank:
+        console.print("[bold]Information Coefficient:[/bold]")
+        console.print(f"  IC Rank:   {card.ic_rank:.4f}")
+        console.print(f"  IC IR:     {card.ic_ir:.2f}")
+        console.print(f"  Hit Rate:  {card.ic_hit_rate:.0%}")
+        if card.ic_decile_1:
+            console.print(f"  Decile 1:  {card.ic_decile_1:.4f}  (highest-score portfolio)")
+        if card.ic_decile_10:
+            console.print(f"  Decile 10: {card.ic_decile_10:.4f}  (lowest-score portfolio)")
+        if card.decay_half_life:
+            console.print(f"  Half-Life: {card.decay_half_life:.1f} periods")
+        console.print()
+    if card.wf_sharpe_mean:
+        console.print("[bold]Walk-Forward:[/bold]")
+        console.print(f"  Sharpe μ:  {card.wf_sharpe_mean:.2f}")
+        console.print(f"  Sharpe σ:  {card.wf_sharpe_std:.2f}")
+        console.print(f"  Consist.:  {card.wf_sharpe_consistency:.0%}")
+        console.print(f"  Avg DD:    {card.wf_avg_drawdown:.1%}")
+        console.print()
     console.print()
 
 
