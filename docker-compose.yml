@@ -1,0 +1,29 @@
+version: "3.9"
+
+services:
+  daemon:
+    build: .
+    image: polymind:latest
+    command: daemon --strategy momentum --interval 60 --paper
+    environment:
+      - POLYMARKET_API_KEY=${POLYMARKET_API_KEY:-}
+      - POLYMARKET_PRIVATE_KEY=${POLYMARKET_PRIVATE_KEY:-}
+      - POLYMARKET_CHAIN_ID=${POLYMARKET_CHAIN_ID:-137}
+    volumes:
+      - polymind_data:/app/data
+    restart: unless-stopped
+
+  collect-snapshots:
+    build: .
+    image: polymind:latest
+    command: python /app/scripts/collect_snapshots.py --interval 120 --store /app/data/snapshots.jsonl
+    environment:
+      - POLYMARKET_API_KEY=${POLYMARKET_API_KEY:-}
+    volumes:
+      - polymind_data:/app/data
+    profiles:
+      - data-collection
+    restart: unless-stopped
+
+volumes:
+  polymind_data:
