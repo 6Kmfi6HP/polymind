@@ -298,6 +298,139 @@ def factor_backtest(description: str):
     console.print()
 
 
+@cli.command()
+@click.option("--interval", "-i", type=int, default=300, help="Loop interval in seconds")
+@click.option("--strategy", "-s", default="auto", help="Strategy name or 'auto'")
+@click.option("--log-file", type=click.Path(), default="polymind-daemon.log")
+@click.option("--paper", is_flag=True, help="Paper trading mode")
+def daemon(interval: int, strategy: str, log_file: str, paper: bool):
+    """Run polymind as a continuous background daemon.
+
+    Sets up a TradingEngine with the specified strategy and runs it
+    on a configurable interval.  Logs tick results to a file.
+    Use Ctrl+C to stop gracefully.
+    """
+    import asyncio
+    import logging
+    import signal
+
+    from polymind.core.engine import TradingEngine, TradingEngineConfig
+    from polymind.execution.executor import PaperExecutor
+    from polymind.execution.fill_model import FillModel, FillModelConfig
+    from polymind.studio.generator import StrategyGenerator
+
+    # Set up file logging
+    logging.basicConfig(
+        filename=log_file,
+        level=logging.INFO,
+        format="%(asctime)s [%(levelname)s] %(message)s",
+    )
+    logger = logging.getLogger("polymind.daemon")
+
+    console.print(BANNER)
+    console.print()
+    console.print("[bold]Daemon Mode[/bold]")
+    console.print(f"  Interval:  {interval}s")
+    console.print(f"  Strategy:  {strategy}")
+    console.print(f"  Log file:  {log_file}")
+    console.print(f"  Mode:      {'[cyan]PAPER[/cyan]' if paper else '[yellow]DRY RUN[/yellow]'}")
+    console.print()
+
+    # Resolve strategy
+    if strategy == "auto":
+        gen = StrategyGenerator()
+        config = gen.generate("Basic market making with 2% spread")
+        strategy_name = config.strategy_name
+        from polymind.strategies import get_strategy as resolve_strategy
+
+        strategy_instance = resolve_strategy(config.strategy_name, config)
+        logger.info("Auto-generated strategy: %s", strategy_name)
+    else:
+        from polymind.core.strategy import StrategyConfig
+        from polymind.strategies import get_strategy as resolve_strategy
+
+        cfg = StrategyConfig(name=strategy)
+        strategy_instance = resolve_strategy(strategy, cfg)
+        strategy_name = strategy
+        logger.info("Using strategy: %s", strategy)
+
+    fill_model = FillModel(FillModelConfig())
+    executor = PaperExecutor(fill_model=fill_model)
+
+    engine = TradingEngine(
+        strategy=strategy_instance,
+        executor=executor,
+        config=TradingEngineConfig(
+            strategy_name=strategy_name,
+            loop_interval=interval,
+            dry_run=True,
+        ),
+    )
+
+    console.print("[green]✓[/green] Daemon initialised. Starting loop...")
+    console.print("[dim]Press Ctrl+C to stop gracefully.[/dim]")
+    console.print()
+
+    stop_event = asyncio.Event()
+
+    def _handle_signal(*_: object) -> None:
+        console.print("\n[yellow]Shutdown signal received, stopping...[/yellow]")
+        stop_event.set()
+
+    async def _daemon_loop() -> None:
+        """Run the daemon loop until stopped."""
+        import asyncio as _asyncio
+        from datetime import datetime as _datetime
+
+        from polymind.execution.fill_model import MarketSnapshot
+
+        tick_count = 0
+        while not stop_event.is_set():
+            tick_count += 1
+            ts = _datetime.now(_datetime.timezone.utc)
+            dummy = MarketSnapshot(
+                market_id="",
+                timestamp=ts,
+                bid_price=0.0,
+                ask_price=0.0,
+                mid_price=0.0,
+                bid_size=0.0,
+                ask_size=0.0,
+            )
+            try:
+                result = await engine.run_tick(dummy)
+                logger.info(
+                    "Tick %d: %d orders placed, %d errors",
+                    tick_count,
+                    result.orders_placed,
+                    getattr(result, "errors", 0),
+                )
+            except Exception as exc:
+                logger.error("Tick %d failed: %s", tick_count, exc)
+            try:
+                await _asyncio.wait_for(stop_event.wait(), timeout=float(interval))
+                break
+            except _asyncio.TimeoutError:
+                pass
+
+    loop = asyncio.new_event_loop()
+    asyncio.set_event_loop(loop)
+    for sig in (signal.SIGINT, signal.SIGTERM):
+        try:
+            loop.add_signal_handler(sig, _handle_signal)
+        except (NotImplementedError, ValueError):
+            signal.signal(sig, lambda *_: None)
+
+    try:
+        loop.run_until_complete(_daemon_loop())
+    except KeyboardInterrupt:
+        console.print("\n[yellow]Interrupted.[/yellow]")
+    finally:
+        loop.close()
+        console.print("[green]Daemon stopped.[/green]")
+    console.print()
+
+
 @factor.command(name="recommend")
 @click.argument("idea")
 def factor_recommend(idea: str):

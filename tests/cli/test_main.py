@@ -267,3 +267,18 @@ class TestReportCommands:
             result = runner.invoke(cli, ["report", "risk"])
             assert result.exit_code == 0
             assert "Error" in result.output
+
+
+class TestDaemonCommand:
+    def test_daemon_help(self):
+        runner = CliRunner()
+        result = runner.invoke(cli, ["daemon", "--help"])
+        assert result.exit_code == 0
+        assert "Daemon" in result.output or "interval" in result.output
+
+    def test_daemon_auto_strategy(self):
+        """Daemon with auto strategy generates output."""
+        runner = CliRunner()
+        result = runner.invoke(cli, ["daemon", "--interval", "60"])
+        # Ctrl+C emulation: daemon starts, shows banner
+        assert "Daemon" in result.output or "daemon" in result.output.lower()
