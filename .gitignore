@@ -49,3 +49,6 @@ coverage.xml
 
 # Docs site (mkdocs output)
 site/
+
+# Docker
+docker-data/
