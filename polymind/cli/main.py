@@ -381,13 +381,14 @@ def daemon(interval: int, strategy: str, log_file: str, paper: bool):
         """Run the daemon loop until stopped."""
         import asyncio as _asyncio
         from datetime import datetime as _datetime
+        from datetime import timezone as _timezone
 
         from polymind.execution.fill_model import MarketSnapshot
 
         tick_count = 0
         while not stop_event.is_set():
             tick_count += 1
-            ts = _datetime.now(_datetime.timezone.utc)
+            ts = _datetime.now(_timezone.utc)
             dummy = MarketSnapshot(
                 market_id="",
                 timestamp=ts,

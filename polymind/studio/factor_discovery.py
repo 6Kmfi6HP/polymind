@@ -182,7 +182,10 @@ class FactorDiscoveryAgent:
             )
             import json
 
-            data = json.loads(response.content[0].text)
+            first_content = response.content[0]
+            if not hasattr(first_content, "text"):
+                return fallback
+            data = json.loads(first_content.text)
             return FactorDefinition(
                 description=description,
                 name=data.get("name", fallback.name),

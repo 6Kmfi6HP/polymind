@@ -15,6 +15,7 @@ from typing import Any
 
 import eth_account
 from web3 import Web3
+from web3.types import HexStr
 
 from polymind.polymarket.errors import ContractError, InsufficientGasError
 
@@ -263,9 +264,9 @@ class ContractsGateway:
             address=Web3.to_checksum_address(CTF_EXCHANGE_ADDRESS), abi=CTF_EXCHANGE_ABI
         )
         condition_bytes = (
-            Web3.to_bytes(hexstr=condition_id)
+            Web3.to_bytes(hexstr=HexStr(condition_id))
             if condition_id.startswith("0x")
-            else Web3.to_bytes(hexstr="0x" + condition_id)
+            else Web3.to_bytes(hexstr=HexStr("0x" + condition_id))
         )
 
         try:
@@ -295,9 +296,9 @@ class ContractsGateway:
             address=Web3.to_checksum_address(CTF_EXCHANGE_ADDRESS), abi=CTF_EXCHANGE_ABI
         )
         condition_bytes = (
-            Web3.to_bytes(hexstr=condition_id)
+            Web3.to_bytes(hexstr=HexStr(condition_id))
             if condition_id.startswith("0x")
-            else Web3.to_bytes(hexstr="0x" + condition_id)
+            else Web3.to_bytes(hexstr=HexStr("0x" + condition_id))
         )
 
         try:
@@ -325,9 +326,9 @@ class ContractsGateway:
             address=Web3.to_checksum_address(CTF_EXCHANGE_ADDRESS), abi=CTF_EXCHANGE_ABI
         )
         condition_bytes = (
-            Web3.to_bytes(hexstr=condition_id)
+            Web3.to_bytes(hexstr=HexStr(condition_id))
             if condition_id.startswith("0x")
-            else Web3.to_bytes(hexstr="0x" + condition_id)
+            else Web3.to_bytes(hexstr=HexStr("0x" + condition_id))
         )
 
         try:

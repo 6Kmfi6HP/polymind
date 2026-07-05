@@ -270,56 +270,56 @@ class WorkflowRunner:
 
         try:
             if cmd.command == CommandType.SPLIT:
-                result = await self._pair_lifecycle.split(condition_id, amount)
+                split_result = await self._pair_lifecycle.split(condition_id, amount)
                 return CommandResult(
                     workflow_id=cmd.workflow_id,
                     command=cmd.command,
                     success=True,
-                    state=result.updated_position.condition_id,
-                    message=f"Split {amount / 1e6} USDC, tx={result.tx_hash}",
+                    state=split_result.updated_position.condition_id,
+                    message=f"Split {amount / 1e6} USDC, tx={split_result.tx_hash}",
                     instance_count=len(self._instances),
                 )
             elif cmd.command == CommandType.MERGE:
-                result = await self._pair_lifecycle.merge(condition_id, amount)
+                merge_result = await self._pair_lifecycle.merge(condition_id, amount)
                 return CommandResult(
                     workflow_id=cmd.workflow_id,
                     command=cmd.command,
                     success=True,
-                    state=result.updated_position.condition_id,
-                    message=f"Merged {result.outcome_token_amount} pairs, tx={result.tx_hash}",
+                    state=merge_result.updated_position.condition_id,
+                    message=f"Merged {merge_result.outcome_token_amount} pairs, tx={merge_result.tx_hash}",
                     instance_count=len(self._instances),
                 )
             elif cmd.command == CommandType.REDEEM:
-                result = await self._pair_lifecycle.redeem(condition_id)
+                redeem_result = await self._pair_lifecycle.redeem(condition_id)
                 return CommandResult(
                     workflow_id=cmd.workflow_id,
                     command=cmd.command,
                     success=True,
-                    state=result.updated_position.condition_id,
-                    message=f"Redeemed {result.amount_redeemed} {result.outcome} tokens, "
-                    f"proceeds={result.proceeds_usdc} USDC",
+                    state=redeem_result.updated_position.condition_id,
+                    message=f"Redeemed {redeem_result.amount_redeemed} {redeem_result.outcome} tokens, "
+                    f"proceeds={redeem_result.proceeds_usdc} USDC",
                     instance_count=len(self._instances),
                 )
             elif cmd.command == CommandType.SELL_REMAINDER:
-                result = await self._pair_lifecycle.sell_remainder(market_id, outcome)
+                sell_result = await self._pair_lifecycle.sell_remainder(market_id, outcome)
                 return CommandResult(
                     workflow_id=cmd.workflow_id,
                     command=cmd.command,
                     success=True,
                     state="",
-                    message=f"Sold {result.amount_sold} {outcome} tokens, "
-                    f"{result.orders_placed} orders placed",
+                    message=f"Sold {sell_result.amount_sold} {outcome} tokens, "
+                    f"{sell_result.orders_placed} orders placed",
                     instance_count=len(self._instances),
                 )
             elif cmd.command == CommandType.ONE_SIDED_HALT:
-                result = await self._pair_lifecycle.one_sided_halt(market_id, outcome)
+                halt_result = await self._pair_lifecycle.one_sided_halt(market_id, outcome)
                 return CommandResult(
                     workflow_id=cmd.workflow_id,
                     command=cmd.command,
                     success=True,
                     state="",
                     message=f"Halted {outcome} side on {market_id}, "
-                    f"{result.orders_cancelled} orders cancelled",
+                    f"{halt_result.orders_cancelled} orders cancelled",
                     instance_count=len(self._instances),
                 )
             else:

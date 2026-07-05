@@ -58,11 +58,12 @@ class MomentumBridge(FactorExecutionBridge):
     def __init__(self, strategy_name: str = "momentum"):
         self.strategy_name = strategy_name
 
-    async def to_order_intents(self, targets: list) -> list[StrategyIntent]:
+    async def to_order_intents(self, targets: list) -> list[StrategyIntent]:  # type: ignore[override]
         """Convert PortfolioTargets to StrategyIntents.
 
-        Current implementation creates one bare StrategyIntent per target.
-        Full order creation requires the execution layer.
+        Note: Takes a *list* of PortfolioTargets (batch), unlike the
+        abstract base which accepts a single target. This is intentional
+        for the momentum pipeline.
         """
         from datetime import datetime, timezone
 
