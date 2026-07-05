@@ -4,7 +4,7 @@ Tests for WorkflowRunner pair command delegation to PairLifecycleManager.
 
 from __future__ import annotations
 
-from unittest.mock import AsyncMock
+from unittest.mock import AsyncMock, MagicMock
 
 import pytest
 
@@ -144,3 +144,36 @@ class TestWorkflowRunnerPairCommands:
 
         assert result.success is False
         assert "split failed" in result.message
+
+    async def test_one_sided_halt_uses_params(
+        self, runner: WorkflowRunner, mock_pair_lifecycle: AsyncMock
+    ):
+        """One-sided halt uses market_id and outcome from params."""
+        from polymind.core.workflows import CommandType
+
+        mock_result = MagicMock()
+        mock_result.orders_cancelled = 3
+        mock_pair_lifecycle.one_sided_halt = AsyncMock(return_value=mock_result)
+
+        cmd = _cmd("wf-001", CommandType.ONE_SIDED_HALT, market_id="0xm1", outcome="NO")
+        result = await runner.process_command(cmd)
+        assert result.success is True
+        assert "3" in result.message
+        mock_pair_lifecycle.one_sided_halt.assert_awaited_once_with("0xm1", "NO")
+
+    async def test_pair_command_sell_remainder(
+        self, runner: WorkflowRunner, mock_pair_lifecycle: AsyncMock
+    ):
+        """Sell remainder command passes outcome from params."""
+        from polymind.core.workflows import CommandType
+
+        mock_result = MagicMock()
+        mock_result.amount_sold = 50.0
+        mock_result.orders_placed = 2
+        mock_pair_lifecycle.sell_remainder = AsyncMock(return_value=mock_result)
+
+        cmd = _cmd("wf-001", CommandType.SELL_REMAINDER, market_id="0xm1", outcome="YES")
+        result = await runner.process_command(cmd)
+        assert result.success is True
+        assert "50.0" in result.message
+        assert "2" in result.message

@@ -138,6 +138,32 @@ class TestIntelligenceAgentDecide:
         assert isinstance(result.confidence, float)
         assert 0 <= result.confidence <= 1.0
 
+    @pytest.mark.asyncio
+    async def test_decide_buy_with_high_sentiment(self) -> None:
+        """Sentiment > 0.3 triggers buy action."""
+        agent = IntelligenceAgent(config=AgentConfig(role=AgentRole.DECIDER))
+
+        async def high_sentiment(market_ids: list[str]) -> dict[str, object]:
+            return {"news_sentiment": 0.8, "market_ids": market_ids}
+
+        agent.gather_context = high_sentiment  # type: ignore[assignment]
+        result = await agent.decide(Observation(data={"market_ids": ["0x123"]}))
+        assert result.action == "buy"
+        assert result.confidence == 0.8
+
+    @pytest.mark.asyncio
+    async def test_decide_sell_with_low_sentiment(self) -> None:
+        """Sentiment < -0.3 triggers sell action."""
+        agent = IntelligenceAgent(config=AgentConfig(role=AgentRole.DECIDER))
+
+        async def low_sentiment(market_ids: list[str]) -> dict[str, object]:
+            return {"news_sentiment": -0.7, "market_ids": market_ids}
+
+        agent.gather_context = low_sentiment  # type: ignore[assignment]
+        result = await agent.decide(Observation(data={"market_ids": ["0x123"]}))
+        assert result.action == "sell"
+        assert result.confidence == 0.7
+
 
 class TestIntelligenceAgentAct:
     """Action execution."""
