@@ -1,3 +1,5 @@
+> **Status:** Superseded by [`docs/architecture.md`](../../architecture.md) and [`docs/architecture/decisions/`](../../architecture/decisions/). This spec was a design document and is kept for historical reference only.
+
 # Phase 12: Agent Provider Implementation — Design
 
 **Status:** Approved Design

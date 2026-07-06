@@ -19,9 +19,49 @@ Append one entry per run. Prune entries older than 30 days.
 
 ## Recent Runs
 
-<!-- Loop appends below this line -->
+2026-07-05T21:00:00Z | roadmap-implement | gap:GAP-009 | outcome:PASS | files:3 | tests:28
+{"run_id":"2026-07-05T21:00:00Z","pattern":"roadmap-implement","duration_s":720,"items_found":1,"actions_taken":2,"escalations":0,"tokens_estimate":350000,"outcome":"fix-proposed","note":"GAP-009 FactorPromotionGate implemented. 2 Maker attempts (Checker REJECTED attempt 1 with 5 issues, PASSED attempt 2). 3 files: promotion_gate.py, test_promotion_gate.py, __init__.py. 28 tests."}
+2026-07-05T21:15:00Z | roadmap-implement | gap:GAP-006 | outcome:PASS | files:4 | tests:81
+{"run_id":"2026-07-05T21:15:00Z","pattern":"roadmap-implement","duration_s":349,"items_found":1,"actions_taken":2,"escalations":0,"tokens_estimate":250000,"outcome":"fix-proposed","note":"GAP-006 workflow state-machine docs implemented. 2 Maker attempts (Checker REJECTED attempt 1 with 4 accuracy issues, fixed in attempt 2). 4 files: maker-rebate, event-mm, sniper, copy-trade state machine docs. 81 tests."}
+2026-07-05T21:30:00Z | roadmap-implement | gap:GAP-010 | outcome:PASS | files:6 | tests:102
+{"run_id":"2026-07-05T21:30:00Z","pattern":"roadmap-implement","duration_s":595,"items_found":1,"actions_taken":1,"escalations":0,"tokens_estimate":400000,"outcome":"fix-proposed","note":"GAP-010 ResearchOutcome enum (PASS, FAIL, NO_EDGE, INCONCLUSIVE) added to factor_analysis.py. outcome field in FactorCard and FactorBacktestResult. 6 files changed, 102 affected tests pass, 1722 total."}
+2026-07-05T21:45:00Z | roadmap-implement | gap:GAP-008 | outcome:PASS | files:4 | tests:101
+{"run_id":"2026-07-05T21:45:00Z","pattern":"roadmap-implement","duration_s":1200,"items_found":1,"actions_taken":1,"escalations":0,"tokens_estimate":500000,"outcome":"fix-proposed","note":"GAP-008 ExecutionEvidence dataclass (6 fields) added to factor_bt.py. execution_evidence in FactorBacktestResult and FactorCard. Summary separates signal from exec evidence. Maker resumed after 524 timeout. 4 files: factor_bt.py, factor_discovery.py, test_factor_bt.py, test_factor_discovery.py. 101 tests."}
+2026-07-05T22:00:00Z | roadmap-implement | gap:GAP-011 | outcome:PASS | files:3 | tests:36
+{"run_id":"2026-07-05T22:00:00Z","pattern":"roadmap-implement","duration_s":351,"items_found":1,"actions_taken":1,"escalations":0,"tokens_estimate":400000,"outcome":"fix-proposed","note":"GAP-011 Validation pipeline: schema/impl-status/risk-limit gates in StrategyGenerator.generate(). ValidationGate dataclass, validation_results in GeneratedConfig. 13 new tests. docs/studio/validation-gates.md. 36 generator tests pass."}
+2026-07-05T22:15:00Z | roadmap-implement | gap:GAP-013 | outcome:PASS | files:1 | tests:191
+{"run_id":"2026-07-05T22:15:00Z","pattern":"roadmap-implement","duration_s":102,"items_found":1,"actions_taken":1,"escalations":0,"tokens_estimate":100000,"outcome":"fix-proposed","note":"GAP-013 CI pipeline additions: 3 new jobs in ci.yml (license-provenance-check, adapter-conformance, factor-regression). 191 tests pass."}
+2026-07-05T22:30:00Z | roadmap-implement | gap:GAP-012 | outcome:PASS | files:2 | tests:44
+{"run_id":"2026-07-05T22:30:00Z","pattern":"roadmap-implement","duration_s":147,"items_found":1,"actions_taken":1,"escalations":0,"tokens_estimate":150000,"outcome":"fix-proposed","note":"GAP-012 GeneratedConfig provenance fields. 4 new fields (provenance, source_version, risk_limits, execution_policy) + 8 new tests. 44 generator tests pass."}
+2026-07-05T22:45:00Z | roadmap-implement | gap:GAP-001 | outcome:PASS | files:1 | tests:1714
+{"run_id":"2026-07-05T22:45:00Z","pattern":"roadmap-implement","duration_s":92,"items_found":1,"actions_taken":1,"escalations":0,"tokens_estimate":50000,"outcome":"fix-proposed","note":"GAP-001 README Planned & Research-Blocked sections added. 2 tables with 4 planned and 3 research-blocked items. 1 file changed (README.md). Tests unchanged."}
+2026-07-05T23:00:00Z | roadmap-implement | gap:GAP-002 | outcome:PASS | files:1 | tests:1714
+{"run_id":"2026-07-05T23:00:00Z","pattern":"roadmap-implement","duration_s":91,"items_found":1,"actions_taken":1,"escalations":0,"tokens_estimate":50000,"outcome":"fix-proposed","note":"GAP-002 THIRD_PARTY.md created at repo root. 8 external projects documented with source URL, license, derived files, and compatibility status."}
+2026-07-05T23:15:00Z | roadmap-implement | gap:GAP-003 | outcome:PASS | files:1 | tests:1714
+{"run_id":"2026-07-05T23:15:00Z","pattern":"roadmap-implement","duration_s":65,"items_found":1,"actions_taken":1,"escalations":0,"tokens_estimate":30000,"outcome":"fix-proposed","note":"GAP-003 ADR 0005 LGPL Boundary created. Documents isolation strategy (extras/adapter/subprocess), confirms no LGPL code copied. 1 file."}
+2026-07-05T23:30:00Z | roadmap-implement | gap:GAP-004 | outcome:PASS | files:27 | tests:1714
+{"run_id":"2026-07-05T23:30:00Z","pattern":"roadmap-implement","duration_s":133,"items_found":1,"actions_taken":1,"escalations":0,"tokens_estimate":75000,"outcome":"fix-proposed","note":"GAP-004 Supersession markers added to all 27 docs/superpowers/specs/*.md files. Phase 0 now complete."}
+2026-07-05T23:45:00Z | roadmap-implement | gap:GAP-005 | outcome:PASS | files:1 | tests:1714
+{"run_id":"2026-07-05T23:45:00Z","pattern":"roadmap-implement","duration_s":266,"items_found":1,"actions_taken":1,"escalations":0,"tokens_estimate":75000,"outcome":"fix-proposed","note":"GAP-005 Official MM parity doc created. 4 scenarios with formula comparison, design divergence analysis. Phase 4 now complete."}
+2026-07-05T00:00:00Z | roadmap-implement | gap:GAP-007 | outcome:PASS | files:9 | tests:93
+{"run_id":"2026-07-06T00:00:00Z","pattern":"roadmap-implement","duration_s":137,"items_found":1,"actions_taken":1,"escalations":0,"tokens_estimate":75000,"outcome":"fix-proposed","note":"GAP-007 paper_mode flag added to all 4 workflow state machine constructors + WorkflowRunner. 9 files, 93 tests. Phase 5 now complete."}
+2026-07-06T00:00:00Z | roadmap-implement | gap:GAP-014 | outcome:PASS | files:2 | tests:1714
+{"run_id":"2026-07-06T00:00:00Z","pattern":"roadmap-implement","duration_s":83,"items_found":1,"actions_taken":1,"escalations":0,"tokens_estimate":30000,"outcome":"fix-proposed","note":"GAP-014 RELEASE.md + Makefile check-release-readiness target. ALL 14 GAPS RESOLVED. All 10 phases complete."}
+2026-07-06T04:15:00Z | roadmap-triage | PHASE:9 | FINDINGS:1 | NEW:0 | RESOLVED:1 | ESCALATED:0
+2026-07-06T04:30:00Z | roadmap-triage | PHASE:0-9 | FINDINGS:0 | NEW:0 | RESOLVED:0 | ESCALATED:0
+{"run_id":"2026-07-06T04:15:00Z","pattern":"roadmap-triage","duration_s":480,"items_found":1,"actions_taken":3,"escalations":0,"tokens_estimate":130000,"outcome":"fix-proposed","note":"GAP-015: Fixed 3 changes (strategies/__init__.py lazy init, test_generator.py PluginRegistry.reset(), mkdocs.yml adr nav). 1791 tests pass, mkdocs strict exit 0."}
+{"run_id":"2026-07-06T04:30:00Z","pattern":"roadmap-triage","duration_s":45,"items_found":0,"actions_taken":0,"escalations":0,"tokens_estimate":40000,"outcome":"no-op","note":"All 15 gaps resolved across all 10 phases. 1791 tests, mkdocs strict exit 0. No new findings."}
+
+{"run_id":"2026-07-06T06:00:00Z","pattern":"polymind-autonomous-dev-loop","duration_s":120,"items_found":0,"actions_taken":0,"escalations":0,"tokens_estimate":8000,"outcome":"no-op","note":"1791 tests pass, mkdocs strict clean. All 10 phases complete, 15/15 gaps resolved. No actionable items."}
+
+{"run_id":"2026-07-06T06:30:00Z","pattern":"polymind-autonomous-dev-loop","duration_s":60,"items_found":0,"actions_taken":0,"escalations":0,"tokens_estimate":5000,"outcome":"no-op","note":"1791 tests pass, 0 failed. No regression. No actionable items found since last run."}
+
+{"run_id":"2026-07-06T07:00:00Z","pattern":"polymind-autonomous-dev-loop","duration_s":50,"items_found":0,"actions_taken":0,"escalations":0,"tokens_estimate":4000,"outcome":"no-op","note":"1791 tests pass. No regression. Repository state unchanged. No actionable items."}
+
+{"run_id":"2026-07-05T20:30:00Z","pattern":"roadmap-triage","duration_s":300,"items_found":14,"actions_taken":0,"escalations":0,"tokens_estimate":35000,"outcome":"report-only"}
 2026-07-03T16:58:00Z — daily-triage — report-only — 12 failed / 16 tests, 4 passed.
 {"run_id":"2026-07-03T17:16:00Z","pattern":"daily-triage","duration_s":30,"items_found":2,"actions_taken":1,"escalations":0,"tokens_estimate":15000,"outcome":"report-only","note":"首次本地 triage 运行。Loop 基础设施就绪，无待修复项。"}
+{"run_id":"2026-07-06T01:00:00Z","pattern":"roadmap-triage","duration_s":180,"items_found":1,"actions_taken":0,"escalations":0,"tokens_estimate":25000,"outcome":"report-only","note":"GAP-015: CI test collection broken (pytest tests/ exits 2, mkdocs build --strict has 27 broken links)"}
 2026-07-03T15:51:42Z — dev-loop — fix-proposed — Phase 2 5 contracts + 5 test files, 52 tests.
 {"run_id":"2026-07-03T15:51:42Z","pattern":"dev-loop","duration_s":300,"items_found":5,"actions_taken":5,"escalations":0,"tokens_estimate":45000,"outcome":"fix-proposed","note":"Phase 2 domain contracts: PortfolioTarget, FillEvent, LedgerEntry, RiskDecision, WorkflowCommand. All 52 tests pass."}
 2026-07-03T17:57:00Z — dev-loop — fix-proposed — Phase 3 execution core: OrderIdentity, FillModel, PaperExecutor. 94 tests.

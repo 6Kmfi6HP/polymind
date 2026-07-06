@@ -8,6 +8,24 @@ This file records repository state separately from the target architecture in
 
 ## Implemented
 
+- **Phase 0: README status sections** — Added "Planned" (4 items) and "Research-Blocked"
+  (3 items) sections to README.md after Current Status, before Quick Start. Uses
+  consistent table formatting. ([2026-07-05] GAP-001)
+- **Phase 0: THIRD_PARTY.md** — Created THIRD_PARTY.md at repo root documenting all
+  8 external merged projects with source URL, license, derived files, and compatibility
+  status. ([2026-07-05] GAP-002)
+- **Phase 0: ADR 0005 LGPL Boundary** — ADR documenting LGPL isolation strategy (pip
+  extras, adapter package, or subprocess boundary); confirms no LGPL code copied.
+  ([2026-07-05] GAP-003)
+- **Phase 0: Spec supersession markers** — All 27 docs/superpowers/specs/*.md files
+  marked as superseded by architecture.md and decisions/. ([2026-07-05] GAP-004)
+- **Phase 4: Official MM parity doc** — Comprehensive design divergence analysis in
+  docs/references/official-mm-parity.md with 4 scenarios, formula comparison, and
+  parity status matrix. ([2026-07-05] GAP-005)
+- **Phase 5: Workflow paper_mode** — paper_mode flag added to all 4 workflow
+  state machine constructors + WorkflowRunner wire-up. ([2026-07-05] GAP-007)
+- **Phase 9: Release checklist** — RELEASE.md created with 4-step release
+  process; Makefile check-release-readiness target. ([2026-07-05] GAP-014)
 - Python package scaffold under `polymind/`.
 - CLI shell with help, status, setup, strategy-list, and report commands.
 - Core packages: agent loop, config, domain contracts (Phase 2), strategy base,
@@ -24,6 +42,25 @@ This file records repository state separately from the target architecture in
 - **Phase 21: WorkflowRunner** — routes WorkflowCommand to state machines, type
   inference, PluginRegistry integration, lifecycle management (START/STOP/PAUSE/RESUME/
   RESTART), pair command delegation.
+- **Phase 5: Workflow State Machine Docs** — 4 lightweight spec docs in
+  docs/strategies/workflows/ (maker-rebate, event-mm, sniper, copy-trade). Each covers
+  state transitions, error handling, recovery paths, and simulation/paper mode with
+  mermaid diagrams and transition tables. ([2026-07-05] GAP-006)
+	- **Phase 7: ResearchOutcome enum** — PASS, FAIL, NO_EDGE, INCONCLUSIVE added to
+  factor_analysis.py; outcome field in FactorCard and FactorBacktestResult, computed
+  from sharpe/drawdown thresholds. ([2026-07-05] GAP-010)
+	- **Phase 7: ExecutionEvidence** — execution_model/slippage/fill_rate/cost fields
+  separated from signal metrics in FactorCard and FactorBacktestResult, summary
+  reports signal and exec evidence independently. ([2026-07-05] GAP-008)
+- **Phase 8: Validation pipeline** — ValidationGate dataclass with 3 gates (schema,
+  implementation status, risk limits) integrated into StrategyGenerator.generate();
+  docs/studio/validation-gates.md documents the chain. ([2026-07-05] GAP-011)
+- **Phase 9: CI pipeline additions** — 3 new CI jobs (license-provenance-check,
+  adapter-conformance, factor-regression) added to .github/workflows/ci.yml.
+  ([2026-07-05] GAP-013)
+- **Phase 8: GeneratedConfig provenance** — 4 fields (provenance, source_version,
+  risk_limits, execution_policy) added to GeneratedConfig, populated by all 7
+  generation paths. ([2026-07-05] GAP-012)
 - **Phase 22: PairLifecycleManager** — YES/NO token pair lifecycle (split/merge/redeem/
   sell remainder/one-sided halt), inventory tracking, on-chain sync.
 - **Phase 24: SnapshotCollector** — CLOB data collector, polls PolymarketDataAPI,
@@ -42,6 +79,9 @@ This file records repository state separately from the target architecture in
   fair-value, composite, hedge, volume).
 - **Phase 7: Factor strategies** — separate packages for each factor type, all
   implementing the score interface.
+- **Phase 7: Factor Promotion Gate** — FactorPromotionGate enforces all 7 evidence
+  requirements before factor approval. Includes CapacityAnalysis, ExecutionSensitivityReport,
+  FailureAnalysis dataclasses and PromotionCheckReport with pass/fail summary. 28 unit tests.
 - **Phase 3: Execution** — PaperExecutor, FillModel, OrderIdentity, LiveExecutor,
   Serializer.
 - **Phase 8: Studio** — NL-to-config generator, optimizer.
