@@ -178,3 +178,68 @@ class TestTakerExecutionModel:
         model = TakerExecutionModel(ExecutionModelConfig())
         slp = model.estimate_slippage(100.0, 0.0)
         assert slp == 0.0
+
+
+class TestMicroPriceSignalOnly:
+    """REF-008: Micro-price used as signal-only in execution models.
+
+    Backtesting execution models must use executable bid/ask for fill
+    prices — never micro_price, fair_value, or mid_price.
+    """
+
+    def test_taker_buy_uses_ask_not_micro_price(self) -> None:
+        """Taker BUY must use ask_price for fill, never micro_price."""
+        model = TakerExecutionModel(ExecutionModelConfig(slippage_bps=0))
+        # Use small order (ratio <= 0.1 of book) to avoid additional slippage
+        snap = _snapshot(bid=0.40, ask=0.60, mid=0.50, bid_size=5000.0, ask_size=500.0)
+        intent = _intent(OrderSide.BUY, price=0.65, size=50.0)  # ratio = 50/500 = 0.1
+
+        result = model.simulate_fill(intent, snap)
+
+        assert result.filled
+        # Should fill at ask (0.60), not at micro_price (~0.582) or mid (0.50)
+        assert (
+            result.fill_price == 0.60
+        ), f"Taker BUY fill must use ask (0.60), got {result.fill_price}"
+
+    def test_taker_sell_uses_bid_not_micro_price(self) -> None:
+        """Taker SELL must use bid_price for fill, never micro_price."""
+        model = TakerExecutionModel(ExecutionModelConfig(slippage_bps=0))
+        # Use small order (ratio <= 0.1 of book) to avoid additional slippage
+        snap = _snapshot(bid=0.40, ask=0.60, mid=0.50, bid_size=5000.0, ask_size=500.0)
+        intent = _intent(OrderSide.SELL, price=0.35, size=50.0)  # ratio = 50/5000 = 0.01
+
+        result = model.simulate_fill(intent, snap)
+
+        assert result.filled
+        assert (
+            result.fill_price == 0.40
+        ), f"Taker SELL fill must use bid (0.40), got {result.fill_price}"
+
+    def test_passive_cross_check_uses_ask_not_mid(self) -> None:
+        """Passive BUY cross check uses ask_price, not mid or micro_price.
+
+        A BUY order at 0.55 should NOT fill when ask is 0.60, even though
+        mid (0.50) is below the order price.  Using mid as fill-cross
+        threshold would incorrectly consider this crossed.
+        """
+        model = PassiveExecutionModel(ExecutionModelConfig())
+        snap = _snapshot(bid=0.40, ask=0.60, mid=0.50)
+        intent = _intent(OrderSide.BUY, price=0.55)  # above mid, below ask
+
+        result = model.simulate_fill(intent, snap)
+
+        # Must NOT fill — spread hasn't been crossed (ask 0.60 > price 0.55)
+        assert not result.filled, (
+            "Passive BUY at 0.55 must not fill when ask is 0.60 " "(mid 0.50 is not the fill price)"
+        )
+
+    def test_execution_model_src_has_no_micro_price_reference(self) -> None:
+        """Structural: execution_model.py must not reference micro_price or fair_value."""
+        import inspect
+
+        import polymind.backtesting.execution_model as em
+
+        src = inspect.getsource(em)
+        assert "micro_price" not in src, "execution_model must not reference micro_price"
+        assert "fair_value" not in src, "execution_model must not reference fair_value"

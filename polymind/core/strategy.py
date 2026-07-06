@@ -59,6 +59,19 @@ class BaseMMStrategy(ABC):
         self.config = config or StrategyConfig(name=self.__class__.__name__)
         self.name = self.config.name
 
+    # ── Market selection (REF-001d: ported from probablyprofit BaseStrategy.filter_markets) ─
+
+    def filter_markets(self, markets: list[Any]) -> list[Any]:
+        """Filter which markets to analyze this tick.
+
+        Default implementation returns all markets unchanged.  Subclasses
+        may override to implement custom filtering logic (keyword match,
+        volume threshold, active-only, etc.).
+
+        Reference: probablyprofit/agent/strategy.py:BaseStrategy.filter_markets()
+        """
+        return markets
+
     # ── Primary analysis interface (ADR 0002) ──────────────────────────────
 
     @abstractmethod

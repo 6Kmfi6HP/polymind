@@ -304,7 +304,7 @@ class TestLedgerStoreIntegration:
         intent = StrategyIntent(
             timestamp=datetime(2026, 6, 1, 12, 0, 0),
             strategy_name="persist_test",
-            orders=[OrderIntent(market_id="0xledger2", side=OrderSide.BUY, price=0.42, size=30.0)],
+            orders=[OrderIntent(market_id="0xledger2", side=OrderSide.BUY, price=0.44, size=30.0)],
         )
 
         paper_executor._current_snapshot = snapshot
@@ -373,7 +373,7 @@ class TestLedgerStoreIntegration:
         intent = StrategyIntent(
             timestamp=datetime(2026, 6, 1, 12, 0, 0),
             strategy_name="pnl_test",
-            orders=[OrderIntent(market_id="0xledger4", side=OrderSide.BUY, price=0.55, size=20.0)],
+            orders=[OrderIntent(market_id="0xledger4", side=OrderSide.BUY, price=0.51, size=20.0)],
         )
         paper_executor._current_snapshot = snapshot
         await paper_executor.execute(intent)
@@ -414,7 +414,7 @@ class TestLedgerStoreIntegration:
         intent = StrategyIntent(
             timestamp=datetime(2026, 6, 1, 12, 0, 0),
             strategy_name="recon_test",
-            orders=[OrderIntent(market_id="0xrecon1", side=OrderSide.BUY, price=0.55, size=25.0)],
+            orders=[OrderIntent(market_id="0xrecon1", side=OrderSide.BUY, price=0.51, size=25.0)],
         )
         paper_executor._current_snapshot = snapshot
         await paper_executor.execute(intent)
@@ -559,7 +559,7 @@ class TestLedgerStoreIntegration:
             timestamp=datetime(2026, 6, 15, 10, 0, 0),
             strategy_name="full_flow_test",
             orders=[
-                OrderIntent(market_id="0xfull-flow", side=OrderSide.BUY, price=0.48, size=100.0)
+                OrderIntent(market_id="0xfull-flow", side=OrderSide.BUY, price=0.50, size=100.0)
             ],
         )
         paper_executor._current_snapshot = snapshot

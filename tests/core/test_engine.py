@@ -335,3 +335,49 @@ class TestTradingEngine:
         executor.execute.return_value = {}
         result = await engine.run_tick(market)
         assert result.risk_approved is True
+
+    async def test_run_tick_all_filter(self, executor: AsyncMock, market: MarketSnapshot):
+        """run_tick_all filters markets via strategy.filter_markets."""
+        from datetime import datetime, timezone
+
+        from polymind.core.strategy import BaseMMStrategy, StrategyConfig, StrategyIntent
+
+        class FilterTestStrategy(BaseMMStrategy):
+            def __init__(self):
+                super().__init__(config=StrategyConfig(name="filter_test"))
+
+            def filter_markets(self, markets):
+                return [m for m in markets if getattr(m, "market_id", "") == "mkt_ok"]
+
+            async def analyze(self, market):
+                return StrategyIntent(
+                    timestamp=datetime.now(timezone.utc),
+                    strategy_name=self.name,
+                    orders=[],
+                )
+
+        strategy = FilterTestStrategy()
+        engine = TradingEngine(strategy=strategy, executor=executor)
+
+        mkt1 = MarketSnapshot(
+            market_id="mkt_no",
+            timestamp=datetime(2026, 7, 4),
+            bid_price=0.5,
+            ask_price=0.6,
+            mid_price=0.55,
+            bid_size=100,
+            ask_size=100,
+        )
+        mkt2 = MarketSnapshot(
+            market_id="mkt_ok",
+            timestamp=datetime(2026, 7, 4),
+            bid_price=0.5,
+            ask_price=0.6,
+            mid_price=0.55,
+            bid_size=100,
+            ask_size=100,
+        )
+
+        results = await engine.run_tick_all([mkt1, mkt2])
+        assert len(results) == 1
+        assert results[0].strategy == "filter_test"

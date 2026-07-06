@@ -5,6 +5,7 @@
 | Pattern | Cadence | Status | Command |
 |---------|---------|--------|---------|
 | Daily Triage | 1d | L1 report-only | `/loop 1d Run $loop-triage` |
+| Architecture Conformance | 45m | L2 fix-or-report | `tmux session: arch-conformance-loop → claude --dangerously-skip-permissions -p .claude/prompts/architecture-conformance-loop.md` |
 
 ## Human Gates
 

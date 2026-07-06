@@ -245,6 +245,7 @@ class FactorDiscoveryAgent:
         definition: FactorDefinition,
         snapshots: dict[str, list[MarketSnapshot]] | None = None,
         scores: dict[str, float] | None = None,
+        score_series: list[dict[str, float]] | None = None,
     ) -> FactorCard:
         """Backtest a FactorDefinition and return a FactorCard.
 
@@ -253,10 +254,16 @@ class FactorDiscoveryAgent:
         definition:
             The factor definition to backtest.
         snapshots:
-            Optional historical snapshots keyed by market_id.
+            Optional historical snapshots keyed by market_id. Each value is a
+            list of snapshots for successive time periods.
         scores:
             Optional pre-computed scores keyed by market_id.
             If None, a simple mock score is generated.
+        score_series:
+            Optional list of score dicts for successive time periods. When
+            provided together with multi-period *snapshots*, a walk-forward
+            analysis is performed and results populate the ``wf_*`` fields
+            on the returned :class:`FactorCard`.
         """
         config = FactorBacktestConfig(
             initial_capital=10_000.0,
@@ -274,7 +281,6 @@ class FactorDiscoveryAgent:
         if snapshots is None:
             snapshots = self._mock_snapshots()
 
-        # Run backtest across all timesteps
         all_snap_keys = list(snapshots.keys())
         try:
             # Run one step with all markets in scores + snapshots
@@ -291,6 +297,36 @@ class FactorDiscoveryAgent:
                 error=str(exc),
             )
 
+        # Walk-forward: run when multi-period data is provided
+        wf_fields: dict[str, float] = {}
+        if (
+            score_series is not None
+            and len(score_series) > 1
+            and all(len(v) > 1 for v in snapshots.values())
+        ):
+            try:
+                snapshot_series = [
+                    {mkt: snaps[i] for mkt, snaps in snapshots.items() if i < len(snaps)}
+                    for i in range(max(len(v) for v in snapshots.values()))
+                ]
+                # Trim to match score_series length
+                n = min(len(score_series), len(snapshot_series))
+                wf_result = FactorAnalyzer.walk_forward(
+                    score_series[:n],
+                    snapshot_series[:n],
+                    config=config,
+                    window=min(5, n),
+                    step=1,
+                )
+                wf_fields = {
+                    "wf_sharpe_mean": round(wf_result.sharpe_mean, 4),
+                    "wf_sharpe_std": round(wf_result.sharpe_std, 4),
+                    "wf_sharpe_consistency": round(wf_result.sharpe_consistency, 4),
+                    "wf_avg_drawdown": round(wf_result.avg_drawdown, 4),
+                }
+            except Exception:
+                pass
+
         return FactorCard(
             definition=definition,
             sharpe=result.sharpe,
@@ -304,8 +340,9 @@ class FactorDiscoveryAgent:
                 and result.max_drawdown <= FACTOR_APPROVAL_MAX_DRAWDOWN
             ),
             execution_evidence=result.execution_evidence,
-            # Advanced analytics
-            **self._compute_advanced_analytics(scores, step_snapshots),
+            # Advanced analytics (IC, decay, walk-forward)
+            # Merge so wf_fields override the defaults from _compute_advanced_analytics
+            **{**self._compute_advanced_analytics(scores, step_snapshots), **wf_fields},
         )
 
     def _compute_advanced_analytics(

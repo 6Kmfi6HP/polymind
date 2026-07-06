@@ -217,6 +217,102 @@ class TestPaperExecutorExecute:
         assert len(taker_executor.orders) == 0  # no orders placed
 
 
+class TestPaperExecutorBudget:
+    """Budget enforcement: PaperExecutor should reject orders exceeding cash."""
+
+    @pytest.mark.asyncio
+    async def test_reject_order_exceeding_cash(self, snap: MarketSnapshot):
+        """BUY order where price * size > cash should be silently rejected."""
+        cfg = FillModelConfig(mode=FillMode.TAKER, taker_fee_rate=0.0)
+        model = FillModel(cfg)
+        ex = PaperExecutor(fill_model=model, initial_cash=100.0)
+        ex._current_snapshot = snap
+        intent = StrategyIntent(
+            timestamp=datetime.now(timezone.utc),
+            strategy_name="test",
+            orders=[
+                OrderIntent(
+                    market_id="0xabc",
+                    side=OrderSide.BUY,
+                    price=0.85,
+                    size=200.0,  # 0.85 * 200 = 170 > 100 cash
+                ),
+            ],
+        )
+        result = await ex.execute(intent)
+        assert len(ex.orders) == 0, "Order exceeding cash should not be placed"
+        assert result.get("0xabc", {}).get("orders_placed", 0) == 0
+
+    @pytest.mark.asyncio
+    async def test_accept_order_within_cash(self, snap: MarketSnapshot):
+        """BUY order where price * size <= cash should proceed normally."""
+        cfg = FillModelConfig(mode=FillMode.TAKER, taker_fee_rate=0.0)
+        model = FillModel(cfg)
+        ex = PaperExecutor(fill_model=model, initial_cash=100.0)
+        ex._current_snapshot = snap
+        intent = StrategyIntent(
+            timestamp=datetime.now(timezone.utc),
+            strategy_name="test",
+            orders=[
+                OrderIntent(
+                    market_id="0xabc",
+                    side=OrderSide.BUY,
+                    price=0.85,
+                    size=100.0,  # 0.85 * 100 = 85 <= 100 cash
+                ),
+            ],
+        )
+        result = await ex.execute(intent)
+        assert len(ex.orders) == 1
+        assert result["0xabc"]["orders_placed"] == 1
+
+    @pytest.mark.asyncio
+    async def test_accept_exact_cash_boundary(self, snap: MarketSnapshot):
+        """BUY order at exact cash boundary should be accepted."""
+        cfg = FillModelConfig(mode=FillMode.TAKER, taker_fee_rate=0.0)
+        model = FillModel(cfg)
+        ex = PaperExecutor(fill_model=model, initial_cash=85.0)
+        ex._current_snapshot = snap
+        intent = StrategyIntent(
+            timestamp=datetime.now(timezone.utc),
+            strategy_name="test",
+            orders=[
+                OrderIntent(
+                    market_id="0xabc",
+                    side=OrderSide.BUY,
+                    price=0.85,
+                    size=100.0,  # 0.85 * 100 = 85 == 85 cash
+                ),
+            ],
+        )
+        result = await ex.execute(intent)
+        assert len(ex.orders) == 1
+        assert result["0xabc"]["orders_placed"] == 1
+
+    @pytest.mark.asyncio
+    async def test_sell_no_budget_check(self, snap: MarketSnapshot):
+        """SELL orders should proceed without cash check."""
+        cfg = FillModelConfig(mode=FillMode.TAKER, taker_fee_rate=0.0)
+        model = FillModel(cfg)
+        ex = PaperExecutor(fill_model=model, initial_cash=1.0)  # very low cash
+        ex._current_snapshot = snap
+        intent = StrategyIntent(
+            timestamp=datetime.now(timezone.utc),
+            strategy_name="test",
+            orders=[
+                OrderIntent(
+                    market_id="0xabc",
+                    side=OrderSide.SELL,
+                    price=0.80,
+                    size=100.0,
+                ),
+            ],
+        )
+        result = await ex.execute(intent)
+        assert len(ex.orders) == 1
+        assert result["0xabc"]["orders_placed"] == 1
+
+
 class TestPaperExecutorFillRecording:
     @pytest.mark.asyncio
     async def test_fill_event_recorded(self, taker_executor: PaperExecutor, snap: MarketSnapshot):

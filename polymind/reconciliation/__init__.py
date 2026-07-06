@@ -3,6 +3,11 @@
 from polymind.reconciliation.balances import BalanceReconciler, BalanceSnapshot, BalanceStatus
 from polymind.reconciliation.fills import FillReconciler, FillReconciliationRecord
 from polymind.reconciliation.recovery import RecoveryAction, RecoveryManager, RecoveryRecord
+from polymind.reconciliation.verifier import (
+    FillVerificationResult,
+    FillVerificationStatus,
+    ThreeWayFillVerifier,
+)
 
 __all__ = [
     "FillReconciler",
@@ -13,4 +18,7 @@ __all__ = [
     "RecoveryManager",
     "RecoveryAction",
     "RecoveryRecord",
+    "ThreeWayFillVerifier",
+    "FillVerificationResult",
+    "FillVerificationStatus",
 ]

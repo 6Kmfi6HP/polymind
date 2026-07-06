@@ -193,6 +193,12 @@ class PaperExecutor(IntentExecutor):
         if oid_str in self.orders:
             return
 
+        # Budget enforcement: reject BUY orders that exceed available cash
+        if order.side.value == "BUY":
+            required_cash = order.price * order.size
+            if required_cash > self.cash:
+                return  # silently skip — budget exceeded
+
         record = OrderRecord(
             identity=identity,
             intent=order,

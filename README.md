@@ -73,19 +73,12 @@ Polymind merges **eight existing Polymarket projects** into one unified, AI-nati
 | ✅ **Complete** | **Factor CLI** | AI factor discovery, backtesting, IC analysis, variation recommendation |
 | ✅ **Complete** | **Plugin System** | Entry-point based plugin discovery with `polymind plugin` CLI |
 | ✅ **Complete** | **Daemon Mode** | Continuous TradingEngine operation with file logging |
+| ✅ **Complete** | **License & Provenance** | THIRD_PARTY.md, LGPL boundary ADR (ADR 0005), superseded-spec markers |
+| ✅ **Complete** | **Official MM Parity** | 35-test parity suite + design divergence analysis doc |
+| ✅ **Complete** | **Workflow Simulation Mode** | paper_mode flag in all 4 workflow state machines + WorkflowRunner |
+| ✅ **Complete** | **Release & Packaging** | RELEASE.md, Makefile check-release-readiness target |
 
-**1,715 tests passing · 97% coverage · 0 mypy errors · 3 exchange adapters · 7 strategies · AI factor discovery · Full CLI**
-
----
-
-## Planned
-
-| Status | Item | Notes |
-|--------|------|-------|
-| 🔜 **Planned** | License & Provenance | THIRD_PARTY.md, LGPL boundary doc, superseded-spec markers |
-| 🔜 **Planned** | Official MM Parity | Parity test harness comparing Polymind vs official keeper output |
-| 🔜 **Planned** | Workflow Simulation Mode | Paper/simulation mode flag in workflow constructors |
-| 🔜 **Planned** | Release & Packaging | Release checklist, PyPI readiness verification |
+**1,924 tests passing · 97% coverage · 0 mypy errors · 3 exchange adapters · 7 strategies · AI factor discovery · Full CLI**
 
 ---
 
@@ -198,7 +191,7 @@ polymind/
 │   └── utils/                    # Logging, secrets, kill switch, preflight
 │
 ├── docs/                         # Architecture decisions & reference evidence
-└── tests/                        # 44 test files, 1,715+ tests
+└── tests/                        # 44 test files, 1,924+ tests
 ```
 
 ---

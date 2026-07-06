@@ -29,6 +29,31 @@ This file records repository state separately from the target architecture in
 - **Phase 1: AgentMemory** — AgentMemory class added to polymind/core/agent.py with
   bounded deque (100-entry) + asyncio.Lock thread safety + get_recent_history. Wired
   into BaseAgent.observe() and act(). 12 new tests. ([2026-07-06] REF-001)
+- **Phase 1: Position dedup** — _open_positions set with _has_position/_record_position/
+  _discard_position in BaseAgent; observe() syncs from API positions; act() skips
+  duplicate buy decisions and discards on sell/close. 15 new tests. ([2026-07-06] REF-001b)
+- **Phase 1: RiskManager auto-sizing** — 3 new sizing methods (fixed_pct, confidence_based,
+  dynamic) + should_stop_loss + should_take_profit. Ported from probablyprofit risk/manager.py
+  (REF-001c). 20 new tests. ([2026-07-06] REF-001c)
+- **Phase 1: Strategy filter_markets** — BaseMMStrategy.filter_markets() ported from
+  probablyprofit/agent/strategy.py (REF-001d). Default pass-through; any strategy can override.
+  TradingEngine.run_tick_all() connects filter → analyze pipeline for multi-market operation.
+  5 new tests. ([2026-07-06] REF-001d)
+- **Phase 5: REF-005 Paper OMS budget enforcement** — PaperExecutor._process_order now rejects BUY orders exceeding available cash. 4 new tests. 1876 full suite pass. ([2026-07-06] REF-005)
+- **Phase 5: REF-003 warproxxx verification** — Verified no business logic in WebSocket
+  callbacks (transport layer is pure); per-market serialization (state machine instances
+  are isolated per workflow_id). 90 related tests pass. ([2026-07-06] REF-003)
+- **Phase 5: REF-004 ghost-fill recovery** — ThreeWayFillVerifier integrates WebSocket,
+  CLOB, and on-chain balance into unified three-way fill verification oracle. Detects
+  ghost fills (on-chain confirms but no local record), missing fills (expected but not
+  on-chain), and discrepancies. Creates synthetic fills for ghost recovery. 23 new
+  tests. 1872 full suite pass. ([2026-07-06] REF-004)
+- **Phase 7: REF-007 Queue position + partial-fill model** — FillModel._simulate_passive now uses queue_position_pct as fill threshold (front=fills, back=never) and partial_fill_probability for partial fills, both via deterministic hash (no random.random()). 9 new tests. 1885 full suite pass. ([2026-07-06] REF-007)
+- **Phase 7: REF-008 Micro-price signal-only enforcement** — 7 enforcement tests (3 in FillModel + 4 in execution models) verifying that micro-price/fair-value are never used as fill prices; only bid/ask are fill price sources. Structural import checks prevent regression. 388 related tests pass. ([2026-07-06] REF-008)
+- **Phase 7: REF-006 Walk-forward gate completeness** — FactorDiscoveryAgent.backtest()
+  accepts optional score_series parameter; when multi-period data is provided,
+  FactorAnalyzer.walk_forward() runs and populates FactorCard.wf_* fields (sharpe_mean,
+  sharpe_std, sharpe_consistency, avg_drawdown). 4 new tests. ([2026-07-06] REF-006)
 - **Phase 5: Workflow paper_mode** — paper_mode flag added to all 4 workflow
   state machine constructors + WorkflowRunner wire-up. ([2026-07-05] GAP-007)
 - **Phase 9: Release checklist** — RELEASE.md created with 4-step release

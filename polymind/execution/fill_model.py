@@ -8,6 +8,7 @@ fill at executable price).
 
 from __future__ import annotations
 
+import hashlib
 from dataclasses import dataclass
 from datetime import datetime
 from enum import Enum, auto
@@ -117,7 +118,14 @@ class FillModel:
         intent: OrderIntent,
         snapshot: MarketSnapshot,
     ) -> FillResult:
-        """Simulate a passive fill based on price crossing."""
+        """Simulate a passive fill based on price crossing, queue position, and partial fills.
+
+        1. If price has not crossed → no fill.
+        2. If price has crossed, queue position determines whether the order is
+           at the front of the queue (fills) or still waiting.
+        3. If filling and ``partial_fill_probability > 0``, only a fraction of the
+           order fills; the remainder stays as ``remaining_size``.
+        """
         crossed = self._price_crossed(intent, snapshot)
         if not crossed:
             return FillResult(
@@ -128,17 +136,63 @@ class FillModel:
                 remaining_size=intent.size,
                 timestamp=snapshot.timestamp,
             )
+
+        # Queue position — at front?  front = queue_position_pct near 0.0
+        if not self._queue_allows_fill(intent):
+            return FillResult(
+                filled=False,
+                fill_price=0.0,
+                fill_size=0.0,
+                fee=0.0,
+                remaining_size=intent.size,
+                timestamp=snapshot.timestamp,
+            )
+
+        # Determine fill size (possibly partial)
+        if self.config.partial_fill_probability > 0.0:
+            fill_size = round(intent.size * (1.0 - self.config.partial_fill_probability), 8)
+            remaining = intent.size - fill_size
+        else:
+            fill_size = intent.size
+            remaining = 0.0
+
         fill_price = intent.price
         fee_rate = self.config.maker_fee_rate
-        fee = intent.size * fill_price * fee_rate
+        fee = fill_size * fill_price * fee_rate
         return FillResult(
             filled=True,
             fill_price=fill_price,
-            fill_size=intent.size,
+            fill_size=fill_size,
             fee=fee,
-            remaining_size=0.0,
+            remaining_size=remaining,
             timestamp=snapshot.timestamp,
         )
+
+    def _queue_allows_fill(self, intent: OrderIntent) -> bool:
+        """Deterministic check of whether the order is at the front of the queue.
+
+        Uses ``queue_position_pct`` (0.0 = front, 1.0 = back).  The fill
+        probability is ``1.0 - queue_position_pct``.  A deterministic hash of the
+        intent produces a value in [0, 1) that is compared against that threshold
+        so simulation results are reproducible across runs.
+
+        At the extremes:
+        - ``queue_position_pct == 0.0`` → always fills (front of queue).
+        - ``queue_position_pct == 1.0`` → never fills (back of queue).
+        """
+        fill_prob = 1.0 - self.config.queue_position_pct
+        if fill_prob >= 1.0:
+            return True
+        if fill_prob <= 0.0:
+            return False
+        return self._fill_determinant(intent) < fill_prob
+
+    @staticmethod
+    def _fill_determinant(intent: OrderIntent) -> float:
+        """Deterministic value in [0, 1) derived from the intent for reproducible simulation."""
+        raw = f"{intent.market_id}:{intent.side.value}:{intent.price}:{intent.size}"
+        digest = hashlib.md5(raw.encode()).hexdigest()
+        return int(digest[:8], 16) / 0xFFFFFFFF
 
     @staticmethod
     def _price_crossed(intent: OrderIntent, snapshot: MarketSnapshot) -> bool:

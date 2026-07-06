@@ -11,6 +11,14 @@ import pytest
 from polymind.core.agent import AgentMemory, BaseAgent, Decision, Observation
 
 
+class SimpleMock:
+    """Lightweight mock for position objects returned by get_positions()."""
+
+    def __init__(self, **kwargs):
+        for k, v in kwargs.items():
+            setattr(self, k, v)
+
+
 class TestObservation:
     def test_minimal(self):
         now = datetime.now()
@@ -55,7 +63,7 @@ class TestBaseAgent:
     async def test_dry_run(self):
         agent = self._TestAgent()
         agent.dry_run = True
-        decision = Decision(action="buy", market_id="0xabc", size=10.0, price=0.5)
+        decision = Decision(action="buy", market_id="0xabc", outcome="YES", size=10.0, price=0.5)
         result = await agent.act(decision)
         assert result is True
 
@@ -95,7 +103,7 @@ class TestBaseAgent:
         """act() with non-hold action, not dry run (line 87)."""
         agent = self._TestAgent()
         agent.dry_run = False
-        decision = Decision(action="buy", market_id="0xabc", size=10.0)
+        decision = Decision(action="buy", market_id="0xabc", outcome="YES", size=10.0)
         result = await agent.act(decision)
         assert result is True
 
@@ -104,9 +112,147 @@ class TestBaseAgent:
         """act() with non-hold, non-dry run with mock client."""
         agent = self._TestAgent()
         agent.dry_run = False
-        decision = Decision(action="close", market_id="0xabc")
+        decision = Decision(action="close", market_id="0xabc", outcome="YES")
         result = await agent.act(decision)
         assert result is True
+
+    # --- REF-001b: Position dedup ---
+
+    @pytest.mark.asyncio
+    async def test_has_position_returns_false_initially(self):
+        agent = self._TestAgent()
+        assert agent._has_position("0x1", "YES") is False
+
+    @pytest.mark.asyncio
+    async def test_record_position_then_has_position(self):
+        agent = self._TestAgent()
+        agent._record_position("0x1", "YES")
+        assert agent._has_position("0x1", "YES") is True
+        assert agent._has_position("0x1", "NO") is False
+
+    @pytest.mark.asyncio
+    async def test_discard_position_removes_it(self):
+        agent = self._TestAgent()
+        agent._record_position("0x1", "YES")
+        assert agent._has_position("0x1", "YES") is True
+        agent._discard_position("0x1", "YES")
+        assert agent._has_position("0x1", "YES") is False
+
+    @pytest.mark.asyncio
+    async def test_discard_nonexistent_position_does_not_raise(self):
+        agent = self._TestAgent()
+        agent._discard_position("0xmissing", "YES")  # should not raise
+        assert len(agent._open_positions) == 0
+
+    @pytest.mark.asyncio
+    async def test_buy_skip_existing_position(self):
+        """act('buy') skips when position already tracked (dedup)."""
+        agent = self._TestAgent()
+        agent._record_position("0x1", "YES")  # already have it
+        result = await agent.act(Decision(action="buy", market_id="0x1", outcome="YES"))
+        assert result is True  # not an error, just skip
+        # Still only one entry (did not double-add)
+        assert len([k for k in agent._open_positions if k == "0x1:YES"]) == 1
+
+    @pytest.mark.asyncio
+    async def test_buy_records_position_when_new(self):
+        """act('buy') records position when no existing position."""
+        agent = self._TestAgent()
+        result = await agent.act(Decision(action="buy", market_id="0x1", outcome="YES"))
+        assert result is True
+        assert agent._has_position("0x1", "YES") is True
+
+    @pytest.mark.asyncio
+    async def test_buy_missing_fields_returns_false(self):
+        agent = self._TestAgent()
+        result = await agent.act(Decision(action="buy"))  # no market_id / outcome
+        assert result is False
+
+    @pytest.mark.asyncio
+    async def test_act_sell_discards_position(self):
+        agent = self._TestAgent()
+        agent._record_position("0x1", "YES")
+        result = await agent.act(Decision(action="sell", market_id="0x1", outcome="YES"))
+        assert result is True
+        assert agent._has_position("0x1", "YES") is False
+
+    @pytest.mark.asyncio
+    async def test_act_close_discards_position(self):
+        agent = self._TestAgent()
+        agent._record_position("0x1", "YES")
+        result = await agent.act(Decision(action="close", market_id="0x1", outcome="YES"))
+        assert result is True
+        assert agent._has_position("0x1", "YES") is False
+
+    @pytest.mark.asyncio
+    async def test_observe_syncs_api_positions(self):
+        """observe() syncs positions from API response into _open_positions."""
+        from unittest.mock import AsyncMock
+
+        agent = self._TestAgent()
+        mock = AsyncMock()
+        mock.get_markets = AsyncMock(return_value=[])
+        mock.get_positions = AsyncMock(
+            return_value=[
+                SimpleMock(market_id="0xa", outcome="YES", size=10),
+                SimpleMock(market_id="0xa", outcome="NO", size=5),
+            ]
+        )
+        mock.get_balance = AsyncMock(return_value=100.0)
+        agent.client = mock
+        await agent.observe()
+        assert agent._has_position("0xa", "YES") is True
+        assert agent._has_position("0xa", "NO") is True
+        assert agent._has_position("0xb", "YES") is False
+
+    @pytest.mark.asyncio
+    async def test_observe_empty_positions(self):
+        """observe() with no positions leaves set empty."""
+        from unittest.mock import AsyncMock
+
+        agent = self._TestAgent()
+        mock = AsyncMock()
+        mock.get_markets = AsyncMock(return_value=[])
+        mock.get_positions = AsyncMock(return_value=[])
+        mock.get_balance = AsyncMock(return_value=100.0)
+        agent.client = mock
+        await agent.observe()
+        assert len(agent._open_positions) == 0
+
+    @pytest.mark.asyncio
+    async def test_buy_dry_run_records_position(self):
+        agent = self._TestAgent()
+        agent.dry_run = True
+        result = await agent.act(Decision(action="buy", market_id="0x1", outcome="YES"))
+        assert result is True
+        assert agent._has_position("0x1", "YES") is True
+
+    @pytest.mark.asyncio
+    async def test_run_loop_skip_duplicate_buy(self):
+        """Full loop: buy a position twice -> second act skips."""
+        import asyncio
+
+        agent = self._TestAgent()
+        agent.loop_interval = 0.005
+        call_count = 0
+
+        async def alternating_decide(obs):
+            nonlocal call_count
+            call_count += 1
+            if call_count == 1:
+                return Decision(action="buy", market_id="0x1", outcome="YES", reasoning="first")
+            return Decision(action="buy", market_id="0x1", outcome="YES", reasoning="dup")
+
+        agent.decide = alternating_decide  # type: ignore[assignment]
+
+        loop_task = asyncio.create_task(agent.run_loop())
+        await asyncio.sleep(0.03)
+        agent.stop()
+        await loop_task
+
+        # Position recorded once despite two buy decisions
+        assert len(agent._open_positions) == 1
+        assert agent._has_position("0x1", "YES") is True
 
     @pytest.mark.asyncio
     async def test_observe_with_mock_client(self):

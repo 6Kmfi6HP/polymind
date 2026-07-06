@@ -194,6 +194,28 @@ class TradingEngine:
         self._last_result = result
         return result
 
+    async def run_tick_all(self, markets: list[MarketSnapshot]) -> list[TickResult]:
+        """Execute one observe-decide-act cycle over *all* filtered markets.
+
+        Parameters
+        ----------
+        markets:
+            All available market snapshots.  The strategy's **filter_markets**
+            method is called first, then **analyze** is run on each filtered
+            market.
+
+        Returns
+        -------
+        list[TickResult]
+            One result per market that passed the filter.
+        """
+        filtered = self._strategy.filter_markets(markets)
+        results: list[TickResult] = []
+        for m in filtered:
+            r = await self.run_tick(m)
+            results.append(r)
+        return results
+
     async def run_forever(
         self,
         market_provider: Callable[[], Awaitable[MarketSnapshot]],

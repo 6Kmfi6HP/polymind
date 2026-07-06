@@ -81,6 +81,73 @@ class TestBaseMMStrategy:
         strategy = NoopStrategy()
         assert await strategy.risk_check() is True
 
+    @pytest.mark.asyncio
+    async def test_filter_markets_default(self):
+        """Default filter_markets returns all markets unchanged."""
+        strategy = NoopStrategy()
+        markets = ["mkt1", "mkt2", "mkt3"]
+        result = strategy.filter_markets(markets)
+        assert result == markets
+
+    @pytest.mark.asyncio
+    async def test_filter_markets_custom(self):
+        """Custom filter_markets on concrete strategy."""
+        strategy = FilterOnlyStrategy(allowed={"allowed_market"})
+        all_markets = ["mkt1", "allowed_market", "mkt2"]
+        result = strategy.filter_markets(all_markets)
+        assert result == ["allowed_market"]
+
+    @pytest.mark.asyncio
+    async def test_filter_markets_empty(self):
+        """filter_markets returns empty list when nothing passes."""
+        strategy = FilterOnlyStrategy(allowed=set())
+        result = strategy.filter_markets(["mkt1", "mkt2"])
+        assert result == []
+
+    @pytest.mark.asyncio
+    async def test_strategy_with_filter_markets_in_engine(self):
+        """filter_markets is called before analyze in TradingEngine.run_tick_all."""
+        from datetime import datetime
+        from unittest.mock import AsyncMock
+
+        from polymind.core.engine import TradingEngine, TradingEngineConfig
+        from polymind.core.intents import IntentExecutor
+        from polymind.execution.fill_model import MarketSnapshot
+
+        strategy = FilterOnlyStrategy(allowed={"mkt2"})
+        executor = AsyncMock(spec=IntentExecutor)
+        executor.execute = AsyncMock(return_value={})
+        engine = TradingEngine(
+            strategy=strategy,
+            executor=executor,
+            config=TradingEngineConfig(strategy_name="test"),
+        )
+
+        snapshots = [
+            MarketSnapshot(
+                market_id="mkt1",
+                timestamp=datetime(2026, 7, 4),
+                bid_price=0.5,
+                ask_price=0.6,
+                mid_price=0.55,
+                bid_size=100,
+                ask_size=100,
+            ),
+            MarketSnapshot(
+                market_id="mkt2",
+                timestamp=datetime(2026, 7, 4),
+                bid_price=0.5,
+                ask_price=0.6,
+                mid_price=0.55,
+                bid_size=100,
+                ask_size=100,
+            ),
+        ]
+
+        results = await engine.run_tick_all(snapshots)
+        assert len(results) == 1  # only mkt2 passed the filter
+        assert results[0].strategy == "test"
+
 
 # ── Concrete strategy stubs for testing ──────────────────────────────────
 
@@ -121,3 +188,21 @@ class CancelOnlyStrategy(BaseMMStrategy):
         now = datetime.now(timezone.utc)
         cancel = CancelIntent(market_id="0x222", reason="reprice")
         return StrategyIntent(timestamp=now, strategy_name=self.name, cancels=[cancel])
+
+
+class FilterOnlyStrategy(BaseMMStrategy):
+    """Strategy that filters markets to a specific set (REF-001d)."""
+
+    def __init__(self, allowed: set[str] | None = None):
+        super().__init__(config=StrategyConfig(name="FilterOnly"))
+        self._allowed = allowed or set()
+
+    def filter_markets(self, markets: list[Any]) -> list[Any]:
+        return [m for m in markets if self._is_allowed(m)]
+
+    def _is_allowed(self, market: Any) -> bool:
+        mid = market if isinstance(market, str) else getattr(market, "market_id", "")
+        return mid in self._allowed
+
+    async def analyze(self, market: Any) -> StrategyIntent | None:
+        return None

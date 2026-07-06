@@ -633,3 +633,185 @@ class TestFactorDiscoveryAgent:
         result = agent._compute_advanced_analytics({}, {})
         assert result["ic_rank"] == 0.0
         assert result["wf_sharpe_mean"] == 0.0
+
+    # ── Walk-forward integration tests ──────────────────────────────────────
+
+    @pytest.mark.asyncio
+    async def test_walk_forward_multi_period_populates_wf_fields(self):
+        """backtest with score_series + multi-period snapshots populates wf_ fields."""
+        from datetime import datetime
+
+        from polymind.execution.fill_model import MarketSnapshot
+
+        agent = FactorDiscoveryAgent()
+        fd = FactorDefinition(name="wf_test", lookback="7d", top_n=2)
+
+        # Multi-period data: 8 periods, 4 markets.
+        # Scores oscillate so ranking changes period-to-period -> turnover.
+        # Price movement per period (0.05) exceeds spread (0.01) so trades can be profitable.
+        markets = ["m1", "m2", "m3", "m4"]
+        snapshots: dict[str, list[MarketSnapshot]] = {}
+        score_series: list[dict[str, float]] = []
+
+        n_periods = 8
+        for period in range(n_periods):
+            scores: dict[str, float] = {}
+            for i, mkt in enumerate(markets):
+                if mkt not in snapshots:
+                    snapshots[mkt] = []
+                mid = 0.50 + period * 0.05 + i * 0.01
+                snapshots[mkt].append(
+                    MarketSnapshot(
+                        market_id=mkt,
+                        timestamp=datetime(2026, 7, 4 + period),
+                        bid_price=mid - 0.005,
+                        ask_price=mid + 0.005,
+                        mid_price=mid,
+                        bid_size=1000,
+                        ask_size=1000,
+                    )
+                )
+                # Oscillating scores: each market takes turns being top-ranked
+                offset = (period + i) % len(markets)
+                scores[mkt] = round((4 - offset) * 0.2, 4)
+            score_series.append(scores)
+
+        card = await agent.backtest(fd, snapshots=snapshots, score_series=score_series)
+        assert isinstance(card, FactorCard)
+        # Walk-forward fields should be populated (non-zero) from multi-period data
+        assert card.wf_sharpe_mean != 0.0, "wf_sharpe_mean should be populated by walk-forward"
+        assert (
+            card.wf_sharpe_consistency != 0.0
+        ), "wf_sharpe_consistency should be populated by walk-forward"
+        # wf_sharpe_std is valid even when 0 (all windows identical)
+        assert isinstance(card.wf_sharpe_std, float)
+        # avg_drawdown can be 0.0 for monotonic PnL; just check it's a valid float
+        assert isinstance(card.wf_avg_drawdown, float)
+
+    @pytest.mark.asyncio
+    async def test_walk_forward_single_period_defaults(self):
+        """backtest without score_series keeps wf_ fields at 0."""
+        from datetime import datetime
+
+        from polymind.execution.fill_model import MarketSnapshot
+
+        agent = FactorDiscoveryAgent()
+        fd = FactorDefinition(name="wf_default", lookback="7d", top_n=2)
+
+        # Single-period data only (no score_series)
+        snapshots = {
+            "m1": [
+                MarketSnapshot(
+                    market_id="m1",
+                    timestamp=datetime(2026, 7, 4),
+                    bid_price=0.48,
+                    ask_price=0.52,
+                    mid_price=0.50,
+                    bid_size=1000,
+                    ask_size=1000,
+                ),
+            ],
+            "m2": [
+                MarketSnapshot(
+                    market_id="m2",
+                    timestamp=datetime(2026, 7, 4),
+                    bid_price=0.38,
+                    ask_price=0.42,
+                    mid_price=0.40,
+                    bid_size=1000,
+                    ask_size=1000,
+                ),
+            ],
+        }
+        scores = {"m1": 0.9, "m2": 0.1}
+
+        # Call without score_series
+        card = await agent.backtest(fd, snapshots=snapshots, scores=scores)
+        assert card.wf_sharpe_mean == 0.0
+        assert card.wf_sharpe_std == 0.0
+        assert card.wf_sharpe_consistency == 0.0
+        assert card.wf_avg_drawdown == 0.0
+
+    @pytest.mark.asyncio
+    async def test_walk_forward_short_series(self):
+        """Fewer score_series periods than window returns empty result (wf defaults)."""
+        from datetime import datetime
+
+        from polymind.execution.fill_model import MarketSnapshot
+
+        agent = FactorDiscoveryAgent()
+        fd = FactorDefinition(name="wf_short", lookback="7d", top_n=1)
+
+        # 2 periods, 3 markets — too few for a window of 5
+        markets = ["m1", "m2", "m3"]
+        snapshots: dict[str, list[MarketSnapshot]] = {}
+        score_series: list[dict[str, float]] = []
+
+        for period in range(2):
+            scores: dict[str, float] = {}
+            for i, mkt in enumerate(markets):
+                if mkt not in snapshots:
+                    snapshots[mkt] = []
+                mid = 0.50 + period * 0.01 + i * 0.02
+                snapshots[mkt].append(
+                    MarketSnapshot(
+                        market_id=mkt,
+                        timestamp=datetime(2026, 7, 4 + period),
+                        bid_price=mid - 0.02,
+                        ask_price=mid + 0.02,
+                        mid_price=mid,
+                        bid_size=1000,
+                        ask_size=1000,
+                    )
+                )
+                scores[mkt] = round(0.5 + i * 0.1, 4)
+            score_series.append(scores)
+
+        card = await agent.backtest(fd, snapshots=snapshots, score_series=score_series)
+        # 2 periods < window 5 => walk_forward returns empty => defaults stay 0
+        assert card.wf_sharpe_mean == 0.0
+        assert card.wf_sharpe_consistency == 0.0
+
+    @pytest.mark.asyncio
+    async def test_walk_forward_backtest_exception(self):
+        """Exception in walk-forward falls back silently (wf_ fields stay 0)."""
+        from datetime import datetime
+        from unittest.mock import patch
+
+        from polymind.execution.fill_model import MarketSnapshot
+
+        agent = FactorDiscoveryAgent()
+        fd = FactorDefinition(name="wf_exc", lookback="7d", top_n=2)
+
+        markets = ["m1", "m2"]
+        snapshots: dict[str, list[MarketSnapshot]] = {}
+        score_series: list[dict[str, float]] = []
+
+        for period in range(6):
+            scores: dict[str, float] = {}
+            for mkt in markets:
+                if mkt not in snapshots:
+                    snapshots[mkt] = []
+                mid = 0.50 + period * 0.01
+                snapshots[mkt].append(
+                    MarketSnapshot(
+                        market_id=mkt,
+                        timestamp=datetime(2026, 7, 4 + period),
+                        bid_price=mid - 0.02,
+                        ask_price=mid + 0.02,
+                        mid_price=mid,
+                        bid_size=1000,
+                        ask_size=1000,
+                    )
+                )
+                scores[mkt] = 0.5
+            score_series.append(scores)
+
+        with patch("polymind.studio.factor_discovery.FactorAnalyzer.walk_forward") as mock_wf:
+            mock_wf.side_effect = ValueError("walk-forward crashed")
+            card = await agent.backtest(fd, snapshots=snapshots, score_series=score_series)
+        # Exception caught silently, wf fields stay at 0
+        assert card.wf_sharpe_mean == 0.0
+        assert card.wf_sharpe_std == 0.0
+        assert card.wf_sharpe_consistency == 0.0
+        assert card.wf_avg_drawdown == 0.0
