@@ -78,6 +78,27 @@ Polymind merges **eight existing Polymarket projects** into one unified, AI-nati
 
 ---
 
+## Planned
+
+| Status | Item | Notes |
+|--------|------|-------|
+| 🔜 **Planned** | License & Provenance | THIRD_PARTY.md, LGPL boundary doc, superseded-spec markers |
+| 🔜 **Planned** | Official MM Parity | Parity test harness comparing Polymind vs official keeper output |
+| 🔜 **Planned** | Workflow Simulation Mode | Paper/simulation mode flag in workflow constructors |
+| 🔜 **Planned** | Release & Packaging | Release checklist, PyPI readiness verification |
+
+---
+
+## Research-Blocked
+
+| Status | Item | Blocked By |
+|--------|------|-----------|
+| 🔬 **Research** | LLM-powered factor discovery | Needs execution-reality validation — reference momentum shows 6.19 Sharpe BT → −13.6% live paper PnL |
+| 🔬 **Research** | Live trading performance | Requires sustained paper trading track record across market conditions |
+| 🔬 **Research** | Third-party code provenance | Awaiting legal review of LGPL-scoped reference code |
+
+---
+
 ## Quick Start
 
 ```bash

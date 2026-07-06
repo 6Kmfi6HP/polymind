@@ -1,4 +1,4 @@
-.PHONY: help install test test-all lint format check build clean pre-commit
+.PHONY: help install test test-all lint format check build clean pre-commit check-release-readiness
 
 PYTHON ?= python3
 
@@ -33,3 +33,15 @@ clean: ## Clean build artifacts
 
 pre-commit: ## Run pre-commit on all files
 	pre-commit run --all-files
+
+.PHONY: check-release-readiness
+check-release-readiness:
+	@echo "=== Checking all public modules import ==="
+	python -c "import polymind; print('polymind:', dir(polymind))"
+	@echo "=== Running full test suite ==="
+	python -m pytest tests/ -q --timeout=60
+	@echo "=== Checking for NotImplementedError stubs ==="
+	! grep -r "NotImplementedError" polymind/ --include="*.py" | grep -v "__pycache__" | grep -v ".pyc" || echo "WARNING: NotImplementedError stubs found"
+	@echo "=== Verifying entry points ==="
+	python -c "from polymind.cli.main import main; print('CLI entry point: OK')"
+	@echo "=== Release readiness check complete ==="
