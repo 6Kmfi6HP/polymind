@@ -107,3 +107,20 @@ class TestCopyTradeStateMachine:
         sm.reset()
         assert sm.state == CopyTradeState.IDLE
         assert sm.history == []
+
+    def test_paper_mode_defaults_to_false(self):
+        sm = CopyTradeStateMachine(workflow_id="ct-011")
+        assert sm.paper_mode is False
+        assert sm.is_paper_mode is False
+
+    def test_paper_mode_can_be_set_to_true(self):
+        sm = CopyTradeStateMachine(workflow_id="ct-012", paper_mode=True)
+        assert sm.paper_mode is True
+        assert sm.is_paper_mode is True
+
+    def test_is_paper_mode_property(self):
+        sm = CopyTradeStateMachine(workflow_id="ct-013", paper_mode=True)
+        assert sm.is_paper_mode is True
+        assert isinstance(sm.is_paper_mode, bool)
+        sm2 = CopyTradeStateMachine(workflow_id="ct-014", paper_mode=False)
+        assert sm2.is_paper_mode is False

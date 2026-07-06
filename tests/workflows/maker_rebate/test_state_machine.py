@@ -96,3 +96,20 @@ class TestRebateStateMachine:
         assert sm.state == RebateState.AWAITING_FILLS
         sm.transition(RebateEvent.ALL_FILLED)
         assert sm.state == RebateState.FILLS_COMPLETE
+
+    def test_paper_mode_defaults_to_false(self):
+        sm = RebateStateMachine("wf-009")
+        assert sm.paper_mode is False
+        assert sm.is_paper_mode is False
+
+    def test_paper_mode_can_be_set_to_true(self):
+        sm = RebateStateMachine("wf-010", paper_mode=True)
+        assert sm.paper_mode is True
+        assert sm.is_paper_mode is True
+
+    def test_is_paper_mode_property(self):
+        sm = RebateStateMachine("wf-011", paper_mode=True)
+        assert sm.is_paper_mode is True
+        assert isinstance(sm.is_paper_mode, bool)
+        sm2 = RebateStateMachine("wf-012", paper_mode=False)
+        assert sm2.is_paper_mode is False

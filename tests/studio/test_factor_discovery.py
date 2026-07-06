@@ -6,6 +6,7 @@ from __future__ import annotations
 
 import pytest
 
+from polymind.backtesting.factor_bt import ExecutionEvidence
 from polymind.studio.factor_discovery import (
     FACTOR_APPROVAL_MAX_DRAWDOWN,
     FACTOR_APPROVAL_MIN_SHARPE,
@@ -47,12 +48,15 @@ class TestFactorCard:
         )
         assert card.approved is True
         assert "APPROVED" in card.summary
+        assert hasattr(card, "execution_evidence")
+        assert card.execution_evidence.execution_model == "paper"
 
     def test_rejected_card(self):
         fd = FactorDefinition(name="bad")
         card = FactorCard(definition=fd, sharpe=-0.5, approved=False)
         assert card.approved is False
         assert "REJECTED" in card.summary
+        assert card.execution_evidence.live_result is False
 
     def test_summary_format(self):
         fd = FactorDefinition(name="momentum_7d")
@@ -72,6 +76,33 @@ class TestFactorCard:
         fd = FactorDefinition()
         card = FactorCard(definition=fd)
         assert card.error == ""
+
+    def test_execution_evidence_defaults(self):
+        """FactorCard execution_evidence defaults to paper assumptions."""
+        fd = FactorDefinition(name="test")
+        card = FactorCard(definition=fd)
+        ev = card.execution_evidence
+        assert ev.execution_model == "paper"
+        assert ev.slippage_model == "zero-cost"
+        assert ev.fill_rate == 1.0
+        assert ev.avg_slippage_bps == 0.0
+
+    def test_execution_evidence_custom(self):
+        """ExecutionEvidence can be set to live mode."""
+        from polymind.backtesting.factor_bt import ExecutionEvidence
+
+        fd = FactorDefinition(name="live_test")
+        ev = ExecutionEvidence(
+            execution_model="live",
+            slippage_model="fixed 3bps",
+            fill_rate=0.95,
+            avg_slippage_bps=3.5,
+            total_execution_cost_bps=7.2,
+            live_result=True,
+        )
+        card = FactorCard(definition=fd, execution_evidence=ev)
+        assert "Exec: live" in card.summary
+        assert card.execution_evidence.avg_slippage_bps == 3.5
 
 
 class TestFactorDiscoveryAgent:
@@ -129,6 +160,8 @@ class TestFactorDiscoveryAgent:
         assert card.definition.name == "test"
         assert card.total_trades >= 0
         assert isinstance(card.approved, bool)
+        assert isinstance(card.execution_evidence, ExecutionEvidence)
+        assert card.execution_evidence.execution_model == "paper"
 
     @pytest.mark.asyncio
     async def test_backtest_empty_definition(self):
@@ -488,6 +521,7 @@ class TestFactorDiscoveryAgent:
         assert card.wf_sharpe_std == 0.0
         assert card.wf_sharpe_consistency == 0.0
         assert card.wf_avg_drawdown == 0.0
+        assert card.execution_evidence.execution_model == "paper"
 
     @pytest.mark.asyncio
     async def test_backtest_populates_ic_rank(self):

@@ -7,6 +7,7 @@ from __future__ import annotations
 from datetime import datetime
 
 from polymind.backtesting.factor_bt import (
+    ExecutionEvidence,
     FactorBacktestConfig,
     FactorBacktester,
     FactorBacktestResult,
@@ -165,6 +166,58 @@ class TestConfigProperties:
     def test_result_num_winners_zero_trades(self):
         res = FactorBacktestResult()
         assert res.num_winners == 0
+
+
+class TestExecutionEvidence:
+    def test_defaults(self):
+        ev = ExecutionEvidence()
+        assert ev.execution_model == "paper"
+        assert ev.slippage_model == "zero-cost"
+        assert ev.fill_rate == 1.0
+        assert ev.avg_slippage_bps == 0.0
+        assert ev.total_execution_cost_bps == 0.0
+        assert ev.live_result is False
+
+    def test_with_values(self):
+        ev = ExecutionEvidence(
+            execution_model="live",
+            slippage_model="fixed 3bps",
+            fill_rate=0.95,
+            avg_slippage_bps=3.5,
+            total_execution_cost_bps=7.2,
+            live_result=True,
+        )
+        assert ev.execution_model == "live"
+        assert ev.fill_rate == 0.95
+        assert ev.avg_slippage_bps == 3.5
+        assert ev.total_execution_cost_bps == 7.2
+        assert ev.live_result is True
+
+    def test_in_factor_backtest_result_default(self):
+        res = FactorBacktestResult()
+        assert isinstance(res.execution_evidence, ExecutionEvidence)
+        assert res.execution_evidence.execution_model == "paper"
+        assert res.execution_evidence.live_result is False
+
+    def test_in_factor_backtest_result_custom(self):
+        ev = ExecutionEvidence(execution_model="live", live_result=True)
+        res = FactorBacktestResult(
+            total_trades=5,
+            execution_evidence=ev,
+        )
+        assert res.execution_evidence.live_result is True
+        assert res.execution_evidence.execution_model == "live"
+        assert res.total_trades == 5
+
+    def test_immutable_fields(self):
+        """ExecutionEvidence fields are accessible and typed correctly."""
+        ev = ExecutionEvidence()
+        assert isinstance(ev.execution_model, str)
+        assert isinstance(ev.slippage_model, str)
+        assert isinstance(ev.fill_rate, float)
+        assert isinstance(ev.avg_slippage_bps, float)
+        assert isinstance(ev.total_execution_cost_bps, float)
+        assert isinstance(ev.live_result, bool)
 
 
 class TestBacktesterEdgeCases:

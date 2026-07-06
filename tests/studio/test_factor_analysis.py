@@ -12,8 +12,30 @@ from polymind.execution.fill_model import MarketSnapshot
 from polymind.studio.factor_analysis import (
     FactorAnalyzer,
     ICAnalysis,
+    ResearchOutcome,
     WalkForwardResult,
 )
+
+
+class TestResearchOutcome:
+    def test_four_values(self):
+        assert len(ResearchOutcome) == 4
+
+    def test_members(self):
+        assert ResearchOutcome.PASS is not None
+        assert ResearchOutcome.FAIL is not None
+        assert ResearchOutcome.NO_EDGE is not None
+        assert ResearchOutcome.INCONCLUSIVE is not None
+
+    def test_distinct_values(self):
+        values = {m.value for m in ResearchOutcome}
+        assert len(values) == 4
+
+    def test_str_representation(self):
+        assert str(ResearchOutcome.PASS) == "PASS"
+        assert str(ResearchOutcome.FAIL) == "FAIL"
+        assert str(ResearchOutcome.NO_EDGE) == "NO_EDGE"
+        assert str(ResearchOutcome.INCONCLUSIVE) == "INCONCLUSIVE"
 
 
 class TestICAnalysis:
