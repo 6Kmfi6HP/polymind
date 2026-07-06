@@ -19,6 +19,8 @@ Append one entry per run. Prune entries older than 30 days.
 
 ## Recent Runs
 
+{"run_id":"2026-07-06T09:15:00Z","pattern":"reference-port-loop","reference":"probablyprofit-ai-framework","item":"REF-001","duration_s":600,"actions_taken":1,"escalations":0,"tokens_estimate":45000,"outcome":"done","tests":"python -m pytest tests/core/test_agent.py tests/agents/test_base.py -q --tb=short","note":"AgentMemory implemented (bounded deque + asyncio.Lock + get_recent_history). Wired into BaseAgent.observe()/act(). 12 new tests, 37 total agent tests pass. 1836 full suite pass."}
+
 2026-07-05T21:00:00Z | roadmap-implement | gap:GAP-009 | outcome:PASS | files:3 | tests:28
 {"run_id":"2026-07-05T21:00:00Z","pattern":"roadmap-implement","duration_s":720,"items_found":1,"actions_taken":2,"escalations":0,"tokens_estimate":350000,"outcome":"fix-proposed","note":"GAP-009 FactorPromotionGate implemented. 2 Maker attempts (Checker REJECTED attempt 1 with 5 issues, PASSED attempt 2). 3 files: promotion_gate.py, test_promotion_gate.py, __init__.py. 28 tests."}
 2026-07-05T21:15:00Z | roadmap-implement | gap:GAP-006 | outcome:PASS | files:4 | tests:81
@@ -57,6 +59,10 @@ Append one entry per run. Prune entries older than 30 days.
 {"run_id":"2026-07-06T06:30:00Z","pattern":"polymind-autonomous-dev-loop","duration_s":60,"items_found":0,"actions_taken":0,"escalations":0,"tokens_estimate":5000,"outcome":"no-op","note":"1791 tests pass, 0 failed. No regression. No actionable items found since last run."}
 
 {"run_id":"2026-07-06T07:00:00Z","pattern":"polymind-autonomous-dev-loop","duration_s":50,"items_found":0,"actions_taken":0,"escalations":0,"tokens_estimate":4000,"outcome":"no-op","note":"1791 tests pass. No regression. Repository state unchanged. No actionable items."}
+
+{"run_id":"2026-07-06T07:45:00Z","pattern":"reference-port-loop","duration_s":270,"items_found":1,"actions_taken":1,"escalations":0,"tokens_estimate":65000,"outcome":"done","note":"REF-002: Official MM parity test harness. 35 parity tests covering all 4 parity doc scenarios + structural invariants + edge cases. Reference structural bridge included (skips when keeper deps degraded). 116 tests pass in strategies/market_making/."}
+
+{"run_id":"2026-07-06T08:00:00Z","pattern":"polymind-autonomous-dev-loop","duration_s":50,"items_found":0,"actions_taken":0,"escalations":0,"tokens_estimate":4000,"outcome":"no-op","note":"1826 tests pass (+35 parity tests from REF-002). Reference-port-loop completed official MM parity. No actionable items for dev loop."}
 
 {"run_id":"2026-07-05T20:30:00Z","pattern":"roadmap-triage","duration_s":300,"items_found":14,"actions_taken":0,"escalations":0,"tokens_estimate":35000,"outcome":"report-only"}
 2026-07-03T16:58:00Z — daily-triage — report-only — 12 failed / 16 tests, 4 passed.

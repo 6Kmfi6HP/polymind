@@ -1,5 +1,5 @@
 """
-Tests for BaseAgent.
+Tests for BaseAgent and AgentMemory.
 """
 
 from __future__ import annotations
@@ -8,7 +8,7 @@ from datetime import datetime
 
 import pytest
 
-from polymind.core.agent import BaseAgent, Decision, Observation
+from polymind.core.agent import AgentMemory, BaseAgent, Decision, Observation
 
 
 class TestObservation:
@@ -158,3 +158,116 @@ class TestBaseAgent:
         task.cancel()
         await asyncio.sleep(0.05)
         assert agent._running is False
+
+
+class TestAgentMemory:
+    """Tests for AgentMemory bounded-memory collection."""
+
+    @pytest.mark.asyncio
+    async def test_add_observation(self):
+        mem = AgentMemory()
+        now = datetime.now()
+        obs = Observation(timestamp=now, markets=["m1"])
+        await mem.add_observation(obs)
+        assert len(mem.observations) == 1
+        assert mem.observations[0].markets == ["m1"]
+
+    @pytest.mark.asyncio
+    async def test_add_decision(self):
+        mem = AgentMemory()
+        dec = Decision(action="buy", market_id="0x1", size=10.0)
+        await mem.add_decision(dec)
+        assert len(mem.decisions) == 1
+        assert mem.decisions[0].action == "buy"
+
+    @pytest.mark.asyncio
+    async def test_bounded_length(self):
+        """Deque maxlen=100 evicts oldest entries."""
+        mem = AgentMemory()
+        for i in range(110):
+            await mem.add_decision(Decision(action="hold", reasoning=f"step-{i}"))
+        assert len(mem.decisions) == 100
+        # Oldest evicted: first entry should be step-10 (not step-0)
+        assert mem.decisions[0].reasoning == "step-10"
+
+    @pytest.mark.asyncio
+    async def test_thread_safe_concurrent_add(self):
+        """Concurrent adds do not lose entries."""
+        import asyncio
+
+        mem = AgentMemory()
+
+        async def add_obs(i: int):
+            await mem.add_observation(
+                Observation(
+                    timestamp=datetime.now(),
+                    markets=[f"m{i}"],
+                )
+            )
+
+        await asyncio.gather(*[add_obs(i) for i in range(50)])
+        assert len(mem.observations) == 50
+        market_ids = {o.markets[0] for o in mem.observations}
+        assert len(market_ids) == 50
+
+    def test_get_recent_history_empty(self):
+        mem = AgentMemory()
+        history = mem.get_recent_history(n=5)
+        assert history == ""
+
+    @pytest.mark.asyncio
+    async def test_get_recent_history(self):
+        mem = AgentMemory()
+        now = datetime(2026, 7, 6, 12, 0, 0)
+        await mem.add_observation(
+            Observation(timestamp=now, markets=["m1"], positions=[], balance=100.0)
+        )
+        await mem.add_decision(Decision(action="buy", market_id="0x1", reasoning="signal strong"))
+        history = mem.get_recent_history(n=5)
+        assert "12:00:00" in history
+        assert "Markets: 1" in history
+        assert "Balance: 100.0" in history
+        assert "signal strong" in history
+
+    @pytest.mark.asyncio
+    async def test_base_agent_has_memory(self):
+        """BaseAgent initialises with an AgentMemory."""
+        agent = TestBaseAgent._TestAgent()
+        assert hasattr(agent, "memory")
+        assert isinstance(agent.memory, AgentMemory)
+
+    @pytest.mark.asyncio
+    async def test_observe_records_to_memory(self):
+        """BaseAgent.observe() records the observation to memory."""
+        agent = TestBaseAgent._TestAgent()
+        obs = await agent.observe()
+        assert len(agent.memory.observations) == 1
+        assert agent.memory.observations[0] is obs
+
+    @pytest.mark.asyncio
+    async def test_act_records_to_memory(self):
+        """BaseAgent.act() records the decision to memory."""
+        agent = TestBaseAgent._TestAgent()
+        dec = Decision(action="hold")
+        await agent.act(dec)
+        assert len(agent.memory.decisions) == 1
+        assert agent.memory.decisions[0] is dec
+
+    @pytest.mark.asyncio
+    async def test_run_loop_records_observation_and_decision(self):
+        """Full observe→decide→act loop writes to memory."""
+        import asyncio
+
+        agent = TestBaseAgent._TestAgent()
+        agent.loop_interval = 0.01
+
+        async def stop_after():
+            await asyncio.sleep(0.03)
+            agent.stop()
+
+        loop_task = asyncio.create_task(agent.run_loop())
+        await asyncio.sleep(0.05)
+        agent.stop()
+        await loop_task
+        assert len(agent.memory.observations) >= 1
+        assert len(agent.memory.decisions) >= 1

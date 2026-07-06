@@ -22,6 +22,13 @@ This file records repository state separately from the target architecture in
 - **Phase 4: Official MM parity doc** — Comprehensive design divergence analysis in
   docs/references/official-mm-parity.md with 4 scenarios, formula comparison, and
   parity status matrix. ([2026-07-05] GAP-005)
+- **Phase 4: Official MM parity test harness** — Automated 35-test parity suite in
+  tests/strategies/market_making/test_official_parity.py covering all 4 parity doc
+  scenarios + structural invariants + edge cases. Reference structural bridge included
+  (skips gracefully when keeper deps degraded). ([2026-07-06] REF-002)
+- **Phase 1: AgentMemory** — AgentMemory class added to polymind/core/agent.py with
+  bounded deque (100-entry) + asyncio.Lock thread safety + get_recent_history. Wired
+  into BaseAgent.observe() and act(). 12 new tests. ([2026-07-06] REF-001)
 - **Phase 5: Workflow paper_mode** — paper_mode flag added to all 4 workflow
   state machine constructors + WorkflowRunner wire-up. ([2026-07-05] GAP-007)
 - **Phase 9: Release checklist** — RELEASE.md created with 4-step release
