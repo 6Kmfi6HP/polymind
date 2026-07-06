@@ -12,6 +12,7 @@ from datetime import datetime
 from typing import Any
 
 from polymind.backtesting.factor_bt import (
+    ExecutionEvidence,
     FactorBacktestConfig,
     FactorBacktester,
 )
@@ -83,9 +84,12 @@ class FactorCard:
     wf_sharpe_consistency: float = 0.0
     wf_avg_drawdown: float = 0.0
 
+    # Execution evidence (separated from signal metrics)
+    execution_evidence: ExecutionEvidence = field(default_factory=ExecutionEvidence)
+
     @property
     def summary(self) -> str:
-        """One-line summary of the factor card."""
+        """One-line summary of the factor card with execution evidence."""
         status = "✅ APPROVED" if self.approved else "❌ REJECTED"
         parts = [
             f"{status} {self.definition.name}:",
@@ -98,7 +102,9 @@ class FactorCard:
             parts.append(f"IC={self.ic_rank:.2f}")
         if self.wf_sharpe_mean:
             parts.append(f"WF_Sharpe={self.wf_sharpe_mean:.2f}")
-        return " ".join(parts)
+        ev = self.execution_evidence
+        exec_str = f"Exec: {ev.execution_model}, {ev.slippage_model}, " f"fill={ev.fill_rate:.0%}"
+        return " ".join(parts) + "\n" + exec_str
 
 
 FACTOR_APPROVAL_MIN_SHARPE = 0.5
@@ -297,6 +303,7 @@ class FactorDiscoveryAgent:
                 result.sharpe >= FACTOR_APPROVAL_MIN_SHARPE
                 and result.max_drawdown <= FACTOR_APPROVAL_MAX_DRAWDOWN
             ),
+            execution_evidence=result.execution_evidence,
             # Advanced analytics
             **self._compute_advanced_analytics(scores, step_snapshots),
         )

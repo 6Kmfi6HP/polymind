@@ -14,6 +14,19 @@ from enum import Enum
 from typing import Any
 
 
+@dataclass
+class ValidationGate:
+    """Result of a single validation step in the generation pipeline.
+
+    Gates are ordered and all must pass for the generated config to be
+    considered validated.
+    """
+
+    name: str
+    passed: bool
+    message: str
+
+
 class StrategyTemplate(Enum):
     """Known strategy templates that can be generated."""
 
@@ -75,6 +88,11 @@ class GeneratedConfig:
     confidence: float = 0.0
     validated: bool = True
     raw_description: str = ""
+    validation_results: list[ValidationGate] = field(default_factory=list)
+    provenance: str = ""  # Source of the generation (e.g., "keyword", "llm", "manual")
+    source_version: str = ""  # Version of the source strategy template
+    risk_limits: dict[str, float] = field(default_factory=dict)  # Risk limit overrides
+    execution_policy: str = ""  # Execution policy (e.g., "paper", "live", "maker", "taker")
 
     def to_summary(self) -> str:
         """Return a human-readable summary."""
@@ -87,6 +105,46 @@ class GeneratedConfig:
 
 class GenerationError(Exception):
     """Raised when strategy generation fails."""
+
+
+# ── Validation constants ───────────────────────────────────────────────────
+
+_PARAM_TYPES: dict[str, str] = {
+    "min_spread": "number",
+    "max_spread": "number",
+    "spread_pct": "number",
+    "tick_size": "number",
+    "exposure_per_band": "number",
+    "order_size": "number",
+    "total_exposure": "number",
+    "rebal_freq_hours": "number",
+    "num_levels": "int",
+    "top_n": "int",
+    "lookback": "str",
+    "band_spreads": "list",
+}
+
+_RISK_LIMITS: dict[str, float] = {
+    "max_total_exposure": 100_000.0,
+    "max_num_levels": 20,
+    "max_top_n": 50,
+    "min_spread": 0.0001,
+    "max_spread": 0.50,
+    "max_position_size": 100_000.0,
+    "max_exposure_per_band": 50_000.0,
+}
+
+
+def _check_param_type(value: Any, expected: str) -> bool:
+    if expected == "int":
+        return isinstance(value, int)
+    if expected == "number":
+        return isinstance(value, int | float)
+    if expected == "str":
+        return isinstance(value, str)
+    if expected == "list":
+        return isinstance(value, list)
+    return True
 
 
 class StrategyGenerator:
@@ -109,6 +167,128 @@ class StrategyGenerator:
                 self._match_factor_discovery,
             ),
         ]
+
+    def _validate(self, config: GeneratedConfig) -> GeneratedConfig:
+        """Run all validation gates and update *config* in place.
+
+        Returns the config for chaining.
+        """
+        gates = [
+            self._validate_schema(config),
+            self._validate_implementation_status(config),
+            self._validate_risk_limits(config),
+        ]
+        config.validation_results = gates
+        config.validated = all(g.passed for g in gates)
+        return config
+
+    def _validate_schema(self, config: GeneratedConfig) -> ValidationGate:
+        """Gate 1: Check required params exist and types are correct."""
+        missing: list[str] = []
+        for param in config.template.required_params:
+            if param not in config.params:
+                missing.append(param)
+
+        type_errors: list[str] = []
+        for param, value in config.params.items():
+            expected = _PARAM_TYPES.get(param)
+            if expected is not None and not _check_param_type(value, expected):
+                type_errors.append(f"{param} (got {type(value).__name__}, want {expected})")
+
+        if missing:
+            return ValidationGate(
+                name="schema",
+                passed=False,
+                message=f"Missing required params: {', '.join(missing)}",
+            )
+        if type_errors:
+            return ValidationGate(
+                name="schema",
+                passed=False,
+                message=f"Type mismatches: {', '.join(type_errors)}",
+            )
+        return ValidationGate(
+            name="schema",
+            passed=True,
+            message="All required params present with correct types",
+        )
+
+    def _validate_implementation_status(self, config: GeneratedConfig) -> ValidationGate:
+        """Gate 2: Check that the strategy template is registered."""
+        if config.template in (StrategyTemplate.CUSTOM, StrategyTemplate.FACTOR):
+            return ValidationGate(
+                name="implementation_status",
+                passed=True,
+                message=(
+                    f"Template '{config.template.value}' is a meta-template "
+                    "(no direct plugin required)"
+                ),
+            )
+
+        from polymind.core.plugin import PluginRegistry
+
+        registry = PluginRegistry()
+        registered = registry.get_strategy(config.template.value)
+        if registered is not None:
+            return ValidationGate(
+                name="implementation_status",
+                passed=True,
+                message=f"Strategy '{config.template.value}' is registered",
+            )
+        return ValidationGate(
+            name="implementation_status",
+            passed=False,
+            message=(
+                f"Strategy '{config.template.value}' is not registered in PluginRegistry. "
+                f"Available: {sorted(registry.list_strategies().keys())}"
+            ),
+        )
+
+    def _validate_risk_limits(self, config: GeneratedConfig) -> ValidationGate:
+        """Gate 3: Check params stay within configured risk limits."""
+        violations: list[str] = []
+
+        nlevels = config.params.get("num_levels")
+        if nlevels is not None and nlevels > _RISK_LIMITS["max_num_levels"]:
+            violations.append(
+                f"num_levels ({nlevels}) exceeds max ({_RISK_LIMITS['max_num_levels']})"
+            )
+
+        top_n = config.params.get("top_n")
+        if top_n is not None and top_n > _RISK_LIMITS["max_top_n"]:
+            violations.append(f"top_n ({top_n}) exceeds max ({_RISK_LIMITS['max_top_n']})")
+
+        exposure = config.params.get("total_exposure")
+        if exposure is not None and exposure > _RISK_LIMITS["max_total_exposure"]:
+            violations.append(
+                f"total_exposure ({exposure}) exceeds max ({_RISK_LIMITS['max_total_exposure']})"
+            )
+
+        epb = config.params.get("exposure_per_band")
+        if epb is not None and epb > _RISK_LIMITS["max_exposure_per_band"]:
+            violations.append(
+                f"exposure_per_band ({epb}) exceeds max ({_RISK_LIMITS['max_exposure_per_band']})"
+            )
+
+        min_s = config.params.get("min_spread")
+        if min_s is not None and min_s < _RISK_LIMITS["min_spread"]:
+            violations.append(f"min_spread ({min_s}) is below min ({_RISK_LIMITS['min_spread']})")
+
+        max_s = config.params.get("max_spread")
+        if max_s is not None and max_s > _RISK_LIMITS["max_spread"]:
+            violations.append(f"max_spread ({max_s}) exceeds max ({_RISK_LIMITS['max_spread']})")
+
+        if violations:
+            return ValidationGate(
+                name="risk_limits",
+                passed=False,
+                message="Risk limit violations: " + "; ".join(violations),
+            )
+        return ValidationGate(
+            name="risk_limits",
+            passed=True,
+            message="All params within risk limits",
+        )
 
     def _match_factor_discovery(self, description: str) -> GeneratedConfig:
         """Route factor-discovery descriptions to FactorDiscoveryAgent."""
@@ -138,10 +318,13 @@ class StrategyGenerator:
             strategy_name=fd.name or "factor_discovery",
             params=params,
             confidence=0.75,
+            provenance="keyword",
+            source_version="0.7.0",
+            execution_policy="paper",
         )
 
     def generate(self, description: str) -> GeneratedConfig:
-        """Parse a NL description and return a GeneratedConfig."""
+        """Parse a NL description and return a validated GeneratedConfig."""
         best_match: GeneratedConfig | None = None
         best_conf = 0.0
 
@@ -153,15 +336,20 @@ class StrategyGenerator:
                     best_conf = result.confidence
 
         if best_match is None:
-            return GeneratedConfig(
-                template=StrategyTemplate.CUSTOM,
-                strategy_name="custom_strategy",
-                confidence=0.2,
-                raw_description=description,
+            return self._validate(
+                GeneratedConfig(
+                    template=StrategyTemplate.CUSTOM,
+                    strategy_name="custom_strategy",
+                    confidence=0.2,
+                    raw_description=description,
+                    provenance="keyword",
+                    source_version="0.7.0",
+                    execution_policy="paper",
+                )
             )
 
         best_match.raw_description = description
-        return best_match
+        return self._validate(best_match)
 
     def _match_amm(self, description: str) -> GeneratedConfig:
         params = dict(StrategyTemplate.AMM.defaults)
@@ -183,6 +371,9 @@ class StrategyGenerator:
             strategy_name="_".join(name_parts),
             params=params,
             confidence=0.9,
+            provenance="keyword",
+            source_version="0.7.0",
+            execution_policy="paper",
         )
 
     def _match_bands(self, description: str) -> GeneratedConfig:
@@ -201,6 +392,9 @@ class StrategyGenerator:
             strategy_name="_".join(name_parts),
             params=params,
             confidence=0.85,
+            provenance="keyword",
+            source_version="0.7.0",
+            execution_policy="paper",
         )
 
     def _match_maker_rebate(self, description: str) -> GeneratedConfig:
@@ -210,6 +404,9 @@ class StrategyGenerator:
             strategy_name="maker_rebate",
             params=params,
             confidence=0.8,
+            provenance="keyword",
+            source_version="0.7.0",
+            execution_policy="paper",
         )
 
     def _match_classic_mm(self, description: str) -> GeneratedConfig:
@@ -221,6 +418,9 @@ class StrategyGenerator:
             strategy_name="classic_mm",
             params=params,
             confidence=0.85,
+            provenance="keyword",
+            source_version="0.7.0",
+            execution_policy="paper",
         )
 
     def _match_momentum(self, description: str) -> GeneratedConfig:
@@ -245,6 +445,9 @@ class StrategyGenerator:
             strategy_name="_".join(name_parts),
             params=params,
             confidence=0.9,
+            provenance="keyword",
+            source_version="0.7.0",
+            execution_policy="paper",
         )
 
 

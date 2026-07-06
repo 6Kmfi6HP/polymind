@@ -77,8 +77,9 @@ TRANSITIONS: dict[RebateState, dict[RebateEvent, RebateState]] = {
 class RebateStateMachine:
     """State machine for a single Maker Rebate workflow instance."""
 
-    def __init__(self, workflow_id: str):
+    def __init__(self, workflow_id: str, paper_mode: bool = False):
         self.workflow_id = workflow_id
+        self.paper_mode = paper_mode
         self.state: RebateState = RebateState.IDLE
         self.history: list[tuple[RebateState, RebateEvent, datetime]] = []
         self.created_at: datetime = datetime.now(timezone.utc)
@@ -118,6 +119,11 @@ class RebateStateMachine:
             RebateState.FAILED,
             RebateState.HALTED,
         )
+
+    @property
+    def is_paper_mode(self) -> bool:
+        """Whether this workflow is running in paper/simulation mode."""
+        return self.paper_mode
 
     def reset(self) -> None:
         """Reset the state machine to IDLE."""

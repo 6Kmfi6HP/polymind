@@ -8,6 +8,7 @@ factor half-life decay estimation, and walk-forward cross-validation.
 from __future__ import annotations
 
 from dataclasses import dataclass, field
+from enum import Enum, auto
 from typing import Any
 
 from polymind.backtesting.factor_bt import (
@@ -15,6 +16,30 @@ from polymind.backtesting.factor_bt import (
     FactorBacktester,
 )
 from polymind.execution.fill_model import MarketSnapshot
+
+
+class ResearchOutcome(Enum):
+    """Outcome classification for a factor research result.
+
+    PASS:
+        The factor meets all performance thresholds and is considered viable.
+    FAIL:
+        The factor was tested but produced poor performance (e.g. high drawdown,
+        negative returns).
+    NO_EDGE:
+        The factor showed no statistically meaningful signal (near-zero returns,
+        no predictive power).
+    INCONCLUSIVE:
+        Insufficient data was available to reach a conclusion.
+    """
+
+    PASS = auto()
+    FAIL = auto()
+    NO_EDGE = auto()
+    INCONCLUSIVE = auto()
+
+    def __str__(self) -> str:
+        return self.name
 
 
 @dataclass
@@ -373,5 +398,6 @@ class FactorAnalyzer:
 __all__ = [
     "FactorAnalyzer",
     "ICAnalysis",
+    "ResearchOutcome",
     "WalkForwardResult",
 ]

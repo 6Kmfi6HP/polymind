@@ -8,6 +8,14 @@ from polymind.core.plugin import PluginRegistry
 from polymind.core.strategy import BaseMMStrategy
 
 _registry: dict[str, type] = {}
+_strategies_loaded: bool = False
+
+
+def _ensure_strategies_loaded() -> None:
+    global _strategies_loaded
+    if not _strategies_loaded:
+        register_builtin_strategies()
+        _strategies_loaded = True
 
 
 def register(name: str):
@@ -24,6 +32,7 @@ def register(name: str):
 
 def get_strategy(name: str, config: Any | None = None) -> BaseMMStrategy:
     """Instantiate a registered strategy by name."""
+    _ensure_strategies_loaded()
     if name in _registry:
         return _registry[name](config)
     cls = PluginRegistry().get_strategy(name)
@@ -37,6 +46,7 @@ def get_strategy(name: str, config: Any | None = None) -> BaseMMStrategy:
 
 def list_strategies() -> dict[str, str]:
     """List all registered strategies with descriptions."""
+    _ensure_strategies_loaded()
     result = {name: cls.__doc__ or "" for name, cls in _registry.items()}
     for name, cls in PluginRegistry().list_strategies().items():
         if name not in result:
@@ -68,8 +78,6 @@ def register_builtin_strategies() -> None:
         if PluginRegistry().get_strategy(name) is None:
             PluginRegistry().register_strategy(name, cls)
 
-
-register_builtin_strategies()
 
 __all__ = [
     "get_strategy",

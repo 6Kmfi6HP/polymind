@@ -15,6 +15,41 @@ from polymind.execution.fill_model import MarketSnapshot
 
 
 @dataclass
+class ExecutionEvidence:
+    """Execution model assumptions captured separately from signal evidence.
+
+    Documents how a factor result was produced from an execution standpoint,
+    so signal quality (Sharpe, IC, etc.) is not conflated with execution
+    assumptions (slippage, fill rate, live vs paper).
+
+    Attributes:
+        execution_model: Description of the execution model
+            ("paper", "live", "simulation", "taker", "maker").
+        slippage_model: Slippage assumptions
+            ("zero-cost", "fixed <N>bps", "market depth based").
+        fill_rate: Estimated fill rate (0.0-1.0).
+        avg_slippage_bps: Average slippage in basis points.
+        total_execution_cost_bps: Total execution costs in basis points.
+        live_result: Whether this result is from live trading (vs paper/simulation).
+    """
+
+    execution_model: str = "paper"
+    slippage_model: str = "zero-cost"
+    fill_rate: float = 1.0
+    avg_slippage_bps: float = 0.0
+    total_execution_cost_bps: float = 0.0
+    live_result: bool = False
+
+
+def _execution_evidence_default() -> ExecutionEvidence:
+    """Default factory for FactorBacktestResult.execution_evidence.
+
+    Returns paper/zero-cost assumptions as the safest default.
+    """
+    return ExecutionEvidence()
+
+
+@dataclass
 class FactorBacktestResult:
     """Result of a single ``FactorBacktester.run()`` step.
 
@@ -37,6 +72,7 @@ class FactorBacktestResult:
     max_drawdown: float = 0.0
     total_return: float = 0.0
     pnl_history: list[float] = field(default_factory=list)
+    execution_evidence: ExecutionEvidence = field(default_factory=_execution_evidence_default)
 
     @property
     def num_winners(self) -> int:

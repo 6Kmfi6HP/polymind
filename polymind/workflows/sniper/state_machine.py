@@ -58,8 +58,9 @@ TRANSITIONS: dict[SniperState, dict[SniperEvent, SniperState]] = {
 
 
 class SniperStateMachine:
-    def __init__(self, workflow_id: str):
+    def __init__(self, workflow_id: str, paper_mode: bool = False):
         self.workflow_id = workflow_id
+        self.paper_mode = paper_mode
         self.state: SniperState = SniperState.IDLE
         self.history: list[tuple[SniperState, SniperEvent, datetime]] = []
         self.created_at: datetime = datetime.now(timezone.utc)
@@ -86,6 +87,11 @@ class SniperStateMachine:
 
     def is_active(self) -> bool:
         return self.state not in (SniperState.COMPLETED, SniperState.FAILED, SniperState.HALTED)
+
+    @property
+    def is_paper_mode(self) -> bool:
+        """Whether this workflow is running in paper/simulation mode."""
+        return self.paper_mode
 
     def reset(self) -> None:
         self.state = SniperState.IDLE

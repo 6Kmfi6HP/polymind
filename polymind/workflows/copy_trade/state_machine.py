@@ -62,8 +62,9 @@ TRANSITIONS: dict[CopyTradeState, dict[CopyTradeEvent, CopyTradeState]] = {
 
 
 class CopyTradeStateMachine:
-    def __init__(self, workflow_id: str):
+    def __init__(self, workflow_id: str, paper_mode: bool = False):
         self.workflow_id = workflow_id
+        self.paper_mode = paper_mode
         self.state: CopyTradeState = CopyTradeState.IDLE
         self.history: list[tuple[CopyTradeState, CopyTradeEvent, datetime]] = []
         self.created_at: datetime = datetime.now(timezone.utc)
@@ -94,6 +95,11 @@ class CopyTradeStateMachine:
             CopyTradeState.FAILED,
             CopyTradeState.HALTED,
         )
+
+    @property
+    def is_paper_mode(self) -> bool:
+        """Whether this workflow is running in paper/simulation mode."""
+        return self.paper_mode
 
     def reset(self) -> None:
         self.state = CopyTradeState.IDLE

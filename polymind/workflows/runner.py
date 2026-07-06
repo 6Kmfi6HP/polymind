@@ -231,7 +231,10 @@ class WorkflowRunner:
         if start_event is None:
             return _fail(cmd, f"Workflow type '{wtype}' has no START event")
 
-        sm = sm_cls(cmd.workflow_id)
+        sm = sm_cls(
+            cmd.workflow_id,
+            paper_mode=cmd.params.get("paper_mode", False),
+        )
         self._instances[cmd.workflow_id] = sm
         self._types[cmd.workflow_id] = wtype
 
