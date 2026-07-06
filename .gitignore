@@ -39,6 +39,7 @@ config.local.yaml
 htmlcov/
 .coverage
 coverage.xml
+*.py,cover
 
 # Type checking
 .mypy_cache/
