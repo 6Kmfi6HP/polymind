@@ -1,0 +1,2465 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+        <meta name="description" content="AI-Native Market Making for Polymarket">
+      
+      
+      
+        <link rel="canonical" href="https://polymind.readthedocs.io/superpowers/specs/2026-07-03-phase1-polymarket-adapter/">
+      
+      
+      
+      
+        
+      
+      
+      <link rel="icon" href="../../../assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.6">
+    
+    
+      
+        <title>2026 07 03 phase1 polymarket adapter - Polymind</title>
+      
+    
+    
+      <link rel="stylesheet" href="../../../assets/stylesheets/main.484c7ddc.min.css">
+      
+        
+        <link rel="stylesheet" href="../../../assets/stylesheets/palette.ab4e12ef.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+    <script>__md_scope=new URL("../../..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+  </head>
+  
+  
+    
+    
+      
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="indigo" data-md-color-accent="indigo">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#phase-1-polymarket-adapter-layer-design-spec" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+<header class="md-header" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href="../../.." title="Polymind" class="md-header__button md-logo" aria-label="Polymind" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            Polymind
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              2026 07 03 phase1 polymarket adapter
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+        <form class="md-header__option" data-md-component="palette">
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="" data-md-color-scheme="default" data-md-color-primary="indigo" data-md-color-accent="indigo"  aria-label="Switch to dark mode"  type="radio" name="__palette" id="__palette_0">
+    
+      <label class="md-header__button md-icon" title="Switch to dark mode" for="__palette_1" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M17 6H7c-3.31 0-6 2.69-6 6s2.69 6 6 6h10c3.31 0 6-2.69 6-6s-2.69-6-6-6m0 10H7c-2.21 0-4-1.79-4-4s1.79-4 4-4h10c2.21 0 4 1.79 4 4s-1.79 4-4 4M7 9c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3"/></svg>
+      </label>
+    
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="" data-md-color-scheme="slate" data-md-color-primary="indigo" data-md-color-accent="indigo"  aria-label="Switch to light mode"  type="radio" name="__palette" id="__palette_1">
+    
+      <label class="md-header__button md-icon" title="Switch to light mode" for="__palette_0" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M17 7H7a5 5 0 0 0-5 5 5 5 0 0 0 5 5h10a5 5 0 0 0 5-5 5 5 0 0 0-5-5m0 8a3 3 0 0 1-3-3 3 3 0 0 1 3-3 3 3 0 0 1 3 3 3 3 0 0 1-3 3"/></svg>
+      </label>
+    
+  
+</form>
+      
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&palette.color){if("(prefers-color-scheme)"===palette.color.media){var media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']");palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent")}for(var[key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+    
+    
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      
+    
+    
+      <div class="md-header__source">
+        <a href="https://github.com/6Kmfi6HP/polymind" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
+  </div>
+  <div class="md-source__repository">
+    GitHub
+  </div>
+</a>
+      </div>
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+            
+<nav class="md-tabs" aria-label="Tabs" data-md-component="tabs">
+  <div class="md-grid">
+    <ul class="md-tabs__list">
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../../.." class="md-tabs__link">
+        
+  
+  
+    
+  
+  Home
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../../../architecture/" class="md-tabs__link">
+        
+  
+  
+    
+  
+  Architecture
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../../architecture/decisions/0001-factor-execution-uses-executable-prices/" class="md-tabs__link">
+          
+  
+  
+  Architecture Decisions
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../../api/core/" class="md-tabs__link">
+          
+  
+  
+  API Reference
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../../guides/getting-started/" class="md-tabs__link">
+          
+  
+  
+  Guides
+
+        </a>
+      </li>
+    
+  
+
+      
+    </ul>
+  </div>
+</nav>
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+  
+
+
+  
+
+<nav class="md-nav md-nav--primary md-nav--lifted md-nav--integrated" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href="../../.." title="Polymind" class="md-nav__button md-logo" aria-label="Polymind" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    Polymind
+  </label>
+  
+    <div class="md-nav__source">
+      <a href="https://github.com/6Kmfi6HP/polymind" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
+  </div>
+  <div class="md-source__repository">
+    GitHub
+  </div>
+</a>
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../.." class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Home
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../architecture/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Architecture
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3" >
+        
+          
+          <label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Architecture Decisions
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Architecture Decisions
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../architecture/decisions/0001-factor-execution-uses-executable-prices/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    ADR 0001
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../architecture/decisions/0002-strategies-emit-intents-executors-place-orders/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    ADR 0002
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../architecture/decisions/0003-onchain-balance-is-reconciliation-truth/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    ADR 0003
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../architecture/decisions/0004-sdk-adapter-isolated-from-core/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    ADR 0004
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../architecture/decisions/0005-lgpl-boundary-and-adapter-strategy/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    ADR 0005
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4" >
+        
+          
+          <label class="md-nav__link" for="__nav_4" id="__nav_4_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    API Reference
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_4_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_4">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    API Reference
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../api/core/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Core
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../api/execution/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Execution
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../api/strategies/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Strategies
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../api/polymarket/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Polymarket
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_5" >
+        
+          
+          <label class="md-nav__link" for="__nav_5" id="__nav_5_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Guides
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_5_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_5">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Guides
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../guides/getting-started/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Getting Started
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+
+<blockquote>
+<p><strong>Status:</strong> Superseded by <a href="../../../architecture/"><code>docs/architecture.md</code></a> and <a href="../../architecture/decisions/"><code>docs/architecture/decisions/</code></a>. This spec was a design document and is kept for historical reference only.</p>
+</blockquote>
+<h1 id="phase-1-polymarket-adapter-layer-design-spec">Phase 1 Polymarket Adapter Layer — Design Spec<a class="headerlink" href="#phase-1-polymarket-adapter-layer-design-spec" title="Permanent link">&para;</a></h1>
+<p><strong>Status:</strong> Draft
+<strong>Date:</strong> 2026-07-03
+<strong>ADR:</strong> ADR 0004 (SDK adapter isolated from core)</p>
+<h2 id="1-overview">1. Overview<a class="headerlink" href="#1-overview" title="Permanent link">&para;</a></h2>
+<p>This spec defines the Polymarket adapter layer — the venue-specific boundary that
+wraps <code>py-clob-client</code> behind async, project-owned interfaces. It implements
+ADR 0004's mandate: <strong>core strategy, factor, risk, and backtesting modules must
+never import SDK types directly.</strong></p>
+<p>The layer maps to three real Polymarket API surfaces:</p>
+<ol>
+<li><strong>CLOB REST API</strong> — market data (order books, tickers, trades), order
+   management (place, cancel, replace), account queries (positions, balances).
+   Wrapped by <code>client.py</code> and <code>data_api.py</code>.</li>
+<li><strong>Polymarket WebSocket API</strong> — public market streams (order books, trades,
+   tickers) and authenticated user streams (fills, order status, account
+   changes). Wrapped by <code>websocket.py</code>.</li>
+<li><strong>Polygon on-chain contracts</strong> — ERC-1155 conditional token operations
+   (split, merge, redeem), collateral (USDC) approval and transfers, CTF
+   exchange interactions. Wrapped by <code>contracts.py</code>.</li>
+</ol>
+<p>Additionally, the layer provides:</p>
+<ul>
+<li><strong><code>signer.py</code></strong> — encapsulates the three authentication tiers (public,
+  API-key-authenticated, wallet/private-key-authenticated) so the rest of the
+  adapter never touches raw key material.</li>
+<li><strong><code>metrics.py</code></strong> — prometheus-compatible counters and histograms for adapter
+  health (call latency, error rates, WebSocket disconnects).</li>
+</ul>
+<p><strong>Design rules:</strong></p>
+<ul>
+<li>Every adapter method is async. Blocking SDK calls are dispatched via
+  <code>asyncio.to_thread</code> or <code>loop.run_in_executor</code> when the SDK is synchronous.</li>
+<li>All public methods return domain types from <code>polymind.core.*</code>, never raw
+  <code>py_clob_client.clob_types.*</code> objects. Internal mapping functions live in
+  each module.</li>
+<li>No strategy logic leaks into adapters. Adapters are pure transport — they
+  translate SDK bytes into domain objects and domain objects into SDK calls.
+  They do not decide what to trade, when to trade, or how much.</li>
+<li>WebSocket reconnection uses asyncio tasks with exponential backoff, not
+  SDK-internal retry.</li>
+</ul>
+<h2 id="2-package-layout">2. Package Layout<a class="headerlink" href="#2-package-layout" title="Permanent link">&para;</a></h2>
+<div class="highlight"><pre><span></span><code>polymind/polymarket/
+├── __init__.py              # Package namespace, exports PolymarketClient
+├── client.py                # CLOB REST adapter (orders, markets, positions)
+├── websocket.py             # Public + authenticated WebSocket streams
+├── data_api.py              # Gamma/Data API metadata, price history, candles
+├── contracts.py             # On-chain operations (split, merge, redeem, approvals)
+├── signer.py                # Auth credentials: API key, private key, wallet
+└── metrics.py               # Prometheus counters and histograms
+</code></pre></div>
+<h2 id="3-modules">3. Modules<a class="headerlink" href="#3-modules" title="Permanent link">&para;</a></h2>
+<h3 id="31-signerpy-authentication-credentials-and-signing">3.1 <code>signer.py</code> — Authentication credentials and signing<a class="headerlink" href="#31-signerpy-authentication-credentials-and-signing" title="Permanent link">&para;</a></h3>
+<p><strong>File:</strong> <code>polymind/polymarket/signer.py</code></p>
+<p>Encapsulates the three authentication tiers defined in ADR 0003 / ADR 0004.
+The <code>Signer</code> class holds no more than one tier's credentials at a time and is
+passed at construction to <code>PolymarketClient</code>, <code>WebSocketManager</code>, etc.</p>
+<div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">__future__</span><span class="w"> </span><span class="kn">import</span> <span class="n">annotations</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">dataclasses</span><span class="w"> </span><span class="kn">import</span> <span class="n">dataclass</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">enum</span><span class="w"> </span><span class="kn">import</span> <span class="n">Enum</span><span class="p">,</span> <span class="n">auto</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Optional</span>
+
+
+<span class="k">class</span><span class="w"> </span><span class="nc">AuthTier</span><span class="p">(</span><span class="n">Enum</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Authentication level for Polymarket API access.&quot;&quot;&quot;</span>
+
+    <span class="n">PUBLIC</span> <span class="o">=</span> <span class="n">auto</span><span class="p">()</span>              <span class="c1"># no credentials, market data only</span>
+    <span class="n">API_KEY</span> <span class="o">=</span> <span class="n">auto</span><span class="p">()</span>             <span class="c1"># API key + secret + passphrase (L2 auth)</span>
+    <span class="n">WALLET</span> <span class="o">=</span> <span class="n">auto</span><span class="p">()</span>              <span class="c1"># private key for on-chain operations</span>
+
+
+<span class="nd">@dataclass</span><span class="p">(</span><span class="n">frozen</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">ApiKeyCredentials</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;API-key-level credentials for L2 authenticated endpoints.&quot;&quot;&quot;</span>
+
+    <span class="n">api_key</span><span class="p">:</span> <span class="nb">str</span>
+    <span class="n">api_secret</span><span class="p">:</span> <span class="nb">str</span>
+    <span class="n">api_passphrase</span><span class="p">:</span> <span class="nb">str</span>
+
+
+<span class="nd">@dataclass</span><span class="p">(</span><span class="n">frozen</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">WalletCredentials</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Wallet-level credentials for on-chain operations.&quot;&quot;&quot;</span>
+
+    <span class="n">private_key</span><span class="p">:</span> <span class="nb">str</span>             <span class="c1"># hex-encoded, with or without 0x prefix</span>
+    <span class="c1"># Derived lazily: address is computed from private_key on first access.</span>
+    <span class="n">_address</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">address</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Return the checksummed Ethereum address derived from private_key.&quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_address</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="o">...</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_address</span>
+
+
+<span class="k">class</span><span class="w"> </span><span class="nc">Signer</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Holds credentials for one auth tier and provides signing operations.</span>
+
+<span class="sd">    The Signer is immutable after construction.  Callers check ``tier`` to</span>
+<span class="sd">    determine which operations are available:</span>
+
+<span class="sd">    - PUBLIC:  market data only (get_markets, get_order_book, etc.)</span>
+<span class="sd">    - API_KEY: adds order placement, cancellation, user-specific WebSocket.</span>
+<span class="sd">    - WALLET:  adds on-chain operations (split, merge, redeem, approvals).</span>
+
+<span class="sd">    The Signer does not perform network calls.  It is a pure-data + signing</span>
+<span class="sd">    object that can be serialized/deserialized for config reload.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">tier</span><span class="p">:</span> <span class="n">AuthTier</span><span class="p">,</span>
+        <span class="n">api_creds</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">ApiKeyCredentials</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">wallet_creds</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">WalletCredentials</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">tier</span> <span class="o">=</span> <span class="n">tier</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">api_creds</span> <span class="o">=</span> <span class="n">api_creds</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">wallet_creds</span> <span class="o">=</span> <span class="n">wallet_creds</span>
+
+    <span class="c1"># ── Factory helpers ──────────────────────────────────────────────────</span>
+
+    <span class="nd">@classmethod</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">public</span><span class="p">(</span><span class="bp">cls</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Signer</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Create a public-tier Signer (no credentials needed).&quot;&quot;&quot;</span>
+        <span class="o">...</span>
+
+    <span class="nd">@classmethod</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">from_api_key</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">api_key</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">secret</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">passphrase</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Signer</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Create an API-key-tier Signer.&quot;&quot;&quot;</span>
+        <span class="o">...</span>
+
+    <span class="nd">@classmethod</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">from_wallet</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">private_key</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Signer</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Create a wallet-tier Signer (implies API-key + on-chain access).&quot;&quot;&quot;</span>
+        <span class="o">...</span>
+
+    <span class="c1"># ─── Signing (wallet tier) ───────────────────────────────────────────</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">sign_typed_data</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">domain</span><span class="p">:</span> <span class="nb">dict</span><span class="p">,</span> <span class="n">message_types</span><span class="p">:</span> <span class="nb">dict</span><span class="p">,</span> <span class="n">message</span><span class="p">:</span> <span class="nb">dict</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Sign an EIP-712 typed data payload with the wallet private key.</span>
+
+<span class="sd">        Returns the hex-encoded signature (0x-prefixed).</span>
+<span class="sd">        Raises ``RuntimeError`` if tier &lt; WALLET.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="o">...</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">sign_hash</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">message_hash</span><span class="p">:</span> <span class="nb">bytes</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Sign an arbitrary hash with the wallet private key.</span>
+
+<span class="sd">        Used for on-chain contract interactions.</span>
+<span class="sd">        Raises ``RuntimeError`` if tier &lt; WALLET.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="o">...</span>
+
+    <span class="c1"># ─── API key management ──────────────────────────────────────────────</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">derive_api_key</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">host</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">ApiKeyCredentials</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Derive (or re-derive) API key credentials from the wallet.</span>
+
+<span class="sd">        This wraps the SDK&#39;s ``ClobClient.create_or_derive_api_creds``</span>
+<span class="sd">        flow.  Raises ``RuntimeError`` if tier &lt; WALLET (API key derivation</span>
+<span class="sd">        requires the wallet).</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="o">...</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">can_sign</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;True if this signer can perform EIP-712 signing (tier &gt;= WALLET).&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">tier</span> <span class="o">==</span> <span class="n">AuthTier</span><span class="o">.</span><span class="n">WALLET</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">can_authenticate</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;True if this signer can authenticate to L2 endpoints (tier &gt;= API_KEY).&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">tier</span> <span class="ow">in</span> <span class="p">(</span><span class="n">AuthTier</span><span class="o">.</span><span class="n">API_KEY</span><span class="p">,</span> <span class="n">AuthTier</span><span class="o">.</span><span class="n">WALLET</span><span class="p">)</span>
+</code></pre></div>
+<h3 id="32-clientpy-clob-rest-adapter">3.2 <code>client.py</code> — CLOB REST adapter<a class="headerlink" href="#32-clientpy-clob-rest-adapter" title="Permanent link">&para;</a></h3>
+<p><strong>File:</strong> <code>polymind/polymarket/client.py</code></p>
+<p>Wraps <code>py_clob_client.client.ClobClient</code> for all CLOB REST operations.
+Returns domain types from <code>polymind.core.*</code> (or dedicated domain types defined
+in this module for Polymarket-specific concepts that have no core equivalent).</p>
+<div class="highlight"><pre><span></span><code><span class="sd">&quot;&quot;&quot;Polymarket CLOB REST adapter.</span>
+
+<span class="sd">Translates between py-clob-client SDK types and polymind.core domain types.</span>
+<span class="sd">All methods are async; synchronous SDK calls are dispatched via executor.</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">__future__</span><span class="w"> </span><span class="kn">import</span> <span class="n">annotations</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">dataclasses</span><span class="w"> </span><span class="kn">import</span> <span class="n">dataclass</span><span class="p">,</span> <span class="n">field</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">datetime</span><span class="w"> </span><span class="kn">import</span> <span class="n">datetime</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">enum</span><span class="w"> </span><span class="kn">import</span> <span class="n">Enum</span><span class="p">,</span> <span class="n">auto</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Any</span><span class="p">,</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">List</span><span class="p">,</span> <span class="n">Optional</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">polymind.polymarket.metrics</span><span class="w"> </span><span class="kn">import</span> <span class="n">AdapterMetrics</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">polymind.polymarket.signer</span><span class="w"> </span><span class="kn">import</span> <span class="n">Signer</span>
+
+
+<span class="c1"># ── Domain types (Polymarket-specific, no core equivalent) ──────────────</span>
+
+
+<span class="nd">@dataclass</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">MarketSummary</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Summary of a Polymarket CLOB market.&quot;&quot;&quot;</span>
+
+    <span class="n">market_id</span><span class="p">:</span> <span class="nb">str</span>
+    <span class="n">condition_id</span><span class="p">:</span> <span class="nb">str</span>
+    <span class="n">token_id</span><span class="p">:</span> <span class="nb">str</span>           <span class="c1"># ERC-1155 token ID for this outcome</span>
+    <span class="n">outcome</span><span class="p">:</span> <span class="nb">str</span>            <span class="c1"># &quot;YES&quot; or &quot;NO&quot;</span>
+    <span class="n">price</span><span class="p">:</span> <span class="nb">float</span>            <span class="c1"># current last-trade or midpoint price</span>
+    <span class="n">volume_24h</span><span class="p">:</span> <span class="nb">float</span>
+    <span class="n">liquidity</span><span class="p">:</span> <span class="nb">float</span>
+    <span class="n">open_interest</span><span class="p">:</span> <span class="nb">float</span>
+    <span class="n">tick_size</span><span class="p">:</span> <span class="nb">float</span>
+    <span class="n">min_size</span><span class="p">:</span> <span class="nb">float</span>
+    <span class="n">neg_risk</span><span class="p">:</span> <span class="nb">bool</span>          <span class="c1"># True if this is a negative-risk market</span>
+    <span class="n">closed</span><span class="p">:</span> <span class="nb">bool</span>
+    <span class="n">created_at</span><span class="p">:</span> <span class="n">datetime</span>
+
+
+<span class="nd">@dataclass</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">OrderBookLevel</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;A single price level in the order book.&quot;&quot;&quot;</span>
+
+    <span class="n">price</span><span class="p">:</span> <span class="nb">float</span>
+    <span class="n">size</span><span class="p">:</span> <span class="nb">float</span>
+    <span class="n">num_orders</span><span class="p">:</span> <span class="nb">int</span>
+
+
+<span class="nd">@dataclass</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">OrderBookSnapshot</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Full order book snapshot for a token.&quot;&quot;&quot;</span>
+
+    <span class="n">market_id</span><span class="p">:</span> <span class="nb">str</span>
+    <span class="n">token_id</span><span class="p">:</span> <span class="nb">str</span>
+    <span class="n">bids</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">OrderBookLevel</span><span class="p">]</span>
+    <span class="n">asks</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">OrderBookLevel</span><span class="p">]</span>
+    <span class="n">timestamp</span><span class="p">:</span> <span class="n">datetime</span>
+    <span class="n">tick_size</span><span class="p">:</span> <span class="nb">float</span>
+    <span class="n">min_order_size</span><span class="p">:</span> <span class="nb">str</span>
+
+
+<span class="nd">@dataclass</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">OrderResult</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Result of placing or cancelling an order.&quot;&quot;&quot;</span>
+
+    <span class="n">order_id</span><span class="p">:</span> <span class="nb">str</span>
+    <span class="n">status</span><span class="p">:</span> <span class="nb">str</span>               <span class="c1"># &quot;OPEN&quot;, &quot;FILLED&quot;, &quot;CANCELLED&quot;, &quot;FAILED&quot;</span>
+    <span class="n">market_id</span><span class="p">:</span> <span class="nb">str</span>
+    <span class="n">side</span><span class="p">:</span> <span class="nb">str</span>                 <span class="c1"># &quot;BUY&quot; or &quot;SELL&quot;</span>
+    <span class="n">price</span><span class="p">:</span> <span class="nb">str</span>
+    <span class="n">size</span><span class="p">:</span> <span class="nb">str</span>
+    <span class="n">filled_size</span><span class="p">:</span> <span class="nb">str</span>
+    <span class="n">remaining_size</span><span class="p">:</span> <span class="nb">str</span>
+    <span class="n">created_at</span><span class="p">:</span> <span class="n">datetime</span>
+    <span class="n">error</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
+
+
+<span class="c1"># ── Adapter class ───────────────────────────────────────────────────────</span>
+
+
+<span class="k">class</span><span class="w"> </span><span class="nc">PolymarketClient</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Async adapter for the Polymarket CLOB REST API.</span>
+
+<span class="sd">    Wraps ``ClobClient`` from ``py-clob-client``.  All public methods accept</span>
+<span class="sd">    and return domain types; SDK types are never exposed.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    host : str</span>
+<span class="sd">        Polymarket CLOB API host (e.g. ``https://clob.polymarket.com``).</span>
+<span class="sd">    signer : Signer</span>
+<span class="sd">        Authentication credentials (public, API key, or wallet).</span>
+<span class="sd">    chain_id : int, optional</span>
+<span class="sd">        Polygon chain ID (137 for mainnet, 80002 for amoy). Derived from</span>
+<span class="sd">        host if omitted.</span>
+<span class="sd">    metrics : AdapterMetrics, optional</span>
+<span class="sd">        Metrics collector.  A new instance is created if omitted.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">host</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+        <span class="n">signer</span><span class="p">:</span> <span class="n">Signer</span><span class="p">,</span>
+        <span class="n">chain_id</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">metrics</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">AdapterMetrics</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_host</span> <span class="o">=</span> <span class="n">host</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_signer</span> <span class="o">=</span> <span class="n">signer</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_chain_id</span> <span class="o">=</span> <span class="n">chain_id</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">_resolve_chain_id</span><span class="p">(</span><span class="n">host</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_metrics</span> <span class="o">=</span> <span class="n">metrics</span> <span class="ow">or</span> <span class="n">AdapterMetrics</span><span class="p">(</span><span class="s2">&quot;polymarket.client&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_client</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="s2">&quot;ClobClient&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
+
+    <span class="c1"># ── Lifecycle ────────────────────────────────────────────────────────</span>
+
+    <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">connect</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Instantiate the underlying ClobClient and authenticate.</span>
+
+<span class="sd">        For API-key-tier signers, this derives API credentials if needed</span>
+<span class="sd">        and sets them on the SDK client.  For public-tier signers, only</span>
+<span class="sd">        the host and chain ID are configured.</span>
+
+<span class="sd">        Safe to call multiple times — subsequent calls are no-ops if</span>
+<span class="sd">        already connected.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="o">...</span>
+
+    <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">close</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Close the underlying client and release HTTP resources.&quot;&quot;&quot;</span>
+        <span class="o">...</span>
+
+    <span class="c1"># ── Market data ──────────────────────────────────────────────────────</span>
+
+    <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">get_markets</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">active</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span> <span class="n">limit</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">50</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="n">MarketSummary</span><span class="p">]:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Fetch active (or all) markets.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        active : bool</span>
+<span class="sd">            If True (default), return only markets that are not closed.</span>
+<span class="sd">        limit : int</span>
+<span class="sd">            Maximum number of markets to return (pagination uses cursors</span>
+<span class="sd">            internally).</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        List[MarketSummary]</span>
+<span class="sd">            One entry per outcome token (two entries per binary market:</span>
+<span class="sd">            YES and NO).</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="o">...</span>
+
+    <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">get_market</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">market_id</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Optional</span><span class="p">[</span><span class="n">MarketSummary</span><span class="p">]:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Fetch a single market by its CLOB market ID.&quot;&quot;&quot;</span>
+        <span class="o">...</span>
+
+    <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">get_order_book</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">token_id</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">depth</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Optional</span><span class="p">[</span><span class="n">OrderBookSnapshot</span><span class="p">]:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Fetch the current order book for a token.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        token_id : str</span>
+<span class="sd">            ERC-1155 token ID for the outcome.</span>
+<span class="sd">        depth : int, optional</span>
+<span class="sd">            Number of price levels per side.  The SDK default is used if</span>
+<span class="sd">            omitted.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        OrderBookSnapshot or None</span>
+<span class="sd">            None if the token ID is unknown or the market is closed.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="o">...</span>
+
+    <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">get_midpoint</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">token_id</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">float</span><span class="p">]:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Fetch the midpoint price for a token.&quot;&quot;&quot;</span>
+        <span class="o">...</span>
+
+    <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">get_spread</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">token_id</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">float</span><span class="p">]:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Fetch the current bid-ask spread for a token.&quot;&quot;&quot;</span>
+        <span class="o">...</span>
+
+    <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">get_last_trade_price</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">token_id</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">float</span><span class="p">]:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Fetch the last traded price for a token.&quot;&quot;&quot;</span>
+        <span class="o">...</span>
+
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_resolve_chain_id</span><span class="p">(</span><span class="n">host</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Map known hosts to chain IDs.&quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="s2">&quot;amoy&quot;</span> <span class="ow">in</span> <span class="n">host</span><span class="o">.</span><span class="n">lower</span><span class="p">():</span>
+            <span class="k">return</span> <span class="mi">80002</span>
+        <span class="k">return</span> <span class="mi">137</span>
+
+    <span class="c1"># ── Orders ────────────────────────────────────────────────────────────</span>
+
+    <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">place_order</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">market_id</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+        <span class="n">token_id</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+        <span class="n">side</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+        <span class="n">price</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
+        <span class="n">size</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
+        <span class="n">order_type</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;GTC&quot;</span><span class="p">,</span>
+        <span class="n">reduce_only</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+        <span class="n">post_only</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+        <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">OrderResult</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Place a limit order on the CLOB.</span>
+
+<span class="sd">        Requires ``signer.can_authenticate == True``.  Raises</span>
+<span class="sd">        ``PermissionError`` for public-tier signers.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        OrderResult</span>
+<span class="sd">            Contains the exchange order ID and initial status.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="o">...</span>
+
+    <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">cancel_order</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">order_id</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Cancel a single open order by exchange order ID.</span>
+
+<span class="sd">        Returns True if the cancellation was accepted by the exchange.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="o">...</span>
+
+    <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">cancel_all_orders</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">market_id</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Cancel all open orders, optionally filtered by market.</span>
+
+<span class="sd">        Returns the number of cancellation requests sent (not necessarily</span>
+<span class="sd">        the number of orders actually cancelled — use ``get_orders`` to</span>
+<span class="sd">        verify).</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="o">...</span>
+
+    <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">get_orders</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">market_id</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">status</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="n">OrderResult</span><span class="p">]:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Fetch open (or all) orders, optionally filtered.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        market_id : str, optional</span>
+<span class="sd">            Filter to a specific market.</span>
+<span class="sd">        status : str, optional</span>
+<span class="sd">            Filter by status: &quot;OPEN&quot;, &quot;FILLED&quot;, &quot;CANCELLED&quot;, etc.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        List[OrderResult]</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="o">...</span>
+
+    <span class="c1"># ── Account ──────────────────────────────────────────────────────────</span>
+
+    <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">get_positions</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]]:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Fetch current positions from the CLOB API.</span>
+
+<span class="sd">        Returns a list of position dicts with keys: market_id, token_id,</span>
+<span class="sd">        outcome, size, avg_price, realized_pnl, unrealized_pnl.</span>
+
+<span class="sd">        Note: These are CLOB-reported positions, not on-chain balances.</span>
+<span class="sd">        On-chain reconciliation (ADR 0003) is handled by ``contracts.py``.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="o">...</span>
+
+    <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">get_balance</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Fetch the USDC balance reported by the CLOB API.</span>
+
+<span class="sd">        This is the exchange-managed balance, not the on-chain wallet</span>
+<span class="sd">        balance.  On-chain balance reads are in ``contracts.py``.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="o">...</span>
+
+    <span class="c1"># ── Internal helpers ─────────────────────────────────────────────────</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_map_market</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">raw</span><span class="p">:</span> <span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">MarketSummary</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Map a raw SDK market response to a domain MarketSummary.&quot;&quot;&quot;</span>
+        <span class="o">...</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_map_order_book</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">raw</span><span class="p">:</span> <span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">OrderBookSnapshot</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Map a raw SDK OrderBookSummary to a domain OrderBookSnapshot.&quot;&quot;&quot;</span>
+        <span class="o">...</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_map_order_result</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">raw</span><span class="p">:</span> <span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">OrderResult</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Map a raw SDK order response to a domain OrderResult.&quot;&quot;&quot;</span>
+        <span class="o">...</span>
+</code></pre></div>
+<h3 id="33-data_apipy-data-api-metadata-price-history-candles">3.3 <code>data_api.py</code> — Data API (metadata, price history, candles)<a class="headerlink" href="#33-data_apipy-data-api-metadata-price-history-candles" title="Permanent link">&para;</a></h3>
+<p><strong>File:</strong> <code>polymind/polymarket/data_api.py</code></p>
+<p>Provides access to Polymarket's Gamma/Data API endpoints for historical data
+used by factors and backtesting. This module is read-only (no order placement).</p>
+<div class="highlight"><pre><span></span><code><span class="sd">&quot;&quot;&quot;Polymarket Data API adapter.</span>
+
+<span class="sd">Read-only access to market metadata, price history, and OHLCV candles.</span>
+<span class="sd">Returns domain types usable by the factor engine and backtester.</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">__future__</span><span class="w"> </span><span class="kn">import</span> <span class="n">annotations</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">dataclasses</span><span class="w"> </span><span class="kn">import</span> <span class="n">dataclass</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">datetime</span><span class="w"> </span><span class="kn">import</span> <span class="n">datetime</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">List</span><span class="p">,</span> <span class="n">Optional</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">polymind.polymarket.metrics</span><span class="w"> </span><span class="kn">import</span> <span class="n">AdapterMetrics</span>
+
+
+<span class="nd">@dataclass</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">Candle</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;OHLCV candle for a market outcome.&quot;&quot;&quot;</span>
+
+    <span class="n">token_id</span><span class="p">:</span> <span class="nb">str</span>
+    <span class="n">timestamp</span><span class="p">:</span> <span class="n">datetime</span>
+    <span class="nb">open</span><span class="p">:</span> <span class="nb">float</span>
+    <span class="n">high</span><span class="p">:</span> <span class="nb">float</span>
+    <span class="n">low</span><span class="p">:</span> <span class="nb">float</span>
+    <span class="n">close</span><span class="p">:</span> <span class="nb">float</span>
+    <span class="n">volume</span><span class="p">:</span> <span class="nb">float</span>
+    <span class="n">complete</span><span class="p">:</span> <span class="nb">bool</span>            <span class="c1"># True if the candle is fully formed</span>
+
+
+<span class="nd">@dataclass</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">MarketMetadata</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Full metadata for a Polymarket event/market.&quot;&quot;&quot;</span>
+
+    <span class="n">market_id</span><span class="p">:</span> <span class="nb">str</span>
+    <span class="n">condition_id</span><span class="p">:</span> <span class="nb">str</span>
+    <span class="n">question</span><span class="p">:</span> <span class="nb">str</span>             <span class="c1"># e.g. &quot;Will BTC reach $100k by Dec 2026?&quot;</span>
+    <span class="n">description</span><span class="p">:</span> <span class="nb">str</span>
+    <span class="n">outcomes</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span>       <span class="c1"># [&quot;YES&quot;, &quot;NO&quot;] for binary markets</span>
+    <span class="n">token_ids</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span>      <span class="c1"># one per outcome, same order as outcomes</span>
+    <span class="n">tick_size</span><span class="p">:</span> <span class="nb">float</span>
+    <span class="n">min_size</span><span class="p">:</span> <span class="nb">float</span>
+    <span class="n">volume_24h</span><span class="p">:</span> <span class="nb">float</span>
+    <span class="n">open_interest</span><span class="p">:</span> <span class="nb">float</span>
+    <span class="n">end_date</span><span class="p">:</span> <span class="n">datetime</span>
+    <span class="n">neg_risk</span><span class="p">:</span> <span class="nb">bool</span>
+    <span class="n">closed</span><span class="p">:</span> <span class="nb">bool</span>
+
+
+<span class="nd">@dataclass</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">Trade</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;A single CLOB trade (fill) from the Data API.&quot;&quot;&quot;</span>
+
+    <span class="n">trade_id</span><span class="p">:</span> <span class="nb">str</span>
+    <span class="n">market_id</span><span class="p">:</span> <span class="nb">str</span>
+    <span class="n">token_id</span><span class="p">:</span> <span class="nb">str</span>
+    <span class="n">side</span><span class="p">:</span> <span class="nb">str</span>                  <span class="c1"># &quot;BUY&quot; or &quot;SELL&quot;</span>
+    <span class="n">price</span><span class="p">:</span> <span class="nb">float</span>
+    <span class="n">size</span><span class="p">:</span> <span class="nb">float</span>
+    <span class="n">timestamp</span><span class="p">:</span> <span class="n">datetime</span>
+    <span class="n">taker</span><span class="p">:</span> <span class="nb">bool</span>                <span class="c1"># True if this was a taker fill</span>
+
+
+<span class="k">class</span><span class="w"> </span><span class="nc">DataApiClient</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Async adapter for Polymarket&#39;s Data API.</span>
+
+<span class="sd">    Provides market metadata, price history, and trade data for factor</span>
+<span class="sd">    computation and backtesting.  All calls are read-only and can be made</span>
+<span class="sd">    without authentication (public tier).</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    base_url : str</span>
+<span class="sd">        Data API base URL (e.g. ``https://data.polymarket.com`` or</span>
+<span class="sd">        ``https://gamma-api.polymarket.com``).</span>
+<span class="sd">    metrics : AdapterMetrics, optional</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">base_url</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;https://gamma-api.polymarket.com&quot;</span><span class="p">,</span>
+        <span class="n">metrics</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">AdapterMetrics</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_base_url</span> <span class="o">=</span> <span class="n">base_url</span><span class="o">.</span><span class="n">rstrip</span><span class="p">(</span><span class="s2">&quot;/&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_metrics</span> <span class="o">=</span> <span class="n">metrics</span> <span class="ow">or</span> <span class="n">AdapterMetrics</span><span class="p">(</span><span class="s2">&quot;polymarket.data_api&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_session</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="s2">&quot;httpx.AsyncClient&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
+
+    <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">connect</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Create the HTTP client session.&quot;&quot;&quot;</span>
+        <span class="o">...</span>
+
+    <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">close</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Close the HTTP session.&quot;&quot;&quot;</span>
+        <span class="o">...</span>
+
+    <span class="c1"># ── Market metadata ─────────────────────────────────────────────────</span>
+
+    <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">get_market_metadata</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">market_id</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Optional</span><span class="p">[</span><span class="n">MarketMetadata</span><span class="p">]:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Fetch full metadata for a single market/event.&quot;&quot;&quot;</span>
+        <span class="o">...</span>
+
+    <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">list_markets</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">active_only</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+        <span class="n">limit</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">100</span><span class="p">,</span>
+        <span class="n">offset</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="n">MarketMetadata</span><span class="p">]:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;List available markets with optional filtering.</span>
+
+<span class="sd">        Supports pagination via limit/offset.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="o">...</span>
+
+    <span class="c1"># ── Price history ───────────────────────────────────────────────────</span>
+
+    <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">get_candles</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">token_id</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+        <span class="n">interval</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;1h&quot;</span><span class="p">,</span>          <span class="c1"># &quot;1h&quot;, &quot;4h&quot;, &quot;1d&quot;, &quot;7d&quot;</span>
+        <span class="n">start</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">datetime</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">end</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">datetime</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">limit</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">500</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="n">Candle</span><span class="p">]:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Fetch OHLCV candles for a token.</span>
+
+<span class="sd">        The interval parameter follows the Polymarket Data API convention.</span>
+<span class="sd">        Returns candles sorted by timestamp ascending.</span>
+
+<span class="sd">        This is the primary data source for factor signal computation and</span>
+<span class="sd">        backtesting.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="o">...</span>
+
+    <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">get_price_history</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">token_id</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+        <span class="n">start</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">datetime</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">end</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">datetime</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">limit</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">1000</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="n">Trade</span><span class="p">]:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Fetch historical trades/fills for a token.</span>
+
+<span class="sd">        Useful for reconstructing order book dynamics off-line.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="o">...</span>
+
+    <span class="c1"># ── Trades ──────────────────────────────────────────────────────────</span>
+
+    <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">get_recent_trades</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">token_id</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+        <span class="n">limit</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">100</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="n">Trade</span><span class="p">]:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Fetch the most recent trades for a token.</span>
+
+<span class="sd">        This is a lightweight alternative to get_price_history when only</span>
+<span class="sd">        recent activity is needed.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="o">...</span>
+
+    <span class="c1"># ── Internal helpers ────────────────────────────────────────────────</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_map_candle</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">raw</span><span class="p">:</span> <span class="nb">dict</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Candle</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Map a raw Data API candle response to domain Candle.&quot;&quot;&quot;</span>
+        <span class="o">...</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_map_metadata</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">raw</span><span class="p">:</span> <span class="nb">dict</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">MarketMetadata</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Map a raw Data API market response to domain MarketMetadata.&quot;&quot;&quot;</span>
+        <span class="o">...</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_map_trade</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">raw</span><span class="p">:</span> <span class="nb">dict</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Trade</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Map a raw Data API trade response to domain Trade.&quot;&quot;&quot;</span>
+        <span class="o">...</span>
+</code></pre></div>
+<h3 id="34-websocketpy-public-and-authenticated-websocket-streams">3.4 <code>websocket.py</code> — Public and authenticated WebSocket streams<a class="headerlink" href="#34-websocketpy-public-and-authenticated-websocket-streams" title="Permanent link">&para;</a></h3>
+<p><strong>File:</strong> <code>polymind/polymarket/websocket.py</code></p>
+<p>Manages asyncio-based WebSocket connections to Polymarket's public and
+authenticated streams. Reconnection uses exponential backoff. WebSocket events
+are emitted as callbacks (not business logic sinks — see ADR 0003).</p>
+<div class="highlight"><pre><span></span><code><span class="sd">&quot;&quot;&quot;Polymarket WebSocket adapter.</span>
+
+<span class="sd">Manages asyncio WebSocket connections with automatic reconnection.</span>
+<span class="sd">Events are dispatched to registered callbacks.  No business logic runs</span>
+<span class="sd">inside callbacks — they are wake-up signals only (ADR 0003).</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">__future__</span><span class="w"> </span><span class="kn">import</span> <span class="n">annotations</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">dataclasses</span><span class="w"> </span><span class="kn">import</span> <span class="n">dataclass</span><span class="p">,</span> <span class="n">field</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">datetime</span><span class="w"> </span><span class="kn">import</span> <span class="n">datetime</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">enum</span><span class="w"> </span><span class="kn">import</span> <span class="n">Enum</span><span class="p">,</span> <span class="n">auto</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Any</span><span class="p">,</span> <span class="n">Callable</span><span class="p">,</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">List</span><span class="p">,</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Set</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">polymind.polymarket.signer</span><span class="w"> </span><span class="kn">import</span> <span class="n">Signer</span>
+
+
+<span class="c1"># ── Channel types ──────────────────────────────────────────────────────</span>
+
+
+<span class="k">class</span><span class="w"> </span><span class="nc">ChannelType</span><span class="p">(</span><span class="n">Enum</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;WebSocket channel categories.&quot;&quot;&quot;</span>
+
+    <span class="n">ORDER_BOOK</span> <span class="o">=</span> <span class="s2">&quot;orderbook&quot;</span>           <span class="c1"># public: bid/ask snapshots and deltas</span>
+    <span class="n">TRADES</span> <span class="o">=</span> <span class="s2">&quot;trades&quot;</span>                  <span class="c1"># public: fill events</span>
+    <span class="n">TICKER</span> <span class="o">=</span> <span class="s2">&quot;ticker&quot;</span>                  <span class="c1"># public: price/ticker updates</span>
+    <span class="n">USER_FILLS</span> <span class="o">=</span> <span class="s2">&quot;user&quot;</span>                <span class="c1"># authenticated: user-specific fills</span>
+    <span class="n">USER_ORDERS</span> <span class="o">=</span> <span class="s2">&quot;user&quot;</span>               <span class="c1"># authenticated: order status changes</span>
+    <span class="n">USER_POSITIONS</span> <span class="o">=</span> <span class="s2">&quot;user&quot;</span>            <span class="c1"># authenticated: position changes</span>
+
+
+<span class="c1"># ── Event types ────────────────────────────────────────────────────────</span>
+
+
+<span class="nd">@dataclass</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">OrderBookEvent</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;WebSocket order-book delta or snapshot event.&quot;&quot;&quot;</span>
+
+    <span class="n">market_id</span><span class="p">:</span> <span class="nb">str</span>
+    <span class="n">token_id</span><span class="p">:</span> <span class="nb">str</span>
+    <span class="n">bids</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">]]</span>         <span class="c1"># [{price: str, size: str}, ...]</span>
+    <span class="n">asks</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">]]</span>
+    <span class="n">timestamp</span><span class="p">:</span> <span class="n">datetime</span>
+    <span class="n">is_snapshot</span><span class="p">:</span> <span class="nb">bool</span>                  <span class="c1"># True = full refresh, False = delta</span>
+
+
+<span class="nd">@dataclass</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">TradeEvent</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;WebSocket trade/fill event (public channel).&quot;&quot;&quot;</span>
+
+    <span class="n">market_id</span><span class="p">:</span> <span class="nb">str</span>
+    <span class="n">token_id</span><span class="p">:</span> <span class="nb">str</span>
+    <span class="n">side</span><span class="p">:</span> <span class="nb">str</span>
+    <span class="n">price</span><span class="p">:</span> <span class="nb">float</span>
+    <span class="n">size</span><span class="p">:</span> <span class="nb">float</span>
+    <span class="n">trade_id</span><span class="p">:</span> <span class="nb">str</span>
+    <span class="n">timestamp</span><span class="p">:</span> <span class="n">datetime</span>
+
+
+<span class="nd">@dataclass</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">TickerEvent</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;WebSocket ticker/price-update event.&quot;&quot;&quot;</span>
+
+    <span class="n">market_id</span><span class="p">:</span> <span class="nb">str</span>
+    <span class="n">token_id</span><span class="p">:</span> <span class="nb">str</span>
+    <span class="n">price</span><span class="p">:</span> <span class="nb">float</span>
+    <span class="n">volume_24h</span><span class="p">:</span> <span class="nb">float</span>
+    <span class="n">timestamp</span><span class="p">:</span> <span class="n">datetime</span>
+
+
+<span class="nd">@dataclass</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">UserFillEvent</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;WebSocket user-specific fill event (authenticated channel).</span>
+
+<span class="sd">    This is the primary low-latency wake-up signal for the reconciliation</span>
+<span class="sd">    layer (ADR 0003).  It is NOT the source of truth — on-chain balance</span>
+<span class="sd">    reads serve that role.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">order_id</span><span class="p">:</span> <span class="nb">str</span>
+    <span class="n">market_id</span><span class="p">:</span> <span class="nb">str</span>
+    <span class="n">token_id</span><span class="p">:</span> <span class="nb">str</span>
+    <span class="n">side</span><span class="p">:</span> <span class="nb">str</span>
+    <span class="n">price</span><span class="p">:</span> <span class="nb">float</span>
+    <span class="n">size</span><span class="p">:</span> <span class="nb">float</span>
+    <span class="n">fee</span><span class="p">:</span> <span class="nb">float</span>
+    <span class="n">trade_id</span><span class="p">:</span> <span class="nb">str</span>
+    <span class="n">timestamp</span><span class="p">:</span> <span class="n">datetime</span>
+
+
+<span class="c1"># ── Connection config ─────────────────────────────────────────────────</span>
+
+
+<span class="nd">@dataclass</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">WebSocketConfig</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Configuration for WebSocket connections.&quot;&quot;&quot;</span>
+
+    <span class="n">max_retries</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">10</span>
+    <span class="n">base_retry_delay</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">1.0</span>      <span class="c1"># seconds, doubled each attempt</span>
+    <span class="n">max_retry_delay</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">60.0</span>
+    <span class="n">ping_interval</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">20.0</span>        <span class="c1"># seconds</span>
+    <span class="n">ping_timeout</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">10.0</span>
+
+
+<span class="c1"># ── Callback types ────────────────────────────────────────────────────</span>
+
+
+<span class="n">OrderBookCallback</span> <span class="o">=</span> <span class="n">Callable</span><span class="p">[[</span><span class="n">OrderBookEvent</span><span class="p">],</span> <span class="kc">None</span><span class="p">]</span>
+<span class="n">TradeCallback</span> <span class="o">=</span> <span class="n">Callable</span><span class="p">[[</span><span class="n">TradeEvent</span><span class="p">],</span> <span class="kc">None</span><span class="p">]</span>
+<span class="n">TickerCallback</span> <span class="o">=</span> <span class="n">Callable</span><span class="p">[[</span><span class="n">TickerEvent</span><span class="p">],</span> <span class="kc">None</span><span class="p">]</span>
+<span class="n">UserFillCallback</span> <span class="o">=</span> <span class="n">Callable</span><span class="p">[[</span><span class="n">UserFillEvent</span><span class="p">],</span> <span class="kc">None</span><span class="p">]</span>
+
+
+<span class="c1"># ── Manager class ──────────────────────────────────────────────────────</span>
+
+
+<span class="k">class</span><span class="w"> </span><span class="nc">WebSocketManager</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Manages asyncio WebSocket connections to Polymarket.</span>
+
+<span class="sd">    Supports multiple concurrent subscriptions (channels).  Reconnection</span>
+<span class="sd">    is handled internally with exponential backoff.  Events are dispatched</span>
+<span class="sd">    to registered callbacks.</span>
+
+<span class="sd">    The manager does NOT run business logic.  Callbacks must be fast and</span>
+<span class="sd">    non-blocking — they should enqueue work for the reconciliation or</span>
+<span class="sd">    executor layer, not perform I/O themselves.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    ws_url : str</span>
+<span class="sd">        WebSocket endpoint (e.g. ``wss://ws-subscriptions-clob.polymarket.com/ws/``).</span>
+<span class="sd">    signer : Signer, optional</span>
+<span class="sd">        If provided with tier &gt;= API_KEY, authenticated channels are available.</span>
+<span class="sd">    config : WebSocketConfig, optional</span>
+<span class="sd">        Reconnection and keepalive settings.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">ws_url</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+        <span class="n">signer</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Signer</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">config</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">WebSocketConfig</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_ws_url</span> <span class="o">=</span> <span class="n">ws_url</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_signer</span> <span class="o">=</span> <span class="n">signer</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_config</span> <span class="o">=</span> <span class="n">config</span> <span class="ow">or</span> <span class="n">WebSocketConfig</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_subscriptions</span><span class="p">:</span> <span class="n">Set</span><span class="p">[</span><span class="n">ChannelType</span><span class="p">]</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_callbacks</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="n">ChannelType</span><span class="p">,</span> <span class="n">List</span><span class="p">[</span><span class="n">Callable</span><span class="p">]]</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_task</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="s2">&quot;asyncio.Task&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_connected</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span>
+
+    <span class="c1"># ── Lifecycle ──────────────────────────────────────────────────────</span>
+
+    <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">connect</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Start the WebSocket connection and event loop.</span>
+
+<span class="sd">        Launches a background asyncio task that manages the connection</span>
+<span class="sd">        lifecycle.  This method returns once the initial handshake is</span>
+<span class="sd">        complete or raises if the first connection fails.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="o">...</span>
+
+    <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">disconnect</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Gracefully close the WebSocket and stop the reconnect loop.&quot;&quot;&quot;</span>
+        <span class="o">...</span>
+
+    <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">subscribe</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">channel</span><span class="p">:</span> <span class="n">ChannelType</span><span class="p">,</span>
+        <span class="n">assets</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">callback</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Callable</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Subscribe to a channel.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        channel : ChannelType</span>
+<span class="sd">            The channel to subscribe to.</span>
+<span class="sd">        assets : list of str, optional</span>
+<span class="sd">            Token IDs or market IDs to filter (None = subscribe to all).</span>
+<span class="sd">        callback : callable, optional</span>
+<span class="sd">            Function to call on each event.  If not provided, events can</span>
+<span class="sd">            be polled via ``poll_events()``.</span>
+
+<span class="sd">        Raises</span>
+<span class="sd">        ------</span>
+<span class="sd">        PermissionError</span>
+<span class="sd">            If the channel requires authentication and the signer&#39;s tier</span>
+<span class="sd">            is insufficient.</span>
+<span class="sd">        RuntimeError</span>
+<span class="sd">            If called before ``connect()``.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="o">...</span>
+
+    <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">unsubscribe</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">channel</span><span class="p">:</span> <span class="n">ChannelType</span><span class="p">,</span>
+        <span class="n">assets</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Unsubscribe from a channel (or specific assets on it).&quot;&quot;&quot;</span>
+        <span class="o">...</span>
+
+    <span class="c1"># ── Event polling (alternative to callbacks) ───────────────────────</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">poll_events</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">channel</span><span class="p">:</span> <span class="n">ChannelType</span><span class="p">,</span> <span class="n">max_count</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">10</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="n">Any</span><span class="p">]:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Dequeue buffered events for a channel.</span>
+
+<span class="sd">        Returns up to ``max_count`` events that have arrived since the</span>
+<span class="sd">        last poll.  Returns an empty list immediately if no events are</span>
+<span class="sd">        buffered.</span>
+
+<span class="sd">        This is the recommended interface for the reconciliation loop:</span>
+<span class="sd">        polls on a timer rather than reacting to every WebSocket message.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="o">...</span>
+
+    <span class="c1"># ── Status ─────────────────────────────────────────────────────────</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">is_connected</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;True if the WebSocket is currently connected.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_connected</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">active_subscriptions</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="n">ChannelType</span><span class="p">]:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Return the list of currently subscribed channels.&quot;&quot;&quot;</span>
+        <span class="o">...</span>
+
+    <span class="c1"># ── Internal ───────────────────────────────────────────────────────</span>
+
+    <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">_connection_loop</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Background task: maintain connection and dispatch events.</span>
+
+<span class="sd">        Implements exponential backoff reconnection on disconnect.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="o">...</span>
+
+    <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">_handle_message</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">raw</span><span class="p">:</span> <span class="nb">dict</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Deserialize a raw WebSocket message and dispatch to callbacks.&quot;&quot;&quot;</span>
+        <span class="o">...</span>
+
+    <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">_send_subscription</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">channel</span><span class="p">:</span> <span class="n">ChannelType</span><span class="p">,</span> <span class="n">assets</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Send a subscription message on the active WebSocket.&quot;&quot;&quot;</span>
+        <span class="o">...</span>
+</code></pre></div>
+<h3 id="35-contractspy-on-chain-contract-operations">3.5 <code>contracts.py</code> — On-chain contract operations<a class="headerlink" href="#35-contractspy-on-chain-contract-operations" title="Permanent link">&para;</a></h3>
+<p><strong>File:</strong> <code>polymind/polymarket/contracts.py</code></p>
+<p>Wraps on-chain interactions via Web3.py: ERC-1155 operations (split, merge,
+redeem), collateral approvals, and CTF exchange operations. All methods
+require a wallet-tier signer.</p>
+<div class="highlight"><pre><span></span><code><span class="sd">&quot;&quot;&quot;Polymarket on-chain contract adapter.</span>
+
+<span class="sd">ERC-1155 operations, collateral management, and CTF exchange interactions.</span>
+<span class="sd">All methods require wallet-tier authentication (Signer.tier &gt;= WALLET).</span>
+
+<span class="sd">These are the reconciliation source of truth (ADR 0003) — on-chain balances</span>
+<span class="sd">supersede CLOB-reported positions and WebSocket fill events.</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">__future__</span><span class="w"> </span><span class="kn">import</span> <span class="n">annotations</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">dataclasses</span><span class="w"> </span><span class="kn">import</span> <span class="n">dataclass</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">datetime</span><span class="w"> </span><span class="kn">import</span> <span class="n">datetime</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">enum</span><span class="w"> </span><span class="kn">import</span> <span class="n">Enum</span><span class="p">,</span> <span class="n">auto</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Optional</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">polymind.polymarket.metrics</span><span class="w"> </span><span class="kn">import</span> <span class="n">AdapterMetrics</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">polymind.polymarket.signer</span><span class="w"> </span><span class="kn">import</span> <span class="n">Signer</span>
+
+
+<span class="nd">@dataclass</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">OnChainBalance</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;ERC-1155 token balance and USDC balance on-chain.&quot;&quot;&quot;</span>
+
+    <span class="n">token_id</span><span class="p">:</span> <span class="nb">str</span>
+    <span class="n">balance</span><span class="p">:</span> <span class="nb">int</span>               <span class="c1"># raw ERC-1155 balance (may be fractional)</span>
+    <span class="n">usdc_balance</span><span class="p">:</span> <span class="nb">float</span>        <span class="c1"># USDC collateral balance</span>
+    <span class="n">decimals</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">6</span>
+
+
+<span class="nd">@dataclass</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">TransactionResult</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Outcome of an on-chain transaction.&quot;&quot;&quot;</span>
+
+    <span class="n">tx_hash</span><span class="p">:</span> <span class="nb">str</span>
+    <span class="n">status</span><span class="p">:</span> <span class="nb">str</span>                <span class="c1"># &quot;PENDING&quot;, &quot;CONFIRMED&quot;, &quot;FAILED&quot;</span>
+    <span class="n">block_number</span><span class="p">:</span> <span class="nb">int</span>
+    <span class="n">gas_used</span><span class="p">:</span> <span class="nb">int</span>
+    <span class="n">gas_price_gwei</span><span class="p">:</span> <span class="nb">float</span>
+
+
+<span class="k">class</span><span class="w"> </span><span class="nc">ContractClient</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Async adapter for Polymarket on-chain contract interactions.</span>
+
+<span class="sd">    Uses Web3.py to interact with Polygon.  All methods are async and</span>
+<span class="sd">    submit transactions via ``eth_sendRawTransaction`` (locally signed</span>
+<span class="sd">    using the wallet private key).</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    rpc_url : str</span>
+<span class="sd">        Polygon RPC endpoint (e.g. ``https://polygon-rpc.com`` or an</span>
+<span class="sd">        Alchemy/Infura endpoint).</span>
+<span class="sd">    signer : Signer</span>
+<span class="sd">        Must be wallet-tier (signer.can_sign == True).</span>
+<span class="sd">    chain_id : int</span>
+<span class="sd">        Polygon chain ID (137 or 80002).</span>
+<span class="sd">    metrics : AdapterMetrics, optional</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">rpc_url</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+        <span class="n">signer</span><span class="p">:</span> <span class="n">Signer</span><span class="p">,</span>
+        <span class="n">chain_id</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">137</span><span class="p">,</span>
+        <span class="n">metrics</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">AdapterMetrics</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_rpc_url</span> <span class="o">=</span> <span class="n">rpc_url</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_signer</span> <span class="o">=</span> <span class="n">signer</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_chain_id</span> <span class="o">=</span> <span class="n">chain_id</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_metrics</span> <span class="o">=</span> <span class="n">metrics</span> <span class="ow">or</span> <span class="n">AdapterMetrics</span><span class="p">(</span><span class="s2">&quot;polymarket.contracts&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_w3</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="s2">&quot;Web3&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_contracts</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">=</span> <span class="p">{}</span>       <span class="c1"># cached contract instances</span>
+
+    <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">connect</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Initialize Web3 connection and cache contract instances.&quot;&quot;&quot;</span>
+        <span class="o">...</span>
+
+    <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">close</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Disconnect and release resources.&quot;&quot;&quot;</span>
+        <span class="o">...</span>
+
+    <span class="c1"># ── Balance reads (ADR 0003 reconciliation truth) ──────────────────</span>
+
+    <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">get_onchain_balance</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">token_id</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">OnChainBalance</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Read ERC-1155 token balance and USDC balance on-chain.</span>
+
+<span class="sd">        This is the reconciliation source of truth.  Always prefer this</span>
+<span class="sd">        over CLOB-reported positions for final position verification.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="o">...</span>
+
+    <span class="c1"># ── ERC-1155 operations ────────────────────────────────────────────</span>
+
+    <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">split</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">condition_id</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+        <span class="n">collateral_amount</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>        <span class="c1"># amount of USDC to split</span>
+        <span class="n">outcomes</span><span class="p">:</span> <span class="nb">list</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">TransactionResult</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Split USDC collateral into YES/NO outcome tokens.</span>
+
+<span class="sd">        Requires prior USDC approval for the CTF exchange.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="o">...</span>
+
+    <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">merge</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">condition_id</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+        <span class="n">amount</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
+        <span class="n">outcomes</span><span class="p">:</span> <span class="nb">list</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">TransactionResult</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Merge YES/NO tokens back into USDC collateral.</span>
+
+<span class="sd">        Both YES and NO tokens must be held in equal quantities.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="o">...</span>
+
+    <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">redeem</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">condition_id</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+        <span class="n">outcome_index</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
+        <span class="n">amount</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">TransactionResult</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Redeem winning tokens for USDC after market resolution.</span>
+
+<span class="sd">        Only the winning outcome can be redeemed.  The transaction</span>
+<span class="sd">        fails if the market has not been resolved.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="o">...</span>
+
+    <span class="c1"># ── Approvals ──────────────────────────────────────────────────────</span>
+
+    <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">approve_usdc</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">amount</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">TransactionResult</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Approve the CTF exchange to spend USDC.</span>
+
+<span class="sd">        Required before split/merge operations.  ``amount`` is the</span>
+<span class="sd">        maximum approval (set to ``2**256-1`` for unlimited).</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="o">...</span>
+
+    <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">approve_exchange</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">token_id</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">amount</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">TransactionResult</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Approve the CTF exchange to transfer an ERC-1155 token.</span>
+
+<span class="sd">        Required before placing orders on the CLOB for this token.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="o">...</span>
+
+    <span class="c1"># ── Internal helpers ────────────────────────────────────────────────</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_get_contract</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">address</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">abi</span><span class="p">:</span> <span class="nb">list</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Any</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Get or create a cached Web3 contract instance.&quot;&quot;&quot;</span>
+        <span class="o">...</span>
+
+    <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">_send_transaction</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">tx</span><span class="p">:</span> <span class="nb">dict</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">TransactionResult</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Sign, send, and wait for a transaction.</span>
+
+<span class="sd">        Signs locally using the wallet private key, sends via</span>
+<span class="sd">        ``eth_sendRawTransaction``, and waits for confirmation.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="o">...</span>
+</code></pre></div>
+<h3 id="36-metricspy-adapter-instrumentation">3.6 <code>metrics.py</code> — Adapter instrumentation<a class="headerlink" href="#36-metricspy-adapter-instrumentation" title="Permanent link">&para;</a></h3>
+<p><strong>File:</strong> <code>polymind/polymarket/metrics.py</code></p>
+<p>Prometheus-compatible counters and histograms for monitoring adapter health.
+Exported as a single class used by all other adapter modules.</p>
+<div class="highlight"><pre><span></span><code><span class="sd">&quot;&quot;&quot;Adapter instrumentation — Prometheus counters and histograms.&quot;&quot;&quot;</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">__future__</span><span class="w"> </span><span class="kn">import</span> <span class="n">annotations</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">contextlib</span><span class="w"> </span><span class="kn">import</span> <span class="n">contextmanager</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">dataclasses</span><span class="w"> </span><span class="kn">import</span> <span class="n">dataclass</span><span class="p">,</span> <span class="n">field</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">Optional</span>
+
+
+<span class="nd">@dataclass</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">Counter</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Simple monotonic counter (Prometheus Counter equivalent).&quot;&quot;&quot;</span>
+
+    <span class="n">name</span><span class="p">:</span> <span class="nb">str</span>
+    <span class="n">labels</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="n">field</span><span class="p">(</span><span class="n">default_factory</span><span class="o">=</span><span class="nb">dict</span><span class="p">)</span>
+    <span class="n">_value</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">0</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">inc</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">amount</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">1</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_value</span> <span class="o">+=</span> <span class="n">amount</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">value</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_value</span>
+
+
+<span class="nd">@dataclass</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">Histogram</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Simple histogram for latency distributions.</span>
+
+<span class="sd">    Buckets follow Prometheus defaults: [0.005, 0.01, 0.025, 0.05, 0.1,</span>
+<span class="sd">    0.25, 0.5, 1.0, 2.5, 5.0, 10.0] seconds.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">name</span><span class="p">:</span> <span class="nb">str</span>
+    <span class="n">labels</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="n">field</span><span class="p">(</span><span class="n">default_factory</span><span class="o">=</span><span class="nb">dict</span><span class="p">)</span>
+    <span class="n">_buckets</span><span class="p">:</span> <span class="nb">tuple</span> <span class="o">=</span> <span class="p">(</span><span class="mf">0.005</span><span class="p">,</span> <span class="mf">0.01</span><span class="p">,</span> <span class="mf">0.025</span><span class="p">,</span> <span class="mf">0.05</span><span class="p">,</span> <span class="mf">0.1</span><span class="p">,</span> <span class="mf">0.25</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">,</span> <span class="mf">2.5</span><span class="p">,</span> <span class="mf">5.0</span><span class="p">,</span> <span class="mf">10.0</span><span class="p">)</span>
+    <span class="n">_counts</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="n">field</span><span class="p">(</span><span class="n">default_factory</span><span class="o">=</span><span class="nb">dict</span><span class="p">)</span>
+    <span class="n">_sum</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.0</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">observe</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="nb">float</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Record an observation.</span>
+
+<span class="sd">        ``value`` is typically a duration in seconds.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_sum</span> <span class="o">+=</span> <span class="n">value</span>
+        <span class="k">for</span> <span class="n">bucket</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_buckets</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">value</span> <span class="o">&lt;=</span> <span class="n">bucket</span><span class="p">:</span>
+                <span class="o">...</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">count</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+        <span class="o">...</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">sum</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+        <span class="o">...</span>
+
+
+<span class="k">class</span><span class="w"> </span><span class="nc">AdapterMetrics</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Collector for adapter-level metrics.</span>
+
+<span class="sd">    Usage::</span>
+
+<span class="sd">        metrics = AdapterMetrics(&quot;polymarket.client&quot;)</span>
+<span class="sd">        metrics.calls_total.inc()</span>
+<span class="sd">        with metrics.latency_seconds.time():</span>
+<span class="sd">            result = await do_something()</span>
+
+<span class="sd">    Each adapter module creates its own instance with a unique prefix.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">prefix</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">prefix</span> <span class="o">=</span> <span class="n">prefix</span>
+
+        <span class="c1"># ── Call-level counters ────────────────────────────────────────</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">calls_total</span><span class="p">:</span> <span class="n">Counter</span> <span class="o">=</span> <span class="n">Counter</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">prefix</span><span class="si">}</span><span class="s2">_calls_total&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">errors_total</span><span class="p">:</span> <span class="n">Counter</span> <span class="o">=</span> <span class="n">Counter</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">prefix</span><span class="si">}</span><span class="s2">_errors_total&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">retries_total</span><span class="p">:</span> <span class="n">Counter</span> <span class="o">=</span> <span class="n">Counter</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">prefix</span><span class="si">}</span><span class="s2">_retries_total&quot;</span><span class="p">)</span>
+
+        <span class="c1"># ── Latency histogram ──────────────────────────────────────────</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">latency_seconds</span><span class="p">:</span> <span class="n">Histogram</span> <span class="o">=</span> <span class="n">Histogram</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">prefix</span><span class="si">}</span><span class="s2">_latency_seconds&quot;</span><span class="p">)</span>
+
+        <span class="c1"># ── WebSocket-specific ─────────────────────────────────────────</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">ws_disconnects_total</span><span class="p">:</span> <span class="n">Counter</span> <span class="o">=</span> <span class="n">Counter</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">prefix</span><span class="si">}</span><span class="s2">_ws_disconnects_total&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">ws_reconnects_total</span><span class="p">:</span> <span class="n">Counter</span> <span class="o">=</span> <span class="n">Counter</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">prefix</span><span class="si">}</span><span class="s2">_ws_reconnects_total&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">ws_messages_received</span><span class="p">:</span> <span class="n">Counter</span> <span class="o">=</span> <span class="n">Counter</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">prefix</span><span class="si">}</span><span class="s2">_ws_messages_received&quot;</span><span class="p">)</span>
+
+    <span class="nd">@contextmanager</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">measure</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Context manager that records call duration as a histogram.</span>
+
+<span class="sd">        If the body raises, ``errors_total`` is incremented automatically.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="kn">import</span><span class="w"> </span><span class="nn">time</span>
+
+        <span class="n">start</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">monotonic</span><span class="p">()</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="k">yield</span>
+        <span class="k">except</span> <span class="ne">Exception</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">errors_total</span><span class="o">.</span><span class="n">inc</span><span class="p">()</span>
+            <span class="k">raise</span>
+        <span class="k">finally</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">latency_seconds</span><span class="o">.</span><span class="n">observe</span><span class="p">(</span><span class="n">time</span><span class="o">.</span><span class="n">monotonic</span><span class="p">()</span> <span class="o">-</span> <span class="n">start</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">calls_total</span><span class="o">.</span><span class="n">inc</span><span class="p">()</span>
+</code></pre></div>
+<h2 id="4-error-handling-patterns">4. Error Handling Patterns<a class="headerlink" href="#4-error-handling-patterns" title="Permanent link">&para;</a></h2>
+<p>All adapter modules follow a consistent error handling strategy:</p>
+<h3 id="41-exception-hierarchy">4.1 Exception Hierarchy<a class="headerlink" href="#41-exception-hierarchy" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">PolymarketAdapterError</span><span class="p">(</span><span class="ne">Exception</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Base for all adapter-level errors.&quot;&quot;&quot;</span>
+    <span class="o">...</span>
+
+
+<span class="k">class</span><span class="w"> </span><span class="nc">AuthenticationError</span><span class="p">(</span><span class="n">PolymarketAdapterError</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Raised when API key or wallet credentials are invalid/expired.&quot;&quot;&quot;</span>
+    <span class="o">...</span>
+
+
+<span class="k">class</span><span class="w"> </span><span class="nc">InsufficientAuthError</span><span class="p">(</span><span class="n">PolymarketAdapterError</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Raised when an operation requires a higher auth tier.&quot;&quot;&quot;</span>
+    <span class="o">...</span>
+
+
+<span class="k">class</span><span class="w"> </span><span class="nc">MarketNotFoundError</span><span class="p">(</span><span class="n">PolymarketAdapterError</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Raised when a requested market/token does not exist.&quot;&quot;&quot;</span>
+    <span class="o">...</span>
+
+
+<span class="k">class</span><span class="w"> </span><span class="nc">OrderRejectedError</span><span class="p">(</span><span class="n">PolymarketAdapterError</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Raised when the CLOB rejects an order (invalid price, size, etc.).&quot;&quot;&quot;</span>
+    <span class="o">...</span>
+
+
+<span class="k">class</span><span class="w"> </span><span class="nc">RateLimitError</span><span class="p">(</span><span class="n">PolymarketAdapterError</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Raised on HTTP 429 from the CLOB API or Data API.&quot;&quot;&quot;</span>
+
+    <span class="n">retry_after</span><span class="p">:</span> <span class="nb">float</span>          <span class="c1"># seconds suggested by the server</span>
+
+
+<span class="k">class</span><span class="w"> </span><span class="nc">ConnectionError</span><span class="p">(</span><span class="n">PolymarketAdapterError</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Raised on network-level failures (DNS, timeout, connection refused).&quot;&quot;&quot;</span>
+    <span class="o">...</span>
+
+
+<span class="k">class</span><span class="w"> </span><span class="nc">WebSocketDisconnect</span><span class="p">(</span><span class="n">PolymarketAdapterError</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Raised internally by WebSocketManager on unexpected disconnect.</span>
+
+<span class="sd">    Not exposed to callers — the reconnection loop handles it.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="o">...</span>
+
+
+<span class="k">class</span><span class="w"> </span><span class="nc">ContractError</span><span class="p">(</span><span class="n">PolymarketAdapterError</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Raised when an on-chain transaction reverts or fails.&quot;&quot;&quot;</span>
+    <span class="o">...</span>
+
+
+<span class="k">class</span><span class="w"> </span><span class="nc">NonceTooLowError</span><span class="p">(</span><span class="n">ContractError</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Raised when a transaction nonce is too low (stale nonce).&quot;&quot;&quot;</span>
+    <span class="o">...</span>
+
+
+<span class="k">class</span><span class="w"> </span><span class="nc">InsufficientGasError</span><span class="p">(</span><span class="n">ContractError</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Raised when the wallet lacks MATIC for gas.&quot;&quot;&quot;</span>
+    <span class="o">...</span>
+</code></pre></div>
+<h3 id="42-error-handling-rules">4.2 Error Handling Rules<a class="headerlink" href="#42-error-handling-rules" title="Permanent link">&para;</a></h3>
+<ol>
+<li><strong>SDK exceptions are caught and re-raised as adapter exceptions.</strong> No
+   <code>py_clob_client.exceptions.PolyApiException</code> leaks to callers.</li>
+<li><strong>Transient errors</strong> (network timeouts, HTTP 5xx, rate limits) are retried
+   with exponential backoff via <code>tenacity</code> (already a dependency). Retries are
+   configurable per adapter.</li>
+<li><strong>Permanent errors</strong> (HTTP 4xx except 429, invalid credentials) are raised
+   immediately with a descriptive message.</li>
+<li><strong>WebSocket disconnects</strong> are handled internally by <code>WebSocketManager</code>.
+   Callback code runs in a try/except — if a callback raises, the error is
+   logged and the callback is removed from the dispatch list.</li>
+<li><strong>On-chain transaction failures</strong> (reverts, out-of-gas) are caught and
+   returned as <code>TransactionResult(status="FAILED")</code> rather than raised, so the
+   caller can decide on retry strategy.</li>
+</ol>
+<h2 id="5-auth-patterns">5. Auth Patterns<a class="headerlink" href="#5-auth-patterns" title="Permanent link">&para;</a></h2>
+<h3 id="51-auth-tier-mapping">5.1 Auth Tier Mapping<a class="headerlink" href="#51-auth-tier-mapping" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>Auth Tier</th>
+<th>Signer Factory</th>
+<th>Available Operations</th>
+<th>Adapters</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>PUBLIC</td>
+<td><code>Signer.public()</code></td>
+<td>Market data, order books, tickers, Data API</td>
+<td><code>client.py</code> (read), <code>data_api.py</code>, <code>websocket.py</code> (public channels)</td>
+</tr>
+<tr>
+<td>API_KEY</td>
+<td><code>Signer.from_api_key(key, secret, pass)</code></td>
+<td>+ order placement/cancellation, user WebSocket</td>
+<td><code>client.py</code> (write), <code>websocket.py</code> (user channels)</td>
+</tr>
+<tr>
+<td>WALLET</td>
+<td><code>Signer.from_wallet(pk)</code></td>
+<td>+ on-chain operations, API key derivation</td>
+<td><code>contracts.py</code>, <code>signer.py</code> (key derivation)</td>
+</tr>
+</tbody>
+</table>
+<h3 id="52-credential-lifecycle">5.2 Credential Lifecycle<a class="headerlink" href="#52-credential-lifecycle" title="Permanent link">&para;</a></h3>
+<ol>
+<li><strong>Startup</strong>: The <code>Signer</code> is constructed from config (env vars, config file,
+   or vault). A wallet-tier signer can derive API keys on first use.</li>
+<li><strong>Connection</strong>: <code>PolymarketClient.connect()</code> calls <code>ClobClient.set_api_creds</code>
+   if the signer has API key credentials. For wallet-tier signers, API keys
+   are derived automatically if not already present.</li>
+<li><strong>Runtime</strong>: The <code>Signer</code> is immutable and shared across adapter instances.
+   No module mutates credentials after initialization.</li>
+<li><strong>Rotation</strong>: Credential rotation requires restarting the adapter instances.
+   Hot-reload is a future concern.</li>
+</ol>
+<h3 id="53-security-constraints">5.3 Security Constraints<a class="headerlink" href="#53-security-constraints" title="Permanent link">&para;</a></h3>
+<ul>
+<li>Private keys are held in <code>Signer.wallet_creds</code> and are <strong>never logged or
+  exposed in error messages</strong>.</li>
+<li>API keys and secrets are similarly masked in string representations.</li>
+<li>The <code>Signer</code> class implements <code>__repr__</code> to show only the auth tier and a
+  truncated address (wallet tier) or prefix of the API key.</li>
+<li><code>contracts.py</code> signs transactions locally — the private key never leaves
+  the process.</li>
+</ul>
+<h2 id="6-integration-points-with-existing-code">6. Integration Points With Existing Code<a class="headerlink" href="#6-integration-points-with-existing-code" title="Permanent link">&para;</a></h2>
+<h3 id="61-core-domain-types-consumed-by-adapters">6.1 Core domain types consumed by adapters<a class="headerlink" href="#61-core-domain-types-consumed-by-adapters" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>Core type (File)</th>
+<th>Used by</th>
+<th>Direction</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>StrategyIntent</code> (<code>core/intents.py</code>)</td>
+<td><code>client.place_order()</code> maps OrderIntent to SDK order args</td>
+<td>Core -&gt; Adapter</td>
+</tr>
+<tr>
+<td><code>FillEvent</code> (<code>core/fills.py</code>)</td>
+<td>Adapters produce FillEvents from WebSocket events and CLOB polls</td>
+<td>Adapter -&gt; Core</td>
+</tr>
+<tr>
+<td><code>LedgerEntry</code> (<code>core/ledger.py</code>)</td>
+<td>Adapters (via executor) record ledger entries after fills</td>
+<td>Adapter -&gt; Core</td>
+</tr>
+<tr>
+<td><code>OrderSide</code> (<code>core/intents.py</code>)</td>
+<td>Adapters map BUY/SELL to SDK side strings</td>
+<td>Core -&gt; Adapter</td>
+</tr>
+<tr>
+<td><code>PortfolioTarget</code> (<code>core/portfolio.py</code>)</td>
+<td>Not directly used by adapters; converted to intents by bridge layer</td>
+<td>(Future)</td>
+</tr>
+</tbody>
+</table>
+<h3 id="62-how-the-adapter-layer-is-called">6.2 How the adapter layer is called<a class="headerlink" href="#62-how-the-adapter-layer-is-called" title="Permanent link">&para;</a></h3>
+<p>The adapter layer is consumed by the execution layer (Phase 3) and
+reconciliation layer (Phase 5):</p>
+<div class="highlight"><pre><span></span><code>StrategyIntent
+      |
+      v
+  RiskGates  (Phase 2 - core/risk.py)
+      |
+      v
+  IntentExecutor (abstract - core/intents.py)
+      |
+      +-- PaperExecutor (Phase 3 - executes in memory)
+      |
+      +-- LiveExecutor (Future - uses PolymarketClient)
+              |
+              +-- PolymarketClient.place_order()     [client.py]
+              +-- PolymarketClient.cancel_order()    [client.py]
+              +-- WebSocketManager.poll_events()     [websocket.py]
+              +-- ContractClient.get_onchain_balance() [contracts.py]
+              +-- DataApiClient.get_candles()        [data_api.py]
+</code></pre></div>
+<h3 id="63-fill-detection-flow-adr-0003">6.3 Fill detection flow (ADR 0003)<a class="headerlink" href="#63-fill-detection-flow-adr-0003" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code>1. WebSocket event arrives        (websocket.py -&gt; UserFillEvent)
+2. Enqueues reconciliation task   (core/workflows.py)
+3. CLOB REST cross-check          (client.py -&gt; get_orders)
+4. On-chain balance verification  (contracts.py -&gt; get_onchain_balance)
+5. FillEvent produced             (core/fills.py)
+6. LedgerEntry recorded           (core/ledger.py)
+</code></pre></div>
+<p>Steps 2-6 are orchestrated by the reconciliation layer (Phase 5), not by the
+adapters themselves. The adapters provide the raw data.</p>
+<h3 id="64-data-flow-for-factorsbacktesting">6.4 Data flow for factors/backtesting<a class="headerlink" href="#64-data-flow-for-factorsbacktesting" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code>DataApiClient.get_candles()       (data_api.py)
+        |
+        v
+  Candle domain objects
+        |
+        v
+  Factor signal computation        (polymind/factors/)
+        |
+        v
+  PortfolioTarget                  (core/portfolio.py)
+        |
+        v
+  StrategyIntent                   (core/intents.py)
+        |
+        v
+  Executor                         (paper or live)
+</code></pre></div>
+<h3 id="65-connection-ownership">6.5 Connection ownership<a class="headerlink" href="#65-connection-ownership" title="Permanent link">&para;</a></h3>
+<p>The <code>PolymarketClient</code>, <code>WebSocketManager</code>, <code>DataApiClient</code>, and
+<code>ContractClient</code> are independent connection pools. In a typical deployment,
+they are created once and injected into the executor:</p>
+<div class="highlight"><pre><span></span><code><span class="c1"># Application wiring (conceptual, not part of this spec)</span>
+<span class="n">signer</span> <span class="o">=</span> <span class="n">Signer</span><span class="o">.</span><span class="n">from_wallet</span><span class="p">(</span><span class="n">config</span><span class="o">.</span><span class="n">private_key</span><span class="p">)</span>
+
+<span class="n">clob</span> <span class="o">=</span> <span class="n">PolymarketClient</span><span class="p">(</span><span class="n">host</span><span class="o">=</span><span class="n">config</span><span class="o">.</span><span class="n">clob_host</span><span class="p">,</span> <span class="n">signer</span><span class="o">=</span><span class="n">signer</span><span class="p">)</span>
+<span class="n">ws</span> <span class="o">=</span> <span class="n">WebSocketManager</span><span class="p">(</span><span class="n">ws_url</span><span class="o">=</span><span class="n">config</span><span class="o">.</span><span class="n">ws_url</span><span class="p">,</span> <span class="n">signer</span><span class="o">=</span><span class="n">signer</span><span class="p">)</span>
+<span class="n">data</span> <span class="o">=</span> <span class="n">DataApiClient</span><span class="p">()</span>
+<span class="n">contracts</span> <span class="o">=</span> <span class="n">ContractClient</span><span class="p">(</span><span class="n">rpc_url</span><span class="o">=</span><span class="n">config</span><span class="o">.</span><span class="n">rpc_url</span><span class="p">,</span> <span class="n">signer</span><span class="o">=</span><span class="n">signer</span><span class="p">,</span> <span class="n">chain_id</span><span class="o">=</span><span class="n">config</span><span class="o">.</span><span class="n">chain_id</span><span class="p">)</span>
+
+<span class="k">await</span> <span class="n">clob</span><span class="o">.</span><span class="n">connect</span><span class="p">()</span>
+<span class="k">await</span> <span class="n">ws</span><span class="o">.</span><span class="n">connect</span><span class="p">()</span>
+<span class="k">await</span> <span class="n">data</span><span class="o">.</span><span class="n">connect</span><span class="p">()</span>
+<span class="k">await</span> <span class="n">contracts</span><span class="o">.</span><span class="n">connect</span><span class="p">()</span>
+
+<span class="n">executor</span> <span class="o">=</span> <span class="n">LiveExecutor</span><span class="p">(</span><span class="n">clob</span><span class="o">=</span><span class="n">clob</span><span class="p">,</span> <span class="n">ws</span><span class="o">=</span><span class="n">ws</span><span class="p">,</span> <span class="n">contracts</span><span class="o">=</span><span class="n">contracts</span><span class="p">)</span>
+</code></pre></div>
+<h3 id="66-existing-stub-compatibility">6.6 Existing stub compatibility<a class="headerlink" href="#66-existing-stub-compatibility" title="Permanent link">&para;</a></h3>
+<p>The existing <code>PolymarketClient</code> stub in <code>polymind/polymarket/client.py</code> has
+seven methods that return trivial defaults. The implementation in this spec
+preserves all seven method names (<code>get_markets</code>, <code>get_positions</code>,
+<code>get_balance</code>, <code>place_order</code>, <code>cancel_order</code>, <code>cancel_all_orders</code>, <code>close</code>)
+while adding:</p>
+<ul>
+<li>Rich return types instead of <code>[]</code>, <code>0.0</code>, <code>True</code>, <code>None</code></li>
+<li><code>connect()</code> for explicit initialization</li>
+<li><code>get_market()</code>, <code>get_order_book()</code>, <code>get_midpoint()</code>, <code>get_spread()</code>,
+  <code>get_last_trade_price()</code>, <code>get_orders()</code> — additional endpoints</li>
+<li><code>signer</code> and <code>metrics</code> constructor parameters</li>
+<li>Full SDK integration via <code>ClobClient</code></li>
+</ul>
+<p>The <code>__init__.py</code> remains unchanged (it already exports <code>PolymarketClient</code>).</p>
+<h2 id="7-test-plan">7. Test Plan<a class="headerlink" href="#7-test-plan" title="Permanent link">&para;</a></h2>
+<table>
+<thead>
+<tr>
+<th>Test file</th>
+<th>Tests</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>tests/polymarket/test_signer.py</code></td>
+<td>AuthTier enum values, Signer factory methods (public, from_api_key, from_wallet), credential access, tier checks (can_sign, can_authenticate), <strong>repr</strong> key masking, derive_api_key raises for non-wallet, sign_typed_data requires WALLET tier</td>
+</tr>
+<tr>
+<td><code>tests/polymarket/test_client.py</code></td>
+<td>(Existing file — expand) Constructor with/without signer, connect initializes ClobClient, get_markets returns MarketSummary list, get_market returns single or None, get_order_book returns OrderBookSnapshot, get_midpoint/get_spread/get_last_trade_price return floats or None, place_order requires auth, cancel_order returns bool, cancel_all_orders returns count, get_orders returns list, get_positions/get_balance return data, close releases client, error mapping from SDK exceptions, retry on transient failure</td>
+</tr>
+<tr>
+<td><code>tests/polymarket/test_data_api.py</code></td>
+<td>DataApiClient connect/close lifecycle, get_market_metadata returns MarketMetadata, list_markets supports pagination, get_candles returns Candle list sorted by timestamp, interval parameter validation, get_price_history returns Trade list, get_recent_trades limit works, error handling for HTTP errors, rate limit handling</td>
+</tr>
+<tr>
+<td><code>tests/polymarket/test_websocket.py</code></td>
+<td>WebSocketManager connect/disconnect lifecycle, subscribe to public channels (ORDER_BOOK, TRADES, TICKER), subscribe to authenticated channels requires signer, callback dispatch for each event type, poll_events returns buffered events, unsubscribe removes subscription, reconnection on disconnect, exponential backoff delays, max retries exceeded raises, graceful shutdown via disconnect</td>
+</tr>
+<tr>
+<td><code>tests/polymarket/test_contracts.py</code></td>
+<td>ContractClient connect initializes Web3, signer must be wallet tier, get_onchain_balance returns OnChainBalance, split/merge/redeem produce TransactionResult, approve_usdc and approve_exchange produce TransactionResult, transaction failure returns FAILED status, nonce too low handled, gas estimation errors caught</td>
+</tr>
+<tr>
+<td><code>tests/polymarket/test_metrics.py</code></td>
+<td>Counter inc and value, Histogram observe and bucket counts, AdapterMetrics prefixes, measure context manager records latency and increments errors on exception</td>
+</tr>
+<tr>
+<td><code>tests/polymarket/test_error_handling.py</code></td>
+<td>All exception types construct and stringify correctly, error mapping from SDK PolyApiException to adapter types, InsufficientAuthError raised for mismatched tier operations, RateLimitError includes retry_after, transient errors retry via tenacity</td>
+</tr>
+<tr>
+<td><code>tests/polymarket/test_integration_client_data.py</code></td>
+<td>PolymarketClient + DataApiClient: get_market_metadata returns same market_id as get_markets, token_ids from metadata match order book queries (mock-based, no live network)</td>
+</tr>
+</tbody>
+</table>
+<h3 id="71-testing-approach">7.1 Testing approach<a class="headerlink" href="#71-testing-approach" title="Permanent link">&para;</a></h3>
+<ul>
+<li><strong>Unit tests</strong> mock the SDK classes (<code>ClobClient</code>, <code>Web3</code>) at the adapter
+  boundary. Adapter methods are tested with controlled SDK return values.</li>
+<li><strong>No live network calls</strong> in CI. All tests use <code>unittest.mock</code> or pytest
+  fixtures with fake HTTP responses.</li>
+<li><strong>WebSocket tests</strong> use a mock WebSocket server (via <code>asyncio</code> streams) to
+  verify reconnection, subscription messages, and event dispatch without
+  touching the real Polymarket endpoint.</li>
+<li><strong>Contract tests</strong> mock <code>Web3</code> to return canned transaction receipts and
+  balance data. No RPC calls.</li>
+<li><strong>Integration tests</strong> (single marked as <code>pytest.mark.integration</code>) verify
+  cross-adapter consistency with mocked SDK responses.</li>
+</ul>
+<h2 id="8-future-extensions-not-in-this-spec">8. Future Extensions (not in this spec)<a class="headerlink" href="#8-future-extensions-not-in-this-spec" title="Permanent link">&para;</a></h2>
+<ul>
+<li><strong>Builder attribution</strong> — <code>client.py</code> will gain <code>set_builder_fee</code> and
+  builder-aware order placement when the feature is needed.</li>
+<li><strong>RFQ (Request-for-Quote)</strong> — an RFQ adapter for large-block trades, wrapping
+  <code>py_clob_client.rfq</code>.</li>
+<li><strong>Hot credential reload</strong> — the <code>Signer</code> could be replaced at runtime for
+  credential rotation without restart.</li>
+<li><strong>SQLite/duckdb persistence</strong> for Data API candle caching to reduce API calls
+  in backtesting.</li>
+<li><strong>Full reconciliation layer</strong> (Phase 5) — the workflow that wires WebSocket
+  events -&gt; CLOB cross-check -&gt; on-chain verification -&gt; FillEvent.</li>
+<li><strong>py-clob-client-v2 migration</strong> — when the unified SDK is stable, only these
+  adapter modules change; core strategy code is unaffected (per ADR 0004).</li>
+</ul>
+
+
+
+
+
+
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+        
+<div class="md-social">
+  
+    
+    
+    
+    
+      
+      
+    
+    <a href="https://github.com/" target="_blank" rel="noopener" title="github.com" class="md-social__link">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M173.9 397.4c0 2-2.3 3.6-5.2 3.6-3.3.3-5.6-1.3-5.6-3.6 0-2 2.3-3.6 5.2-3.6 3-.3 5.6 1.3 5.6 3.6m-31.1-4.5c-.7 2 1.3 4.3 4.3 4.9 2.6 1 5.6 0 6.2-2s-1.3-4.3-4.3-5.2c-2.6-.7-5.5.3-6.2 2.3m44.2-1.7c-2.9.7-4.9 2.6-4.6 4.9.3 2 2.9 3.3 5.9 2.6 2.9-.7 4.9-2.6 4.6-4.6-.3-1.9-3-3.2-5.9-2.9M252.8 8C114.1 8 8 113.3 8 252c0 110.9 69.8 205.8 169.5 239.2 12.8 2.3 17.3-5.6 17.3-12.1 0-6.2-.3-40.4-.3-61.4 0 0-70 15-84.7-29.8 0 0-11.4-29.1-27.8-36.6 0 0-22.9-15.7 1.6-15.4 0 0 24.9 2 38.6 25.8 21.9 38.6 58.6 27.5 72.9 20.9 2.3-16 8.8-27.1 16-33.7-55.9-6.2-112.3-14.3-112.3-110.5 0-27.5 7.6-41.3 23.6-58.9-2.6-6.5-11.1-33.3 2.6-67.9 20.9-6.5 69 27 69 27 20-5.6 41.5-8.5 62.8-8.5s42.8 2.9 62.8 8.5c0 0 48.1-33.6 69-27 13.7 34.7 5.2 61.4 2.6 67.9 16 17.7 25.8 31.5 25.8 58.9 0 96.5-58.9 104.2-114.8 110.5 9.2 7.9 17 22.9 17 46.4 0 33.7-.3 75.4-.3 83.6 0 6.5 4.6 14.4 17.3 12.1C436.2 457.8 504 362.9 504 252 504 113.3 391.5 8 252.8 8M105.2 352.9c-1.3 1-1 3.3.7 5.2 1.6 1.6 3.9 2.3 5.2 1 1.3-1 1-3.3-.7-5.2-1.6-1.6-3.9-2.3-5.2-1m-10.8-8.1c-.7 1.3.3 2.9 2.3 3.9 1.6 1 3.6.7 4.3-.7.7-1.3-.3-2.9-2.3-3.9-2-.6-3.6-.3-4.3.7m32.4 35.6c-1.6 1.3-1 4.3 1.3 6.2 2.3 2.3 5.2 2.6 6.5 1 1.3-1.3.7-4.3-1.3-6.2-2.2-2.3-5.2-2.6-6.5-1m-11.4-14.7c-1.6 1-1.6 3.6 0 5.9s4.3 3.3 5.6 2.3c1.6-1.3 1.6-3.9 0-6.2-1.4-2.3-4-3.3-5.6-2"/></svg>
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    
+      
+      
+      <script id="__config" type="application/json">{"annotate": null, "base": "../../..", "features": ["navigation.tabs", "navigation.sections", "toc.integrate"], "search": "../../../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
+    
+    
+      <script src="../../../assets/javascripts/bundle.79ae519e.min.js"></script>
+      
+    
+  </body>
+</html>

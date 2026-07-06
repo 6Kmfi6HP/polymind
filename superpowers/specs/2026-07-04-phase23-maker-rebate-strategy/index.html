@@ -1,0 +1,1578 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+        <meta name="description" content="AI-Native Market Making for Polymarket">
+      
+      
+      
+        <link rel="canonical" href="https://polymind.readthedocs.io/superpowers/specs/2026-07-04-phase23-maker-rebate-strategy/">
+      
+      
+      
+      
+        
+      
+      
+      <link rel="icon" href="../../../assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.6">
+    
+    
+      
+        <title>2026 07 04 phase23 maker rebate strategy - Polymind</title>
+      
+    
+    
+      <link rel="stylesheet" href="../../../assets/stylesheets/main.484c7ddc.min.css">
+      
+        
+        <link rel="stylesheet" href="../../../assets/stylesheets/palette.ab4e12ef.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+    <script>__md_scope=new URL("../../..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+  </head>
+  
+  
+    
+    
+      
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="indigo" data-md-color-accent="indigo">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#phase-23-makerrebatestrategy-design" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+<header class="md-header" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href="../../.." title="Polymind" class="md-header__button md-logo" aria-label="Polymind" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            Polymind
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              2026 07 04 phase23 maker rebate strategy
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+        <form class="md-header__option" data-md-component="palette">
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="" data-md-color-scheme="default" data-md-color-primary="indigo" data-md-color-accent="indigo"  aria-label="Switch to dark mode"  type="radio" name="__palette" id="__palette_0">
+    
+      <label class="md-header__button md-icon" title="Switch to dark mode" for="__palette_1" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M17 6H7c-3.31 0-6 2.69-6 6s2.69 6 6 6h10c3.31 0 6-2.69 6-6s-2.69-6-6-6m0 10H7c-2.21 0-4-1.79-4-4s1.79-4 4-4h10c2.21 0 4 1.79 4 4s-1.79 4-4 4M7 9c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3"/></svg>
+      </label>
+    
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="" data-md-color-scheme="slate" data-md-color-primary="indigo" data-md-color-accent="indigo"  aria-label="Switch to light mode"  type="radio" name="__palette" id="__palette_1">
+    
+      <label class="md-header__button md-icon" title="Switch to light mode" for="__palette_0" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M17 7H7a5 5 0 0 0-5 5 5 5 0 0 0 5 5h10a5 5 0 0 0 5-5 5 5 0 0 0-5-5m0 8a3 3 0 0 1-3-3 3 3 0 0 1 3-3 3 3 0 0 1 3 3 3 3 0 0 1-3 3"/></svg>
+      </label>
+    
+  
+</form>
+      
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&palette.color){if("(prefers-color-scheme)"===palette.color.media){var media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']");palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent")}for(var[key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+    
+    
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      
+    
+    
+      <div class="md-header__source">
+        <a href="https://github.com/6Kmfi6HP/polymind" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
+  </div>
+  <div class="md-source__repository">
+    GitHub
+  </div>
+</a>
+      </div>
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+            
+<nav class="md-tabs" aria-label="Tabs" data-md-component="tabs">
+  <div class="md-grid">
+    <ul class="md-tabs__list">
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../../.." class="md-tabs__link">
+        
+  
+  
+    
+  
+  Home
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../../../architecture/" class="md-tabs__link">
+        
+  
+  
+    
+  
+  Architecture
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../../architecture/decisions/0001-factor-execution-uses-executable-prices/" class="md-tabs__link">
+          
+  
+  
+  Architecture Decisions
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../../api/core/" class="md-tabs__link">
+          
+  
+  
+  API Reference
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../../guides/getting-started/" class="md-tabs__link">
+          
+  
+  
+  Guides
+
+        </a>
+      </li>
+    
+  
+
+      
+    </ul>
+  </div>
+</nav>
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+  
+
+
+  
+
+<nav class="md-nav md-nav--primary md-nav--lifted md-nav--integrated" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href="../../.." title="Polymind" class="md-nav__button md-logo" aria-label="Polymind" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    Polymind
+  </label>
+  
+    <div class="md-nav__source">
+      <a href="https://github.com/6Kmfi6HP/polymind" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
+  </div>
+  <div class="md-source__repository">
+    GitHub
+  </div>
+</a>
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../.." class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Home
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../architecture/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Architecture
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3" >
+        
+          
+          <label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Architecture Decisions
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Architecture Decisions
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../architecture/decisions/0001-factor-execution-uses-executable-prices/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    ADR 0001
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../architecture/decisions/0002-strategies-emit-intents-executors-place-orders/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    ADR 0002
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../architecture/decisions/0003-onchain-balance-is-reconciliation-truth/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    ADR 0003
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../architecture/decisions/0004-sdk-adapter-isolated-from-core/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    ADR 0004
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../architecture/decisions/0005-lgpl-boundary-and-adapter-strategy/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    ADR 0005
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4" >
+        
+          
+          <label class="md-nav__link" for="__nav_4" id="__nav_4_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    API Reference
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_4_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_4">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    API Reference
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../api/core/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Core
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../api/execution/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Execution
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../api/strategies/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Strategies
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../api/polymarket/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Polymarket
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_5" >
+        
+          
+          <label class="md-nav__link" for="__nav_5" id="__nav_5_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Guides
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_5_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_5">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Guides
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../guides/getting-started/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Getting Started
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+
+<blockquote>
+<p><strong>Status:</strong> Superseded by <a href="../../../architecture/"><code>docs/architecture.md</code></a> and <a href="../../architecture/decisions/"><code>docs/architecture/decisions/</code></a>. This spec was a design document and is kept for historical reference only.</p>
+</blockquote>
+<h1 id="phase-23-makerrebatestrategy-design">Phase 23: MakerRebateStrategy — Design<a class="headerlink" href="#phase-23-makerrebatestrategy-design" title="Permanent link">&para;</a></h1>
+<p><strong>Status:</strong> Design
+<strong>Date:</strong> 2026-07-04
+<strong>ADR:</strong> ADR 0002 (Strategies emit intents; executors place orders)
+<strong>Workflow State Machine:</strong> <code>polymind/workflows/maker_rebate/state_machine.py</code>
+<strong>Runner:</strong> <code>polymind/workflows/runner.py</code>
+<strong>Pair Lifecycle:</strong> <code>polymind/polymarket/pair_lifecycle.py</code></p>
+<h2 id="1-overview">1. Overview<a class="headerlink" href="#1-overview" title="Permanent link">&para;</a></h2>
+<p>A <code>MakerRebateStrategy</code> that detects and captures the <strong>maker rebate arbitrage</strong>
+on CLOB prediction markets: when <code>YES_price + NO_price &lt; 1</code>, buying both sides
+at a combined discount and (after fills) merging them back to USDC yields a
+risk-free profit.</p>
+<p>The strategy is a <strong>bounded component</strong> of the broader Maker Rebate workflow
+(per Phase 5 architecture: <code>docs/architecture.md</code> lines 422-425). It owns the
+tick-level pricing and intent production; the workflow state machine
+(<code>RebateStateMachine</code>) and <code>WorkflowRunner</code> own the post-fill lifecycle —
+merge, redeem, error recovery.</p>
+<p><strong>Key constraint:</strong> This is a pair-level strategy. Unlike <code>ClassicMMStrategy</code>
+or <code>AMMStrategy</code> which analyze a single market outcome, <code>MakerRebateStrategy</code>
+must consume both YES and NO market snapshots for a given condition and make
+a joint pricing decision.</p>
+<h3 id="1a-the-rebate-opportunity">1a. The Rebate Opportunity<a class="headerlink" href="#1a-the-rebate-opportunity" title="Permanent link">&para;</a></h3>
+<p>For a binary market with YES and NO outcome tokens:</p>
+<div class="highlight"><pre><span></span><code>rebate_spread = 1.0 - (YES_mid_price + NO_mid_price)
+</code></pre></div>
+<p>When <code>rebate_spread &gt; min_spread + fees</code>, the strategy:</p>
+<ol>
+<li>Places <strong>buy</strong> limit orders for YES at <code>YES_bid * (1 - buffer_pct)</code></li>
+<li>Places <strong>buy</strong> limit orders for NO at <code>NO_bid * (1 - buffer_pct)</code></li>
+<li>Waits for both orders to fill (tracked externally via fill events)</li>
+<li>After both fills are detected, the workflow state machine transitions to
+   <code>FILLS_COMPLETE</code>, then a <strong>merge</strong> command is issued (via
+   <code>PairLifecycleManager.merge()</code>) to convert the paired YES+NO tokens back
+   to USDC, locking in the spread.</li>
+<li>If the market has resolved before merging, the workflow can go directly to
+   <strong>redeem</strong> instead.</li>
+</ol>
+<p>Profit = <code>(1.0 - yes_price - no_price) * position_size - fees</code></p>
+<p>Since merge returns ~1 USDC per pair (minus the CLOB's small redeeming fee),
+the captured spread is essentially guaranteed once both sides fill at prices
+summing to less than 1.</p>
+<h2 id="2-package-layout">2. Package Layout<a class="headerlink" href="#2-package-layout" title="Permanent link">&para;</a></h2>
+<div class="highlight"><pre><span></span><code>polymind/strategies/market_making/maker_rebate/
+├── __init__.py          # existing; update exports
+├── pair_snapshot.py     # PairSnapshot dataclass
+├── pricing.py           # Rebate opportunity detection + spread math
+├── sizing.py            # Position sizing for paired buy orders
+└── strategy.py          # MakerRebateStrategy (extends BaseMMStrategy)
+</code></pre></div>
+<h2 id="3-components">3. Components<a class="headerlink" href="#3-components" title="Permanent link">&para;</a></h2>
+<h3 id="31-pairsnapshot-combined-yesno-market-view">3.1 PairSnapshot — combined YES/NO market view<a class="headerlink" href="#31-pairsnapshot-combined-yesno-market-view" title="Permanent link">&para;</a></h3>
+<p>Location: <code>polymind/strategies/market_making/maker_rebate/pair_snapshot.py</code></p>
+<div class="highlight"><pre><span></span><code><span class="nd">@dataclass</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">PairSnapshot</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Combined snapshot of both YES and NO markets for one condition.</span>
+
+<span class="sd">    Carries the individual MarketSnapshot objects for each side plus</span>
+<span class="sd">    derived pair-level fields.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">condition_id</span><span class="p">:</span> <span class="nb">str</span>
+    <span class="n">yes_market_id</span><span class="p">:</span> <span class="nb">str</span>
+    <span class="n">no_market_id</span><span class="p">:</span> <span class="nb">str</span>
+    <span class="n">timestamp</span><span class="p">:</span> <span class="n">datetime</span>
+
+    <span class="c1"># YES side</span>
+    <span class="n">yes_bid</span><span class="p">:</span> <span class="nb">float</span>
+    <span class="n">yes_ask</span><span class="p">:</span> <span class="nb">float</span>
+    <span class="n">yes_mid</span><span class="p">:</span> <span class="nb">float</span>
+
+    <span class="c1"># NO side</span>
+    <span class="n">no_bid</span><span class="p">:</span> <span class="nb">float</span>
+    <span class="n">no_ask</span><span class="p">:</span> <span class="nb">float</span>
+    <span class="n">no_mid</span><span class="p">:</span> <span class="nb">float</span>
+
+    <span class="c1"># Derived pair fields (computed at construction)</span>
+    <span class="n">combined_mid</span><span class="p">:</span> <span class="nb">float</span>        <span class="c1"># yes_mid + no_mid</span>
+    <span class="n">rebate_spread</span><span class="p">:</span> <span class="nb">float</span>       <span class="c1"># 1.0 - combined_mid</span>
+    <span class="n">implicit_risk_free</span><span class="p">:</span> <span class="nb">float</span>  <span class="c1"># 1.0 - combined_ask (for taker scenarios)</span>
+</code></pre></div>
+<p>Derived fields are computed in <code>__post_init__</code>:</p>
+<div class="highlight"><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">__post_init__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">combined_mid</span> <span class="o">=</span> <span class="nb">round</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">yes_mid</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">no_mid</span><span class="p">,</span> <span class="mi">6</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">rebate_spread</span> <span class="o">=</span> <span class="nb">round</span><span class="p">(</span><span class="mf">1.0</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">combined_mid</span><span class="p">,</span> <span class="mi">6</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">implicit_risk_free</span> <span class="o">=</span> <span class="nb">round</span><span class="p">(</span><span class="mf">1.0</span> <span class="o">-</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">yes_ask</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">no_ask</span><span class="p">),</span> <span class="mi">6</span><span class="p">)</span>
+</code></pre></div>
+<p>A factory function <code>from_snapshots(yes_snapshot, no_snapshot, condition_id)</code>
+constructs a <code>PairSnapshot</code> from two <code>MarketSnapshot</code> objects (from
+<code>polymind.execution.fill_model</code>).</p>
+<h3 id="32-pricing-rebate-opportunity-analysis">3.2 Pricing — rebate opportunity analysis<a class="headerlink" href="#32-pricing-rebate-opportunity-analysis" title="Permanent link">&para;</a></h3>
+<p>Location: <code>polymind/strategies/market_making/maker_rebate/pricing.py</code></p>
+<div class="highlight"><pre><span></span><code><span class="nd">@dataclass</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">RebatePricingConfig</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Configuration for rebate opportunity detection.&quot;&quot;&quot;</span>
+
+    <span class="n">min_rebate_spread</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.005</span>   <span class="c1"># 0.5 % minimum rebate to trade (excl. fees)</span>
+    <span class="n">fee_buffer</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.001</span>          <span class="c1"># additional buffer for maker fees (0.1 %)</span>
+    <span class="n">price_buffer_pct</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.002</span>    <span class="c1"># how far behind bid to place for fill priority</span>
+</code></pre></div>
+<p><strong>Core function — <code>detect_rebate_opportunity</code>:</strong></p>
+<div class="highlight"><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">detect_rebate_opportunity</span><span class="p">(</span>
+    <span class="n">pair</span><span class="p">:</span> <span class="n">PairSnapshot</span><span class="p">,</span>
+    <span class="n">config</span><span class="p">:</span> <span class="n">RebatePricingConfig</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Check if a profitable rebate exists.</span>
+
+<span class="sd">    Returns (yes_buy_price, no_buy_price, expected_spread) if the</span>
+<span class="sd">    opportunity is viable, else None.</span>
+
+<span class="sd">    The effective bid prices are:</span>
+<span class="sd">      yes_price = pair.yes_bid * (1 - price_buffer_pct)</span>
+<span class="sd">      no_price  = pair.no_bid  * (1 - price_buffer_pct)</span>
+
+<span class="sd">    The expected captured spread is:</span>
+<span class="sd">      captured = 1.0 - yes_price - no_price - (2 * fee_buffer)</span>
+
+<span class="sd">    Trade only if captured &gt;= min_rebate_spread.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+</code></pre></div>
+<p>The buffer behind the bid ensures the passive limit order is slightly more
+aggressive than the current best bid, improving fill probability without
+crossing the spread to the ask (which would eliminate the rebate).</p>
+<p><strong>Edge case — one-sided liquidity:</strong></p>
+<p>If either side has <code>bid_size == 0</code> (no bid), the opportunity is skipped
+entirely. A zero-bid market cannot be filled passively.</p>
+<h3 id="33-sizing-pair-position-sizing">3.3 Sizing — pair position sizing<a class="headerlink" href="#33-sizing-pair-position-sizing" title="Permanent link">&para;</a></h3>
+<p>Location: <code>polymind/strategies/market_making/maker_rebate/sizing.py</code></p>
+<div class="highlight"><pre><span></span><code><span class="nd">@dataclass</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">RebateSizingConfig</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Configuration for paired buy-order sizing.&quot;&quot;&quot;</span>
+
+    <span class="n">max_exposure_usdc</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">100.0</span>      <span class="c1"># max USDC committed per condition</span>
+    <span class="n">min_order_size</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">10.0</span>           <span class="c1"># minimum order size per side</span>
+    <span class="n">max_order_size</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">500.0</span>          <span class="c1"># maximum order size per side</span>
+    <span class="n">use_debt_ceiling</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span>          <span class="c1"># cap total open exposure across conditions</span>
+    <span class="n">max_total_exposure_usdc</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">5000.0</span>  <span class="c1"># aggregate cap across all active rebates</span>
+</code></pre></div>
+<p><strong>Core function — <code>compute_pair_sizes</code>:</strong></p>
+<div class="highlight"><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">compute_pair_sizes</span><span class="p">(</span>
+    <span class="n">pair</span><span class="p">:</span> <span class="n">PairSnapshot</span><span class="p">,</span>
+    <span class="n">config</span><span class="p">:</span> <span class="n">RebateSizingConfig</span><span class="p">,</span>
+    <span class="n">current_exposure</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>        <span class="c1"># current USDC committed to this condition</span>
+    <span class="n">total_exposure</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>          <span class="c1"># total USDC committed across all conditions</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Determine YES and NO order sizes for this pair.</span>
+
+<span class="sd">    The two sides always receive equal sizes (the merge requires</span>
+<span class="sd">    equal YES and NO token amounts).  Returns (yes_size, no_size)</span>
+<span class="sd">    or None if the opportunity should be skipped entirely.</span>
+
+<span class="sd">    Constraints:</span>
+<span class="sd">    1. yes_size == no_size  (merge invariant)</span>
+<span class="sd">    2. yes_price * yes_size + no_price * no_size &lt;= max_exposure_usdc</span>
+<span class="sd">    3. total_exposure + (yes_price * yes_size + no_price * no_size)</span>
+<span class="sd">       &lt;= max_total_exposure_usdc</span>
+<span class="sd">    4. yes_size in [min_order_size, max_order_size]</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+</code></pre></div>
+<p>The equal-size invariant is critical: the <code>PairLifecycleManager.merge()</code>
+call burns equal amounts of YES and NO tokens, and the CLOB's redeem/merge
+contract requires matched pairs. An unmatched position creates a "remainder"
+that must be sold separately or held to resolution.</p>
+<h3 id="34-strategy-makerrebatestrategy">3.4 Strategy — MakerRebateStrategy<a class="headerlink" href="#34-strategy-makerrebatestrategy" title="Permanent link">&para;</a></h3>
+<p>Location: <code>polymind/strategies/market_making/maker_rebate/strategy.py</code></p>
+<div class="highlight"><pre><span></span><code><span class="nd">@register</span><span class="p">(</span><span class="s2">&quot;maker_rebate&quot;</span><span class="p">)</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">MakerRebateStrategy</span><span class="p">(</span><span class="n">BaseMMStrategy</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Captures rebate spread by buying YES and NO when their sum &lt; 1.</span>
+
+<span class="sd">    Produces paired buy OrderIntents for both sides of a condition.</span>
+<span class="sd">    Post-fill lifecycle (merge, redeem) is owned by the WorkflowRunner</span>
+<span class="sd">    and RebateStateMachine; this strategy only produces intents.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">pricing_config</span><span class="p">:</span> <span class="n">RebatePricingConfig</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">sizing_config</span><span class="p">:</span> <span class="n">RebateSizingConfig</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">config</span><span class="p">:</span> <span class="n">StrategyConfig</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">pair_lifecycle</span><span class="p">:</span> <span class="n">PairLifecycleManager</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="p">):</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">config</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">pricing_config</span> <span class="o">=</span> <span class="n">pricing_config</span> <span class="ow">or</span> <span class="n">RebatePricingConfig</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">sizing_config</span> <span class="o">=</span> <span class="n">sizing_config</span> <span class="ow">or</span> <span class="n">RebateSizingConfig</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_pair_lifecycle</span> <span class="o">=</span> <span class="n">pair_lifecycle</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_active_conditions</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">RebateState</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}</span>  <span class="c1"># condition_id -&gt; state</span>
+</code></pre></div>
+<p><strong><code>analyze</code> method:</strong></p>
+<p>The <code>analyze</code> signature uses <code>market: Any</code> per <code>BaseMMStrategy</code>. The
+<code>MakerRebateStrategy</code> expects a <code>PairSnapshot</code>:</p>
+<div class="highlight"><pre><span></span><code><span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">analyze</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">market</span><span class="p">:</span> <span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">StrategyIntent</span> <span class="o">|</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Analyze a pair snapshot and produce buy intents for both sides.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    market : PairSnapshot</span>
+<span class="sd">        A combined YES/NO snapshot (not a single MarketSnapshot).</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    StrategyIntent | None</span>
+<span class="sd">        Contains two OrderIntent (buy YES, buy NO) and one CancelIntent</span>
+<span class="sd">        to clear stale orders for both markets.  Returns None when no</span>
+<span class="sd">        rebate opportunity exists.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">market</span><span class="p">,</span> <span class="n">PairSnapshot</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;MakerRebateStrategy expects PairSnapshot, got </span><span class="si">{</span><span class="nb">type</span><span class="p">(</span><span class="n">market</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+    <span class="c1"># Skip if we already have open orders for this condition</span>
+    <span class="n">cond_id</span> <span class="o">=</span> <span class="n">market</span><span class="o">.</span><span class="n">condition_id</span>
+    <span class="k">if</span> <span class="n">cond_id</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_active_conditions</span><span class="p">:</span>
+        <span class="k">return</span> <span class="kc">None</span>  <span class="c1"># let existing orders fill; don&#39;t churn</span>
+
+    <span class="c1"># Detect opportunity</span>
+    <span class="n">prices</span> <span class="o">=</span> <span class="n">detect_rebate_opportunity</span><span class="p">(</span><span class="n">market</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">pricing_config</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">prices</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">return</span> <span class="kc">None</span>
+
+    <span class="n">yes_price</span><span class="p">,</span> <span class="n">no_price</span><span class="p">,</span> <span class="n">expected_spread</span> <span class="o">=</span> <span class="n">prices</span>
+
+    <span class="c1"># Compute sizes</span>
+    <span class="n">current_exp</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_current_exposure</span><span class="p">(</span><span class="n">cond_id</span><span class="p">)</span>
+    <span class="n">total_exp</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_total_exposure</span><span class="p">()</span>
+    <span class="n">sizes</span> <span class="o">=</span> <span class="n">compute_pair_sizes</span><span class="p">(</span><span class="n">market</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">sizing_config</span><span class="p">,</span> <span class="n">current_exp</span><span class="p">,</span> <span class="n">total_exp</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">sizes</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">return</span> <span class="kc">None</span>
+
+    <span class="n">yes_size</span><span class="p">,</span> <span class="n">no_size</span> <span class="o">=</span> <span class="n">sizes</span>
+
+    <span class="n">now</span> <span class="o">=</span> <span class="n">datetime</span><span class="o">.</span><span class="n">now</span><span class="p">(</span><span class="n">timezone</span><span class="o">.</span><span class="n">utc</span><span class="p">)</span>
+
+    <span class="c1"># Cancel stale orders for BOTH markets before placing new ones</span>
+    <span class="n">cancels</span> <span class="o">=</span> <span class="p">[</span>
+        <span class="n">CancelIntent</span><span class="p">(</span>
+            <span class="n">market_id</span><span class="o">=</span><span class="n">market</span><span class="o">.</span><span class="n">yes_market_id</span><span class="p">,</span>
+            <span class="n">reason</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;Maker rebate refresh @ </span><span class="si">{</span><span class="n">now</span><span class="o">.</span><span class="n">isoformat</span><span class="p">()</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span>
+        <span class="p">),</span>
+        <span class="n">CancelIntent</span><span class="p">(</span>
+            <span class="n">market_id</span><span class="o">=</span><span class="n">market</span><span class="o">.</span><span class="n">no_market_id</span><span class="p">,</span>
+            <span class="n">reason</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;Maker rebate refresh @ </span><span class="si">{</span><span class="n">now</span><span class="o">.</span><span class="n">isoformat</span><span class="p">()</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span>
+        <span class="p">),</span>
+    <span class="p">]</span>
+
+    <span class="c1"># Paired buy orders</span>
+    <span class="n">orders</span> <span class="o">=</span> <span class="p">[</span>
+        <span class="n">OrderIntent</span><span class="p">(</span>
+            <span class="n">market_id</span><span class="o">=</span><span class="n">market</span><span class="o">.</span><span class="n">yes_market_id</span><span class="p">,</span>
+            <span class="n">side</span><span class="o">=</span><span class="n">OrderSide</span><span class="o">.</span><span class="n">BUY</span><span class="p">,</span>
+            <span class="n">price</span><span class="o">=</span><span class="n">yes_price</span><span class="p">,</span>
+            <span class="n">size</span><span class="o">=</span><span class="n">yes_size</span><span class="p">,</span>
+            <span class="n">outcome</span><span class="o">=</span><span class="s2">&quot;YES&quot;</span><span class="p">,</span>
+            <span class="n">time_in_force</span><span class="o">=</span><span class="n">TimeInForce</span><span class="o">.</span><span class="n">GTC</span><span class="p">,</span>
+            <span class="n">metadata</span><span class="o">=</span><span class="p">{</span>
+                <span class="s2">&quot;condition_id&quot;</span><span class="p">:</span> <span class="n">cond_id</span><span class="p">,</span>
+                <span class="s2">&quot;strategy&quot;</span><span class="p">:</span> <span class="s2">&quot;maker_rebate&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;expected_spread&quot;</span><span class="p">:</span> <span class="n">expected_spread</span><span class="p">,</span>
+            <span class="p">},</span>
+        <span class="p">),</span>
+        <span class="n">OrderIntent</span><span class="p">(</span>
+            <span class="n">market_id</span><span class="o">=</span><span class="n">market</span><span class="o">.</span><span class="n">no_market_id</span><span class="p">,</span>
+            <span class="n">side</span><span class="o">=</span><span class="n">OrderSide</span><span class="o">.</span><span class="n">BUY</span><span class="p">,</span>
+            <span class="n">price</span><span class="o">=</span><span class="n">no_price</span><span class="p">,</span>
+            <span class="n">size</span><span class="o">=</span><span class="n">no_size</span><span class="p">,</span>
+            <span class="n">outcome</span><span class="o">=</span><span class="s2">&quot;NO&quot;</span><span class="p">,</span>
+            <span class="n">time_in_force</span><span class="o">=</span><span class="n">TimeInForce</span><span class="o">.</span><span class="n">GTC</span><span class="p">,</span>
+            <span class="n">metadata</span><span class="o">=</span><span class="p">{</span>
+                <span class="s2">&quot;condition_id&quot;</span><span class="p">:</span> <span class="n">cond_id</span><span class="p">,</span>
+                <span class="s2">&quot;strategy&quot;</span><span class="p">:</span> <span class="s2">&quot;maker_rebate&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;expected_spread&quot;</span><span class="p">:</span> <span class="n">expected_spread</span><span class="p">,</span>
+            <span class="p">},</span>
+        <span class="p">),</span>
+    <span class="p">]</span>
+
+    <span class="c1"># Track this condition as active</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_active_conditions</span><span class="p">[</span><span class="n">cond_id</span><span class="p">]</span> <span class="o">=</span> <span class="n">RebateState</span><span class="o">.</span><span class="n">ORDERS_PLACED</span>
+
+    <span class="k">return</span> <span class="n">StrategyIntent</span><span class="p">(</span>
+        <span class="n">timestamp</span><span class="o">=</span><span class="n">now</span><span class="p">,</span>
+        <span class="n">strategy_name</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="p">,</span>
+        <span class="n">orders</span><span class="o">=</span><span class="n">orders</span><span class="p">,</span>
+        <span class="n">cancels</span><span class="o">=</span><span class="n">cancels</span><span class="p">,</span>
+        <span class="n">metadata</span><span class="o">=</span><span class="p">{</span>
+            <span class="s2">&quot;condition_id&quot;</span><span class="p">:</span> <span class="n">cond_id</span><span class="p">,</span>
+            <span class="s2">&quot;expected_spread&quot;</span><span class="p">:</span> <span class="n">expected_spread</span><span class="p">,</span>
+        <span class="p">},</span>
+    <span class="p">)</span>
+</code></pre></div>
+<p><strong>State tracking helper:</strong></p>
+<div class="highlight"><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">mark_filled</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">condition_id</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Called externally when both YES and NO fills are confirmed.</span>
+
+<span class="sd">    Removes the condition from active tracking so the next tick</span>
+<span class="sd">    can detect a new opportunity.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_active_conditions</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="n">condition_id</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_current_exposure</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">condition_id</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Return USDC exposure for a condition (via pair_lifecycle or local tracking).&quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_pair_lifecycle</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">pos</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_pair_lifecycle</span><span class="o">.</span><span class="n">get_position</span><span class="p">(</span><span class="n">condition_id</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">pos</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">pos</span><span class="o">.</span><span class="n">yes_cost_basis</span> <span class="o">+</span> <span class="n">pos</span><span class="o">.</span><span class="n">no_cost_basis</span>
+    <span class="k">return</span> <span class="mf">0.0</span>
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_total_exposure</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Return total USDC exposure across all tracked conditions.&quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_pair_lifecycle</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">total</span> <span class="o">=</span> <span class="mf">0.0</span>
+        <span class="k">for</span> <span class="n">pos</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_pair_lifecycle</span><span class="o">.</span><span class="n">list_positions</span><span class="p">()</span><span class="o">.</span><span class="n">values</span><span class="p">():</span>
+            <span class="n">total</span> <span class="o">+=</span> <span class="n">pos</span><span class="o">.</span><span class="n">yes_cost_basis</span> <span class="o">+</span> <span class="n">pos</span><span class="o">.</span><span class="n">no_cost_basis</span>
+        <span class="k">return</span> <span class="n">total</span>
+    <span class="k">return</span> <span class="nb">sum</span><span class="p">(</span><span class="mf">0.0</span> <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_active_conditions</span><span class="p">)</span>  <span class="c1"># fallback</span>
+</code></pre></div>
+<h2 id="4-integration-with-workflowrunner-and-pairlifecyclemanager">4. Integration with WorkflowRunner and PairLifecycleManager<a class="headerlink" href="#4-integration-with-workflowrunner-and-pairlifecyclemanager" title="Permanent link">&para;</a></h2>
+<p>The <code>MakerRebateStrategy</code> is <strong>not</strong> directly coupled to the workflow state
+machine. The integration boundary is:</p>
+<div class="highlight"><pre><span></span><code>Tick (PairSnapshot)
+    │
+    ▼
+MakerRebateStrategy.analyze(pair) ───► StrategyIntent
+    │                                        │
+    ▼                                        ▼
+IntentExecutor.execute(intent)        (order placement)
+    │
+    ▼
+FillEvent (YES filled, NO filled)     (detected externally via WS)
+    │
+    ▼
+WorkflowRunner.process_command(
+    START + maker_rebate workflow     ───► RebateStateMachine: IDLE → PLACING_ORDERS
+)
+    │
+    ▼
+PairLifecycleManager.split()
+    (split USDC → YES + NO)          ───► RebateStateMachine: PLACING_ORDERS → AWAITING_FILLS
+    │
+    ▼
+[Wait for fills via FillProcessor]
+    │
+    ▼
+WorkflowRunner.process_command(
+    MERGE command                     ───► PairLifecycleManager.merge()
+                                         RebateStateMachine: AWAITING_FILLS → FILLS_COMPLETE
+                                                              FILLS_COMPLETE → MERGING
+)
+    │
+    ▼
+[If resolved:]
+WorkflowRunner.process_command(
+    REDEEM command                    ───► PairLifecycleManager.redeem()
+                                         RebateStateMachine: MERGING → REDEEMING → COMPLETED
+)
+</code></pre></div>
+<p><strong>Key design choice:</strong> The strategy only produces intents. The workflow
+state machine and runner own the lifecycle after fills. The caller
+(orchestrator / tick engine) is responsible for:</p>
+<ol>
+<li>Constructing <code>PairSnapshot</code> from two <code>MarketSnapshot</code> objects before
+   calling <code>analyze()</code>.</li>
+<li>Feeding fill events back to the strategy (<code>mark_filled()</code>).</li>
+<li>Routing lifecycle events to the <code>WorkflowRunner</code>.</li>
+</ol>
+<p>This keeps the strategy testable from pair snapshots alone and avoids
+coupling strategy logic to on-chain operations.</p>
+<h3 id="4a-pairsnapshot-construction">4a. PairSnapshot construction<a class="headerlink" href="#4a-pairsnapshot-construction" title="Permanent link">&para;</a></h3>
+<p>The orchestrator builds <code>PairSnapshot</code> from two <code>MarketSnapshot</code> objects:</p>
+<div class="highlight"><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">build_pair_snapshot</span><span class="p">(</span>
+    <span class="n">yes_snapshot</span><span class="p">:</span> <span class="n">MarketSnapshot</span><span class="p">,</span>
+    <span class="n">no_snapshot</span><span class="p">:</span> <span class="n">MarketSnapshot</span><span class="p">,</span>
+    <span class="n">condition_id</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">PairSnapshot</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Build a PairSnapshot from individual YES and NO snapshots.&quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="n">PairSnapshot</span><span class="p">(</span>
+        <span class="n">condition_id</span><span class="o">=</span><span class="n">condition_id</span><span class="p">,</span>
+        <span class="n">yes_market_id</span><span class="o">=</span><span class="n">yes_snapshot</span><span class="o">.</span><span class="n">market_id</span><span class="p">,</span>
+        <span class="n">no_market_id</span><span class="o">=</span><span class="n">no_snapshot</span><span class="o">.</span><span class="n">market_id</span><span class="p">,</span>
+        <span class="n">timestamp</span><span class="o">=</span><span class="n">yes_snapshot</span><span class="o">.</span><span class="n">timestamp</span><span class="p">,</span>
+        <span class="n">yes_bid</span><span class="o">=</span><span class="n">yes_snapshot</span><span class="o">.</span><span class="n">bid_price</span><span class="p">,</span>
+        <span class="n">yes_ask</span><span class="o">=</span><span class="n">yes_snapshot</span><span class="o">.</span><span class="n">ask_price</span><span class="p">,</span>
+        <span class="n">yes_mid</span><span class="o">=</span><span class="n">yes_snapshot</span><span class="o">.</span><span class="n">mid_price</span><span class="p">,</span>
+        <span class="n">no_bid</span><span class="o">=</span><span class="n">no_snapshot</span><span class="o">.</span><span class="n">bid_price</span><span class="p">,</span>
+        <span class="n">no_ask</span><span class="o">=</span><span class="n">no_snapshot</span><span class="o">.</span><span class="n">ask_price</span><span class="p">,</span>
+        <span class="n">no_mid</span><span class="o">=</span><span class="n">no_snapshot</span><span class="o">.</span><span class="n">mid_price</span><span class="p">,</span>
+    <span class="p">)</span>
+</code></pre></div>
+<p>The orchestrator obtains <code>condition_id</code> via <code>PairLifecycleManager</code>'s
+<code>_market_to_condition</code> mapping, or from the Data API's event/market
+relationships.</p>
+<h3 id="4b-usdc-balance-check">4b. USDC balance check<a class="headerlink" href="#4b-usdc-balance-check" title="Permanent link">&para;</a></h3>
+<p>Before the strategy can produce intents for a new condition, the orchestrator
+should verify that the wallet has sufficient USDC to cover the split:</p>
+<div class="highlight"><pre><span></span><code>if token_bal.usdc_balance &lt; yes_price * yes_size + no_price * no_size:
+    skip condition (insufficient balance)
+</code></pre></div>
+<p>This check can be done by calling
+<code>PairLifecycleManager._gateway.get_onchain_balance()</code> or by the strategy's
+<code>_total_exposure()</code> returning a value near the configured debt ceiling.</p>
+<p>A dedicated pre-trade check helper is provided:</p>
+<div class="highlight"><pre><span></span><code><span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">check_usdc_balance</span><span class="p">(</span>
+    <span class="n">pair_lifecycle</span><span class="p">:</span> <span class="n">PairLifecycleManager</span><span class="p">,</span>
+    <span class="n">required_usdc</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">bool</span><span class="p">,</span> <span class="nb">float</span><span class="p">]:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Check USDC balance against the required amount.</span>
+
+<span class="sd">    Returns (sufficient: bool, current_balance: float).</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1"># Uses the first registered condition&#39;s USDC balance as proxy</span>
+    <span class="n">positions</span> <span class="o">=</span> <span class="n">pair_lifecycle</span><span class="o">.</span><span class="n">list_positions</span><span class="p">()</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">positions</span><span class="p">:</span>
+        <span class="k">return</span> <span class="kc">False</span><span class="p">,</span> <span class="mf">0.0</span>
+    <span class="n">first_cond</span> <span class="o">=</span> <span class="nb">next</span><span class="p">(</span><span class="nb">iter</span><span class="p">(</span><span class="n">positions</span><span class="p">))</span>
+    <span class="n">bal</span> <span class="o">=</span> <span class="k">await</span> <span class="n">pair_lifecycle</span><span class="o">.</span><span class="n">_gateway</span><span class="o">.</span><span class="n">get_onchain_balance</span><span class="p">(</span>
+        <span class="n">positions</span><span class="p">[</span><span class="n">first_cond</span><span class="p">]</span><span class="o">.</span><span class="n">yes_token_id</span>
+    <span class="p">)</span>
+    <span class="k">return</span> <span class="n">bal</span><span class="o">.</span><span class="n">usdc_balance</span> <span class="o">&gt;=</span> <span class="n">required_usdc</span><span class="p">,</span> <span class="n">bal</span><span class="o">.</span><span class="n">usdc_balance</span>
+</code></pre></div>
+<h2 id="5-configuration">5. Configuration<a class="headerlink" href="#5-configuration" title="Permanent link">&para;</a></h2>
+<h3 id="51-rebatepricingconfig">5.1 RebatePricingConfig<a class="headerlink" href="#51-rebatepricingconfig" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>Field</th>
+<th>Type</th>
+<th>Default</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>min_rebate_spread</code></td>
+<td>float</td>
+<td>0.005</td>
+<td>Minimum rebate spread to trade (excl. fees). 0.5 %</td>
+</tr>
+<tr>
+<td><code>fee_buffer</code></td>
+<td>float</td>
+<td>0.001</td>
+<td>Additional buffer for maker fees. 0.1 %</td>
+</tr>
+<tr>
+<td><code>price_buffer_pct</code></td>
+<td>float</td>
+<td>0.002</td>
+<td>How far behind bid to place orders for fill priority. 0.2 %</td>
+</tr>
+</tbody>
+</table>
+<h3 id="52-rebatesizingconfig">5.2 RebateSizingConfig<a class="headerlink" href="#52-rebatesizingconfig" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>Field</th>
+<th>Type</th>
+<th>Default</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>max_exposure_usdc</code></td>
+<td>float</td>
+<td>100.0</td>
+<td>Max USDC per condition</td>
+</tr>
+<tr>
+<td><code>min_order_size</code></td>
+<td>float</td>
+<td>10.0</td>
+<td>Min order size per side</td>
+</tr>
+<tr>
+<td><code>max_order_size</code></td>
+<td>float</td>
+<td>500.0</td>
+<td>Max order size per side</td>
+</tr>
+<tr>
+<td><code>use_debt_ceiling</code></td>
+<td>bool</td>
+<td>True</td>
+<td>Cap total open exposure across conditions</td>
+</tr>
+<tr>
+<td><code>max_total_exposure_usdc</code></td>
+<td>float</td>
+<td>5000.0</td>
+<td>Aggregate cap across all active rebates</td>
+</tr>
+</tbody>
+</table>
+<h2 id="6-error-handling">6. Error Handling<a class="headerlink" href="#6-error-handling" title="Permanent link">&para;</a></h2>
+<table>
+<thead>
+<tr>
+<th>Scenario</th>
+<th>Behaviour</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>PairSnapshot</code> has missing bid on either side</td>
+<td>Skip: <code>analyze()</code> returns <code>None</code></td>
+</tr>
+<tr>
+<td>USDC balance insufficient for split</td>
+<td>Strategy produces intents but pre-trade check in orchestrator skips</td>
+</tr>
+<tr>
+<td>Condition already has open orders</td>
+<td><code>analyze()</code> returns <code>None</code> (avoids duplicate placement)</td>
+</tr>
+<tr>
+<td><code>yes_price * yes_size</code> exceeds per-condition cap</td>
+<td><code>compute_pair_sizes</code> clamps to <code>max_exposure_usdc</code></td>
+</tr>
+<tr>
+<td>Combined exposure exceeds <code>max_total_exposure_usdc</code></td>
+<td><code>compute_pair_sizes</code> returns <code>None</code></td>
+</tr>
+<tr>
+<td>Market resolves before merge</td>
+<td>Workflow goes from <code>AWAITING_FILLS</code> → <code>FILLS_COMPLETE</code> → <code>REDEEMING</code> (skips merge)</td>
+</tr>
+<tr>
+<td>One side fills but other does not</td>
+<td>Remainder handling via <code>PairLifecycleManager.sell_remainder()</code></td>
+</tr>
+<tr>
+<td>Fee spike erases spread</td>
+<td><code>price_buffer_pct</code> + <code>fee_buffer</code> provide safety margin</td>
+</tr>
+<tr>
+<td>Order placed but price moves</td>
+<td>Standard cancel-and-replace on next tick</td>
+</tr>
+</tbody>
+</table>
+<h3 id="6a-fee-aware-spread-calculation">6a. Fee-aware spread calculation<a class="headerlink" href="#6a-fee-aware-spread-calculation" title="Permanent link">&para;</a></h3>
+<p>The effective captured spread accounts for both CLOB maker fees and the
+redeem/merge fee:</p>
+<div class="highlight"><pre><span></span><code>effective_spread = 1.0 - yes_price - no_price - maker_fee_rate - merge_fee_rate
+</code></pre></div>
+<p>Where:
+- <code>maker_fee_rate</code> = fee paid when the buy order fills (maker rebate may
+  offset some or all of this)
+- <code>merge_fee_rate</code> = fee paid when merging paired tokens back to USDC
+  (typically small, ~0.1 % per pair)</p>
+<p>The configurable <code>fee_buffer</code> field covers these costs. The strategy trades
+only when:</p>
+<div class="highlight"><pre><span></span><code>1.0 - yes_price - no_price - 2 * fee_buffer &gt;= min_rebate_spread
+</code></pre></div>
+<p>The factor of 2 accounts for worst-case fees on both the entry (maker fill)
+and exit (merge) legs.</p>
+<h2 id="7-edge-cases">7. Edge Cases<a class="headerlink" href="#7-edge-cases" title="Permanent link">&para;</a></h2>
+<h3 id="7a-partial-fill-on-one-side">7a. Partial fill on one side<a class="headerlink" href="#7a-partial-fill-on-one-side" title="Permanent link">&para;</a></h3>
+<p>If YES fills but NO does not, the condition is left with an unbalanced
+position. The workflow should:</p>
+<ol>
+<li>Keep the filled side's order open (don't cancel).</li>
+<li>Wait for the other side to fill, possibly at a more aggressive price.</li>
+<li>If the opportunity window closes, sell the excess remainder via
+   <code>PairLifecycleManager.sell_remainder()</code> and accept a small loss.</li>
+</ol>
+<p>The strategy handles this by leaving the condition in <code>_active_conditions</code>
+until <code>mark_filled()</code> is called, preventing duplicate placement.</p>
+<h3 id="7b-market-resolution-during-order-placement">7b. Market resolution during order placement<a class="headerlink" href="#7b-market-resolution-during-order-placement" title="Permanent link">&para;</a></h3>
+<p>If the market resolves while YES/NO orders are open:</p>
+<ol>
+<li>Fill events stop (market is resolved, no more trading).</li>
+<li>The winning side's order may still fill if it was already matched.</li>
+<li>The workflow runner detects resolution via WebSocket event and calls
+   <code>PairLifecycleManager.mark_resolved()</code>.</li>
+<li>The workflow transitions directly to <code>REDEEMING</code>, skipping <code>MERGE</code>.</li>
+</ol>
+<h3 id="7c-both-sides-fill-but-usdc-merge-fails">7c. Both sides fill but USDC merge fails<a class="headerlink" href="#7c-both-sides-fill-but-usdc-merge-fails" title="Permanent link">&para;</a></h3>
+<p>The merge transaction may revert due to:</p>
+<ul>
+<li>Insufficient approval (solved by the <code>approve=True</code> default in
+  <code>PairLifecycleManager.merge()</code>).</li>
+<li>Insufficient MATIC for gas (catches via <code>InsufficientGasError</code>).</li>
+<li>Token pair mismatch (should not happen if strategy always buys equal
+  amounts).</li>
+</ul>
+<p>The workflow state machine transitions to <code>FAILED</code> on error, and the
+operator can issue a <code>RESTART</code> after resolving the underlying issue.</p>
+<h3 id="7d-fee-rebate-interaction">7d. Fee rebate interaction<a class="headerlink" href="#7d-fee-rebate-interaction" title="Permanent link">&para;</a></h3>
+<p>Polymarket's maker rebate program may rebate a portion of the maker fee
+back to the trader. This improves the effective spread. The strategy's
+<code>fee_buffer</code> can be tuned downward when maker rebate is active.</p>
+<h2 id="8-non-goals">8. Non-goals<a class="headerlink" href="#8-non-goals" title="Permanent link">&para;</a></h2>
+<ul>
+<li><strong>Order execution</strong>: The strategy produces <code>StrategyIntent</code> only. The
+  executor layer owns the CLOB transport, retry, and fill tracking.</li>
+<li><strong>Split/merge/redeem execution</strong>: On-chain operations are owned by
+  <code>PairLifecycleManager</code> via the <code>WorkflowRunner</code>.</li>
+<li><strong>Fill detection</strong>: Fill events are detected externally (WebSocket) and
+  routed to the strategy's <code>mark_filled()</code> method. The strategy does not
+  poll for fills.</li>
+<li><strong>Multi-condition optimization</strong>: The strategy treats each condition
+  independently. Cross-condition exposure optimization is a future concern.</li>
+<li><strong>Taker orders</strong>: The strategy is passive-only (limit orders at/behind
+  the bid). Taker rebates (crossing the spread) are out of scope.</li>
+</ul>
+<h2 id="9-future">9. Future<a class="headerlink" href="#9-future" title="Permanent link">&para;</a></h2>
+<ul>
+<li><strong>Auto-tune <code>price_buffer_pct</code></strong> based on historical fill probability
+  per condition.</li>
+<li><strong>Cross-condition debt ceiling</strong> with priority ranking (most profitable
+  spreads fill first).</li>
+<li><strong>Dynamic sizing</strong> based on available USDC and opportunity quality
+  (wider spreads get larger allocations).</li>
+<li><strong>Partial-fill resilience</strong> with automated remainder management via
+  <code>PairLifecycleManager.sell_remainder()</code>.</li>
+</ul>
+
+
+
+
+
+
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+        
+<div class="md-social">
+  
+    
+    
+    
+    
+      
+      
+    
+    <a href="https://github.com/" target="_blank" rel="noopener" title="github.com" class="md-social__link">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M173.9 397.4c0 2-2.3 3.6-5.2 3.6-3.3.3-5.6-1.3-5.6-3.6 0-2 2.3-3.6 5.2-3.6 3-.3 5.6 1.3 5.6 3.6m-31.1-4.5c-.7 2 1.3 4.3 4.3 4.9 2.6 1 5.6 0 6.2-2s-1.3-4.3-4.3-5.2c-2.6-.7-5.5.3-6.2 2.3m44.2-1.7c-2.9.7-4.9 2.6-4.6 4.9.3 2 2.9 3.3 5.9 2.6 2.9-.7 4.9-2.6 4.6-4.6-.3-1.9-3-3.2-5.9-2.9M252.8 8C114.1 8 8 113.3 8 252c0 110.9 69.8 205.8 169.5 239.2 12.8 2.3 17.3-5.6 17.3-12.1 0-6.2-.3-40.4-.3-61.4 0 0-70 15-84.7-29.8 0 0-11.4-29.1-27.8-36.6 0 0-22.9-15.7 1.6-15.4 0 0 24.9 2 38.6 25.8 21.9 38.6 58.6 27.5 72.9 20.9 2.3-16 8.8-27.1 16-33.7-55.9-6.2-112.3-14.3-112.3-110.5 0-27.5 7.6-41.3 23.6-58.9-2.6-6.5-11.1-33.3 2.6-67.9 20.9-6.5 69 27 69 27 20-5.6 41.5-8.5 62.8-8.5s42.8 2.9 62.8 8.5c0 0 48.1-33.6 69-27 13.7 34.7 5.2 61.4 2.6 67.9 16 17.7 25.8 31.5 25.8 58.9 0 96.5-58.9 104.2-114.8 110.5 9.2 7.9 17 22.9 17 46.4 0 33.7-.3 75.4-.3 83.6 0 6.5 4.6 14.4 17.3 12.1C436.2 457.8 504 362.9 504 252 504 113.3 391.5 8 252.8 8M105.2 352.9c-1.3 1-1 3.3.7 5.2 1.6 1.6 3.9 2.3 5.2 1 1.3-1 1-3.3-.7-5.2-1.6-1.6-3.9-2.3-5.2-1m-10.8-8.1c-.7 1.3.3 2.9 2.3 3.9 1.6 1 3.6.7 4.3-.7.7-1.3-.3-2.9-2.3-3.9-2-.6-3.6-.3-4.3.7m32.4 35.6c-1.6 1.3-1 4.3 1.3 6.2 2.3 2.3 5.2 2.6 6.5 1 1.3-1.3.7-4.3-1.3-6.2-2.2-2.3-5.2-2.6-6.5-1m-11.4-14.7c-1.6 1-1.6 3.6 0 5.9s4.3 3.3 5.6 2.3c1.6-1.3 1.6-3.9 0-6.2-1.4-2.3-4-3.3-5.6-2"/></svg>
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    
+      
+      
+      <script id="__config" type="application/json">{"annotate": null, "base": "../../..", "features": ["navigation.tabs", "navigation.sections", "toc.integrate"], "search": "../../../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
+    
+    
+      <script src="../../../assets/javascripts/bundle.79ae519e.min.js"></script>
+      
+    
+  </body>
+</html>

@@ -1,0 +1,2305 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+        <meta name="description" content="AI-Native Market Making for Polymarket">
+      
+      
+      
+        <link rel="canonical" href="https://polymind.readthedocs.io/architecture/">
+      
+      
+        <link rel="prev" href="..">
+      
+      
+        <link rel="next" href="decisions/0001-factor-execution-uses-executable-prices/">
+      
+      
+        
+      
+      
+      <link rel="icon" href="../assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.6">
+    
+    
+      
+        <title>Architecture - Polymind</title>
+      
+    
+    
+      <link rel="stylesheet" href="../assets/stylesheets/main.484c7ddc.min.css">
+      
+        
+        <link rel="stylesheet" href="../assets/stylesheets/palette.ab4e12ef.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+    <script>__md_scope=new URL("..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+  </head>
+  
+  
+    
+    
+      
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="indigo" data-md-color-accent="indigo">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#polymind-architecture-roadmap" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+<header class="md-header" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href=".." title="Polymind" class="md-header__button md-logo" aria-label="Polymind" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            Polymind
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              Architecture
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+        <form class="md-header__option" data-md-component="palette">
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="" data-md-color-scheme="default" data-md-color-primary="indigo" data-md-color-accent="indigo"  aria-label="Switch to dark mode"  type="radio" name="__palette" id="__palette_0">
+    
+      <label class="md-header__button md-icon" title="Switch to dark mode" for="__palette_1" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M17 6H7c-3.31 0-6 2.69-6 6s2.69 6 6 6h10c3.31 0 6-2.69 6-6s-2.69-6-6-6m0 10H7c-2.21 0-4-1.79-4-4s1.79-4 4-4h10c2.21 0 4 1.79 4 4s-1.79 4-4 4M7 9c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3"/></svg>
+      </label>
+    
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="" data-md-color-scheme="slate" data-md-color-primary="indigo" data-md-color-accent="indigo"  aria-label="Switch to light mode"  type="radio" name="__palette" id="__palette_1">
+    
+      <label class="md-header__button md-icon" title="Switch to light mode" for="__palette_0" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M17 7H7a5 5 0 0 0-5 5 5 5 0 0 0 5 5h10a5 5 0 0 0 5-5 5 5 0 0 0-5-5m0 8a3 3 0 0 1-3-3 3 3 0 0 1 3-3 3 3 0 0 1 3 3 3 3 0 0 1-3 3"/></svg>
+      </label>
+    
+  
+</form>
+      
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&palette.color){if("(prefers-color-scheme)"===palette.color.media){var media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']");palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent")}for(var[key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+    
+    
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      
+    
+    
+      <div class="md-header__source">
+        <a href="https://github.com/6Kmfi6HP/polymind" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
+  </div>
+  <div class="md-source__repository">
+    GitHub
+  </div>
+</a>
+      </div>
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+            
+<nav class="md-tabs" aria-label="Tabs" data-md-component="tabs">
+  <div class="md-grid">
+    <ul class="md-tabs__list">
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href=".." class="md-tabs__link">
+        
+  
+  
+    
+  
+  Home
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+    
+  
+  
+    <li class="md-tabs__item md-tabs__item--active">
+      <a href="./" class="md-tabs__link">
+        
+  
+  
+    
+  
+  Architecture
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="decisions/0001-factor-execution-uses-executable-prices/" class="md-tabs__link">
+          
+  
+  
+  Architecture Decisions
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../api/core/" class="md-tabs__link">
+          
+  
+  
+  API Reference
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../guides/getting-started/" class="md-tabs__link">
+          
+  
+  
+  Guides
+
+        </a>
+      </li>
+    
+  
+
+      
+    </ul>
+  </div>
+</nav>
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+  
+
+
+  
+
+<nav class="md-nav md-nav--primary md-nav--lifted md-nav--integrated" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href=".." title="Polymind" class="md-nav__button md-logo" aria-label="Polymind" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    Polymind
+  </label>
+  
+    <div class="md-nav__source">
+      <a href="https://github.com/6Kmfi6HP/polymind" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
+  </div>
+  <div class="md-source__repository">
+    GitHub
+  </div>
+</a>
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href=".." class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Home
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+    
+  
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Architecture
+  
+
+    
+  </span>
+  
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Architecture
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#executive-summary" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Executive Summary
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Executive Summary">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#merged-projects-market-making-bots" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Merged Projects — Market-Making Bots
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#merged-projects-factor-research-backtesting" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Merged Projects — Factor Research &amp; Backtesting
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#architecture" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Architecture
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#cross-sectional-factor-framework" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Cross-Sectional Factor Framework
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Cross-Sectional Factor Framework">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#factor-pipeline" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Factor Pipeline
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#factor-taxonomy" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Factor Taxonomy
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Factor Taxonomy">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#signal-factors" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Signal factors
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#tradability-filters" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Tradability filters
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#portfolio-overlays" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Portfolio overlays
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#factor-strategy-contracts" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Factor Strategy Contracts
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#key-learning-from-reference-implementation" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Key Learning from Reference Implementation
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#target-directory-layout" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Target Directory Layout
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#roadmap-gates" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Roadmap Gates
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Roadmap Gates">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#phase-0-documentation-provenance-and-license-truth-alignment" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Phase 0: Documentation, provenance, and license truth alignment
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#phase-1-polymarket-adapter-validation" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Phase 1: Polymarket adapter validation
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#phase-2-domain-contracts-and-architecture-spine" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Phase 2: Domain contracts and architecture spine
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#phase-3-execution-reconciliation-and-paper-runtime" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Phase 3: Execution, reconciliation, and paper runtime
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#phase-4-official-mm-port" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Phase 4: Official MM port
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#phase-5-terminal-and-event-workflows" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Phase 5: Terminal and event workflows
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#phase-6-factor-data-and-research-engine" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Phase 6: Factor data and research engine
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#phase-7-factor-strategies-and-promotion-governance" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Phase 7: Factor strategies and promotion governance
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#phase-8-ai-studio" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Phase 8: AI studio
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#phase-9-operator-readiness-release-and-expansion" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Phase 9: Operator readiness, release, and expansion
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#execution-reality-gate" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Execution Reality Gate
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#design-decisions" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Design Decisions
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Design Decisions">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#why-python-as-the-primary-application-stack" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Why Python as the primary application stack
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#factor-strategies-use-execution-aware-bridges" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Factor strategies use execution-aware bridges
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#factor-pipeline-is-real-time-not-batch" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Factor pipeline is real-time, not batch
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#fill-detection-on-chain-balance-is-truth" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Fill detection: on-chain balance is truth
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#reference-project-learnings" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Reference Project Learnings
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Reference Project Learnings">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#recallnetpolymarket-cross-sectional-momentum" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        recallnet/polymarket-cross-sectional-momentum
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#oscarc17polymarket-edge-research" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        oscarc17/Polymarket-Edge-Research
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#evan-kolbergprediction-market-backtesting" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        evan-kolberg/prediction-market-backtesting
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#chiantsiipolymarket-quant" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        chiantsii/polymarket-quant
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#future-considerations" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Future Considerations
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3" >
+        
+          
+          <label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Architecture Decisions
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Architecture Decisions
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="decisions/0001-factor-execution-uses-executable-prices/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    ADR 0001
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="decisions/0002-strategies-emit-intents-executors-place-orders/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    ADR 0002
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="decisions/0003-onchain-balance-is-reconciliation-truth/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    ADR 0003
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="decisions/0004-sdk-adapter-isolated-from-core/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    ADR 0004
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="decisions/0005-lgpl-boundary-and-adapter-strategy/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    ADR 0005
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4" >
+        
+          
+          <label class="md-nav__link" for="__nav_4" id="__nav_4_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    API Reference
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_4_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_4">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    API Reference
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../api/core/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Core
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../api/execution/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Execution
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../api/strategies/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Strategies
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../api/polymarket/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Polymarket
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_5" >
+        
+          
+          <label class="md-nav__link" for="__nav_5" id="__nav_5_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Guides
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_5_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_5">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Guides
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../guides/getting-started/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Getting Started
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+
+<h1 id="polymind-architecture-roadmap">Polymind Architecture &amp; Roadmap<a class="headerlink" href="#polymind-architecture-roadmap" title="Permanent link">&para;</a></h1>
+<p><strong>Status:</strong> Target architecture, not implementation status
+<strong>Date:</strong> 2026-07-03</p>
+<p>This document describes the target architecture and roadmap gates. It is not a
+claim that all modules or strategies are implemented. Current implementation
+status belongs in <code>README.md</code> and <code>docs/architecture/current-state.md</code>.</p>
+<h2 id="executive-summary">Executive Summary<a class="headerlink" href="#executive-summary" title="Permanent link">&para;</a></h2>
+<p>Polymind merges <strong>eight existing Polymarket projects</strong> into a unified AI-native
+market-making and cross-sectional factor framework. Four are market-making bots,
+four are factor research and backtesting frameworks. Users describe strategies
+in natural language; the framework assembles, tunes, and executes them from
+modular components.</p>
+<h3 id="merged-projects-market-making-bots">Merged Projects — Market-Making Bots<a class="headerlink" href="#merged-projects-market-making-bots" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>Project</th>
+<th>Source</th>
+<th>Key Contribution</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>probablyprofit-ai-framework</td>
+<td><code>randomness11/probablyprofit</code></td>
+<td>observe-decide-act loop, multi-LLM, risk mgmt, backtesting</td>
+</tr>
+<tr>
+<td>pm-official-mm-keeper</td>
+<td><code>Polymarket/poly-market-maker</code></td>
+<td>AMM concentrated liquidity, Bands strategy</td>
+</tr>
+<tr>
+<td>warproxxx-mm-bot</td>
+<td><code>warproxxx/poly-maker</code></td>
+<td>Event-driven MM, triple-layer risk, position merging</td>
+</tr>
+<tr>
+<td>pm-terminal-all-in-one</td>
+<td><code>direkturcrypto/polymarket-terminal</code></td>
+<td>Maker rebate arbitrage, sniper, copy trade, ghost fill</td>
+</tr>
+</tbody>
+</table>
+<h3 id="merged-projects-factor-research-backtesting">Merged Projects — Factor Research &amp; Backtesting<a class="headerlink" href="#merged-projects-factor-research-backtesting" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>Project</th>
+<th>Source</th>
+<th>Key Contribution</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>polymarket-cross-sectional-momentum</td>
+<td><code>recallnet/polymarket-cross-sectional-momentum</code></td>
+<td>Cross-sectional momentum pipeline, JSONL price store, paper OMS, momentum decay analysis</td>
+</tr>
+<tr>
+<td>Polymarket-Edge-Research</td>
+<td><code>oscarc17/Polymarket-Edge-Research</code></td>
+<td>DuckDB factor panels, walk-forward backtest, execution-aware simulation</td>
+</tr>
+<tr>
+<td>prediction-market-backtesting</td>
+<td><code>evan-kolberg/prediction-market-backtesting</code></td>
+<td>NautilusTrader backtest engine, passive order modeling, slippage models, queue position</td>
+</tr>
+<tr>
+<td>polymarket-quant</td>
+<td><code>chiantsii/polymarket-quant</code></td>
+<td>Orderbook state → fair value → edge extraction, micro-price, cross-book consistency</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="architecture">Architecture<a class="headerlink" href="#architecture" title="Permanent link">&para;</a></h2>
+<div class="highlight"><pre><span></span><code>┌──────────────────────────────────────────────────────────────┐
+│                        USER STRATEGY                           │
+│  &quot;Run cross-sectional momentum, lookback 7d, top decile, 4h hold&quot; │
+│  &quot;Run maker-rebate on BTC 15m, $0.97 cap, 10 shares&quot;          │
+└──────────────────────────────────────────────────────────────┘
+                              │
+                              ▼
+┌──────────────────────────────────────────────────────────────┐
+│                       STRATEGY ENGINE                          │
+│                                                                │
+│  ┌──────────────┐  ┌──────────────┐  ┌──────────────────┐   │
+│  │  NL Parser   │  │  Strategy    │  │  Factor/Workflow │   │
+│  │  (prompt→    │  │  Registry    │  │  Registries      │   │
+│  │   typed cfg) │  │  (pick impl) │  │  (signals/flows) │   │
+│  └──────────────┘  └──────────────┘  └──────────────────┘   │
+│                          │                                    │
+│                          ▼                                    │
+│  ┌──────────────────────────────────────────────────────┐   │
+│  │              POLICIES AND WORKFLOWS                    │   │
+│  │  Policies: AMM · Bands · Classic MM                    │   │
+│  │  Workflows: Maker Rebate · Event MM · Sniper · Copy    │   │
+│  │  Shared: pair lifecycle · scheduler · recovery         │   │
+│  │                                                      │   │
+│  │  ┌──────────────────────────────────────────────┐   │   │
+│  │  │        FACTOR / FILTER / OVERLAY STRATEGIES   │   │   │
+│  │  │  Signals: Momentum · Regime · Sentiment       │   │   │
+│  │  │  Filters: Spread · Depth · Volume · Fees      │   │   │
+│  │  │  Overlays: Composite · Hedge · Exposure caps  │   │   │
+│  │  │  Structural: Parity · Cross-market · Fair val │   │   │
+│  │  └──────────────────────────────────────────────┘   │   │
+│  └──────────────────────────────────────────────────────┘   │
+└──────────────────────────────────────────────────────────────┘
+                              │
+                              ▼
+┌──────────────────────────────────────────────────────────────┐
+│                      CORE ENGINE                              │
+│  ┌──────────┐  ┌───────────┐  ┌────────────┐  ┌─────────┐  │
+│  │  Agent   │  │   Risk    │  │   Factor   │  │Executor │  │
+│  │  Loop    │  │  Gates    │  │  Engine    │  │(intent→ │  │
+│  │(obs→dec→ │  │(limits,   │  │(features,  │  │ order,  │  │
+│  │  act)    │  │ exposure) │  │ filters)   │  │ fills)  │  │
+│  └──────────┘  └───────────┘  └────────────┘  └─────────┘  │
+└──────────────────────────────────────────────────────────────┘
+                              │
+                              ▼
+┌──────────────────────────────────────────────────────────────┐
+│                      POLYMARKET LAYER                         │
+│  ┌──────────┐  ┌──────────┐  ┌──────────┐  ┌────────────┐ │
+│  │CLOB API  │  │WebSocket │  │Data API  │  │Smart       │ │
+│  │(HTTP)    │  │(realtime)│  │(Gamma/   │  │Contracts   │ │
+│  │          │  │          │  │ History) │  │(merge/     │ │
+│  └──────────┘  └──────────┘  └──────────┘  │ split/     │ │
+│                                              │ redeem)    │ │
+│                                              └────────────┘ │
+└──────────────────────────────────────────────────────────────┘
+</code></pre></div>
+<h2 id="cross-sectional-factor-framework">Cross-Sectional Factor Framework<a class="headerlink" href="#cross-sectional-factor-framework" title="Permanent link">&para;</a></h2>
+<p>This is the major architectural addition beyond the original market-making
+projects. The factor framework ranks markets by numeric signals, then sends
+selected positions through the same passive execution and reconciliation gates
+used by market-making workflows. A factor signal is not considered tradable
+until its execution model passes the reality gate below.</p>
+<h3 id="factor-pipeline">Factor Pipeline<a class="headerlink" href="#factor-pipeline" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code>┌─────────┐   ┌──────────┐   ┌────────┐   ┌─────────┐   ┌──────────┐
+│ Collect │ → │ Compute  │ → │ Rank &amp;  │ → │ Execute │ → │ Monitor  │
+│ raw data│   │ factor   │   │ Select  │   │ trades  │   │ &amp; exit   │
+│ snapshots│  │ scores   │   │ deciles │   │(entry)  │   │(time/    │
+│(bid/ask/│   │          │   │         │   │         │   │ stop)    │
+│ mid/vol)│   │          │   │         │   │         │   │          │
+└─────────┘   └──────────┘   └────────┘   └─────────┘   └──────────┘
+     │              │              │             │             │
+     ▼              ▼              ▼             ▼             ▼
+  JSONL store    windowed       sorted by     limit order   time-based
+  (per market)   computation    score, take    placement    or signal
+                                top/bottom                 based exit
+                                                              │
+                                                              ▼
+                                                     ┌────────────┐
+                                                     │  P&amp;L       │
+                                                     │  tracking  │
+                                                     │  + post-   │
+                                                     │  mortem    │
+                                                     └────────────┘
+</code></pre></div>
+<h3 id="factor-taxonomy">Factor Taxonomy<a class="headerlink" href="#factor-taxonomy" title="Permanent link">&para;</a></h3>
+<p>Polymind separates <strong>signals</strong>, <strong>tradability filters</strong>, and <strong>portfolio
+overlays</strong>. They are different abstractions and must not be collapsed into one
+<code>FactorStrategy</code> base class.</p>
+<h4 id="signal-factors">Signal factors<a class="headerlink" href="#signal-factors" title="Permanent link">&para;</a></h4>
+<table>
+<thead>
+<tr>
+<th>Signal family</th>
+<th>Signal input</th>
+<th>Execution/backtest source</th>
+<th>Lookback</th>
+<th>Use case</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Momentum</strong></td>
+<td>CLOB bid/ask-derived reference price; midpoint allowed only as signal input</td>
+<td>Executable bid/ask or passive-fill model</td>
+<td>4h / 24h / 7d / 21d</td>
+<td>Trend following</td>
+</tr>
+<tr>
+<td><strong>Volatility / regime</strong></td>
+<td>CLOB bid/ask-derived returns, realized spread, event regime</td>
+<td>Executable bid/ask or passive-fill model</td>
+<td>4h / 24h / 7d</td>
+<td>Regime filter or signal conditioner</td>
+</tr>
+<tr>
+<td><strong>Sentiment / news</strong></td>
+<td>External social/news signal with timestamped provenance</td>
+<td>CLOB bid/ask execution model</td>
+<td>Varies</td>
+<td>Contrarian or momentum signal</td>
+</tr>
+<tr>
+<td><strong>Fair-value / microstructure</strong></td>
+<td>Orderbook state, micro-price, depth imbalance, fair-value model</td>
+<td>Executable bid/ask, passive-fill model, or documented taker-cost model</td>
+<td>Real-time to event horizon</td>
+<td>Model price versus executable price</td>
+</tr>
+<tr>
+<td><strong>Structural / relative value</strong></td>
+<td>Complement parity, cross-market consistency, resolution mechanics</td>
+<td>Paired-leg executable simulation with hedge/bailout states</td>
+<td>Real-time</td>
+<td>Constraint or relative-value trades</td>
+</tr>
+</tbody>
+</table>
+<h4 id="tradability-filters">Tradability filters<a class="headerlink" href="#tradability-filters" title="Permanent link">&para;</a></h4>
+<table>
+<thead>
+<tr>
+<th>Filter</th>
+<th>Input</th>
+<th>Purpose</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Volume</strong></td>
+<td>Gamma/Data API volume plus CLOB liquidity checks</td>
+<td>Liquidity and capacity filter</td>
+</tr>
+<tr>
+<td><strong>Spread</strong></td>
+<td>Bid-ask spread and tick size</td>
+<td>Execution-cost filter</td>
+</tr>
+<tr>
+<td><strong>Depth</strong></td>
+<td>Book depth at intended price levels</td>
+<td>Capacity and market-impact filter</td>
+</tr>
+<tr>
+<td><strong>Fees</strong></td>
+<td>Observed fee regime or conservative fallback</td>
+<td>Expected-value filter</td>
+</tr>
+<tr>
+<td><strong>Freshness</strong></td>
+<td>Snapshot timestamp, WebSocket heartbeat, API lag</td>
+<td>Stale-data rejection</td>
+</tr>
+<tr>
+<td><strong>Time to resolution</strong></td>
+<td>Market close / resolution metadata</td>
+<td>Holding-period and settlement-risk filter</td>
+</tr>
+</tbody>
+</table>
+<h4 id="portfolio-overlays">Portfolio overlays<a class="headerlink" href="#portfolio-overlays" title="Permanent link">&para;</a></h4>
+<table>
+<thead>
+<tr>
+<th>Overlay</th>
+<th>Purpose</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Composite</strong></td>
+<td>Weighted or learned combination of signal families after each signal passes validation</td>
+</tr>
+<tr>
+<td><strong>Hedge / exposure neutralization</strong></td>
+<td>Market-neutral or category-neutral construction with explicit YES/NO and paired-position semantics</td>
+</tr>
+<tr>
+<td><strong>Risk caps</strong></td>
+<td>Per-market, per-token, per-category, per-asset, and correlated-exposure limits</td>
+</tr>
+</tbody>
+</table>
+<h3 id="factor-strategy-contracts">Factor Strategy Contracts<a class="headerlink" href="#factor-strategy-contracts" title="Permanent link">&para;</a></h3>
+<p>Factor strategies do <strong>not</strong> inherit from <code>BaseMMStrategy</code>. They share a neutral
+strategy contract and use an execution bridge when a directional factor needs
+market-making-style passive execution.</p>
+<div class="highlight"><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">BaseStrategy</span><span class="p">(</span><span class="n">ABC</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Framework-neutral strategy boundary.&quot;&quot;&quot;</span>
+
+    <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">decide</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">context</span><span class="p">:</span> <span class="n">StrategyContext</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="n">StrategyIntent</span><span class="p">]:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Return intents or workflow commands. Never place exchange orders.&quot;&quot;&quot;</span>
+        <span class="o">...</span>
+
+
+<span class="k">class</span><span class="w"> </span><span class="nc">FactorSignalModel</span><span class="p">(</span><span class="n">ABC</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Computes signal scores from validated snapshots and feature panels.&quot;&quot;&quot;</span>
+
+    <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">compute_scores</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">universe</span><span class="p">:</span> <span class="n">UniverseSnapshot</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">float</span><span class="p">]:</span>
+        <span class="o">...</span>
+
+
+<span class="k">class</span><span class="w"> </span><span class="nc">TradabilityFilter</span><span class="p">(</span><span class="n">ABC</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Rejects markets where the signal is not executable after costs.&quot;&quot;&quot;</span>
+
+    <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">filter</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">universe</span><span class="p">:</span> <span class="n">UniverseSnapshot</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">TradableUniverse</span><span class="p">:</span>
+        <span class="o">...</span>
+
+
+<span class="k">class</span><span class="w"> </span><span class="nc">PortfolioConstructor</span><span class="p">(</span><span class="n">ABC</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Converts ranked scores into desired positions under risk constraints.&quot;&quot;&quot;</span>
+
+    <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">construct</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">scores</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">float</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">PortfolioTarget</span><span class="p">:</span>
+        <span class="o">...</span>
+
+
+<span class="k">class</span><span class="w"> </span><span class="nc">FactorExecutionBridge</span><span class="p">(</span><span class="n">ABC</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Converts a portfolio target into order intents for the executor.&quot;&quot;&quot;</span>
+
+    <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">to_order_intents</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">target</span><span class="p">:</span> <span class="n">PortfolioTarget</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="n">OrderIntent</span><span class="p">]:</span>
+        <span class="o">...</span>
+</code></pre></div>
+<h3 id="key-learning-from-reference-implementation">Key Learning from Reference Implementation<a class="headerlink" href="#key-learning-from-reference-implementation" title="Permanent link">&para;</a></h3>
+<p>The <code>recallnet/polymarket-cross-sectional-momentum</code> project demonstrated that:</p>
+<ol>
+<li><strong>Momentum signal is real</strong> — backtest on 30 markets, 183 days: Sharpe 6.19,
+   t-stat 5.07, positive decile spread 5/6 months</li>
+<li><strong>CLOB execution cost kills the edge</strong> — 18 live paper trades at −13.6% PnL
+   with 11% hit rate because round-trip spread (2–10%) exceeds the signal</li>
+<li><strong>Midpoint prices are untradeable</strong> — backtesting against Gamma midpoint
+   prices systemically overstates returns</li>
+</ol>
+<p><strong>Polymind's approach</strong>: Factor strategies use execution-aware order intents,
+not midpoint or unconditional market-order fills. Entry/exit must be modeled as
+either conservative taker execution at executable bid/ask including costs, or
+post-only/passive limit orders with documented queue position, latency,
+partial-fill, timeout, adverse-selection, and cancel assumptions. Gamma midpoint
+and CLOB midpoint can inform a signal, but they must never be used as assumed
+fill prices. This makes factor strategies hybrid: directional factor signal
+with an execution bridge that may use market-making mechanics.</p>
+<hr />
+<h2 id="target-directory-layout">Target Directory Layout<a class="headerlink" href="#target-directory-layout" title="Permanent link">&para;</a></h2>
+<div class="highlight"><pre><span></span><code>polymind/
+│
+├── pyproject.toml              # Project config
+├── README.md                   # Public-facing docs
+├── LICENSE                     # Repository license; third-party provenance tracked separately
+│
+├── polymind/                   # Main package
+│   ├── __init__.py
+│   │
+│   ├── core/                   # Framework contracts and dependency-inward models
+│   │   ├── agent.py            # BaseAgent — observe → decide → act
+│   │   ├── config.py           # Configuration management
+│   │   ├── intents.py          # OrderIntent, CancelIntent, WorkflowCommand, PortfolioTarget
+│   │   └── strategy.py         # BaseStrategy, MarketMakingPolicy, FactorSignalModel
+│   │
+│   ├── strategies/             # Pure strategy policies; no CLOB transport side effects
+│   │   ├── __init__.py
+│   │   │
+│   │   ├── market_making/      # Bid/ask policy engines
+│   │   │   ├── amm/            # Concentrated-liquidity ladder math (official keeper)
+│   │   │   ├── bands/          # Price-margin band sizing math (official keeper)
+│   │   │   └── classic_mm/     # Split/limit-sell policy surface
+│   │   │
+│   │   └── factors/            # Strategy adapters around factor engine components
+│   │       ├── momentum/
+│   │       ├── regime/
+│   │       ├── sentiment/
+│   │       ├── fair_value/
+│   │       ├── structural/
+│   │       └── composite/
+│   │
+│   ├── workflows/              # Stateful trading workflows with recovery semantics
+│   │   ├── maker_rebate/       # Paired YES/NO fills, merge/redeem, one-sided halt
+│   │   ├── event_mm/           # WebSocket-driven wake-up shell and cooldown flow
+│   │   ├── sniper/             # Deep discount reactive bid workflow
+│   │   └── copy_trade/         # Target wallet ingestion, dedupe, proportional execution
+│   │
+│   ├── factors/                # Factor engine and research-domain primitives
+│   │   ├── __init__.py
+│   │   ├── pipeline.py         # Universe → features → score → rank → target
+│   │   ├── registry.py         # Signal/filter/overlay registration
+│   │   ├── features.py         # Micro-price, spread, depth, imbalance, state features
+│   │   ├── filters.py          # Spread, volume, depth, fee, freshness, time filters
+│   │   ├── portfolio.py        # Deciles, sizing, hedging, exposure caps
+│   │   └── execution.py        # FactorExecutionBridge to order intents
+│   │
+│   ├── execution/              # Venue-neutral execution orchestration
+│   │   ├── executor.py         # Intent → exchange order lifecycle
+│   │   ├── order_identity.py   # Stable identity for audit, dedupe, cancel/replace
+│   │   ├── fill_model.py       # Passive/taker fill assumptions for paper/backtest
+│   │   └── serializer.py       # Per-market/per-token command serialization
+│   │
+│   ├── reconciliation/         # Fill and balance truth model
+│   │   ├── fills.py            # WebSocket wake-up + CLOB cross-check
+│   │   ├── balances.py         # ERC-1155 balanceOf truth reads
+│   │   └── recovery.py         # Ghost-fill, partial-fill, restart recovery
+│   │
+│   ├── polymarket/             # Polymarket integration adapters
+│   │   ├── client.py           # CLOB SDK adapter
+│   │   ├── websocket.py        # Market/user WebSocket adapters
+│   │   ├── data_api.py         # Gamma/Data API metadata and history
+│   │   ├── contracts.py        # Split/merge/redeem gateway
+│   │   ├── signer.py           # Transaction signing and auth
+│   │   └── metrics.py          # Venue adapter metrics
+│   │
+│   ├── agents/                 # AI providers
+│   │   ├── base.py
+│   │   ├── anthropic.py
+│   │   ├── openai.py
+│   │   ├── gemini.py
+│   │   ├── ensemble.py
+│   │   └── intelligence.py     # News/sentiment context
+│   │
+│   ├── risk/                   # Risk gates between strategy intents and execution
+│   │   ├── manager.py
+│   │   ├── limits.py
+│   │   ├── exposure.py
+│   │   └── drawdown.py
+│   │
+│   ├── backtesting/            # Backtesting and paper/sandbox execution
+│   │   ├── engine.py           # Portfolio backtest
+│   │   ├── factor_bt.py        # Cross-sectional factor backtest
+│   │   ├── data.py             # Data loading/replay
+│   │   ├── execution_model.py  # Queue, latency, partial-fill, fee, slippage models
+│   │   └── metrics.py          # Performance, capacity, attribution metrics
+│   │
+│   ├── studio/                 # AI strategy studio
+│   │   ├── generator.py        # NL → typed strategy config
+│   │   └── optimizer.py        # Parameter optimization under promotion gates
+│   │
+│   ├── storage/                # Persistence ports and adapters
+│   │   ├── database.py
+│   │   ├── models.py
+│   │   ├── price_store.py      # Append-only CLOB snapshot store
+│   │   ├── ledger.py           # Paper/live fills, positions, cash, dedupe markers
+│   │   └── warehouse.py        # DuckDB-style research panels
+│   │
+│   ├── alerts/
+│   │   └── telegram.py
+│   │
+│   ├── cli/
+│   │   └── main.py
+│   │
+│   └── utils/
+│       ├── logging.py
+│       ├── secrets.py
+│       ├── killswitch.py
+│       └── preflight.py
+│
+├── docs/
+│   ├── architecture.md
+│   ├── architecture/
+│   │   └── decisions/
+│   ├── strategies/
+│   │   ├── market_making/
+│   │   └── factors/
+│   └── references/
+│       ├── cross-sectional-momentum-kill.md
+│       └── factor-research-overview.md
+│
+├── scripts/
+│   ├── collect_snapshots.py    # Factor data collection daemon
+│   └── backtest_factor.py      # Factor backtest runner
+│
+└── tests/
+</code></pre></div>
+<hr />
+<h2 id="roadmap-gates">Roadmap Gates<a class="headerlink" href="#roadmap-gates" title="Permanent link">&para;</a></h2>
+<p>The roadmap has <strong>ten gates: Phase 0 through Phase 9</strong>. Phase 4, Phase 5, and
+Phase 6 may run in parallel after Phase 3 because they depend on the shared
+contracts, adapters, execution model, and persistence spine rather than on each
+other.</p>
+<h3 id="phase-0-documentation-provenance-and-license-truth-alignment">Phase 0: Documentation, provenance, and license truth alignment<a class="headerlink" href="#phase-0-documentation-provenance-and-license-truth-alignment" title="Permanent link">&para;</a></h3>
+<ul>
+<li>Public README distinguishes implemented, planned, and research-blocked work.</li>
+<li>Current-state and target-state architecture docs are separated.</li>
+<li>Superseded specs are marked explicitly.</li>
+<li>Reference project docs record what to copy and what not to copy.</li>
+<li>Third-party provenance and license boundaries are recorded before source is copied.</li>
+<li>LGPL-covered or non-MIT-compatible components are isolated behind a dependency,
+  adapter, or explicit legal review.</li>
+</ul>
+<h3 id="phase-1-polymarket-adapter-validation">Phase 1: Polymarket adapter validation<a class="headerlink" href="#phase-1-polymarket-adapter-validation" title="Permanent link">&para;</a></h3>
+<ul>
+<li>Validate the current SDK path before strategy implementation.</li>
+<li>Prefer <code>py-clob-client-v2</code> / unified SDK semantics over archived clients.</li>
+<li>Document public, L1, L2, builder, and user-channel auth separately.</li>
+<li>Document asset ID vs condition ID usage for market and user WebSocket channels.</li>
+<li>Document heartbeat behavior and reconnect/reconciliation requirements.</li>
+<li>Add adapter conformance checks for CLOB, Gamma/Data API, WebSocket, signing,
+  split, merge, redeem, and on-chain balance reads.</li>
+</ul>
+<h3 id="phase-2-domain-contracts-and-architecture-spine">Phase 2: Domain contracts and architecture spine<a class="headerlink" href="#phase-2-domain-contracts-and-architecture-spine" title="Permanent link">&para;</a></h3>
+<ul>
+<li>Freeze <code>OrderIntent</code>, <code>CancelIntent</code>, <code>ExpectedOrderDelta</code>,
+  <code>WorkflowCommand</code>, <code>PortfolioTarget</code>, <code>FillEvent</code>, <code>LedgerEntry</code>, and
+  <code>RiskDecision</code> contracts.</li>
+<li>Strategies produce intents, expected-order deltas, portfolio targets, or
+  workflow commands.</li>
+<li>Executors own CLOB transport, retries, cancellations, and order state mutation.</li>
+<li>Wallet/chain adapters own split, merge, redeem, approvals, and on-chain balance reads.</li>
+<li>Risk gates sit between strategy decisions and execution.</li>
+<li>Storage ports cover snapshots, positions, paper ledger, dedupe sets, open
+  intents, exchange order IDs, pending cancels, partial fills, and recovery state.</li>
+<li>Package boundaries enforce that research, strategy, execution, reconciliation,
+  and AI Studio depend inward on contracts rather than on each other.</li>
+</ul>
+<h3 id="phase-3-execution-reconciliation-and-paper-runtime">Phase 3: Execution, reconciliation, and paper runtime<a class="headerlink" href="#phase-3-execution-reconciliation-and-paper-runtime" title="Permanent link">&para;</a></h3>
+<ul>
+<li>Implement the intent executor before live strategy ports.</li>
+<li>Implement post-only/taker execution policies with explicit queue, latency,
+  partial-fill, timeout, cancel-verification, and adverse-selection assumptions.</li>
+<li>Implement WebSocket wake-up plus CLOB cross-check plus on-chain balance truth.</li>
+<li>Persist paper fills, live fills, positions, open orders, dedupe markers, and
+  restart recovery state outside process memory.</li>
+<li>Provide a sandbox/paper runtime shared by market-making workflows and factor strategies.</li>
+<li>Add preflight, dry-run/live confirmation, credential validation, log redaction,
+  emergency stop, and per-market/per-token command serialization.</li>
+</ul>
+<h3 id="phase-4-official-mm-port">Phase 4: Official MM port<a class="headerlink" href="#phase-4-official-mm-port" title="Permanent link">&para;</a></h3>
+<ul>
+<li>Port AMM and Bands pure math first.</li>
+<li>Preserve snapshot to expected-orders to executor boundary.</li>
+<li>Carry over strategy invariant tests: ladder symmetry, band overlap checks,
+  cancel/replace semantics, band fill order, and graceful cancel-all lifecycle.</li>
+<li>Keep binary complement assumptions scoped to official-keeper adapters or
+  strategy packages.</li>
+<li>Prove source parity on representative snapshots before live/paper promotion.</li>
+</ul>
+<h3 id="phase-5-terminal-and-event-workflows">Phase 5: Terminal and event workflows<a class="headerlink" href="#phase-5-terminal-and-event-workflows" title="Permanent link">&para;</a></h3>
+<ul>
+<li>Model Maker Rebate, Event MM, Sniper, Copy Trade, and Classic MM as separate
+  bounded workflows, not all as market-making strategy subclasses.</li>
+<li>Each workflow needs a state-machine document before implementation.</li>
+<li>Shared pair lifecycle covers YES/NO inventory, split, merge, redeem, one-sided
+  halt, sell-remainder, and resolved-position redemption.</li>
+<li>Fill detection uses WebSocket events as wake-up signals and on-chain balances
+  as reconciliation truth.</li>
+<li>Per-market or per-asset serialization is required before placing/canceling
+  live orders.</li>
+<li>Preserve simulation mode and operator runtime assumptions from reference workflows.</li>
+</ul>
+<h3 id="phase-6-factor-data-and-research-engine">Phase 6: Factor data and research engine<a class="headerlink" href="#phase-6-factor-data-and-research-engine" title="Permanent link">&para;</a></h3>
+<ul>
+<li>Build CLOB-native snapshot store before factor strategies.</li>
+<li>Add DuckDB-style research panels for markets, outcomes, orderbook snapshots,
+  trades, holders, resolutions, returns, fee regimes, and data-quality reports.</li>
+<li>Implement universe construction, snapshot integrity checks, feature panels,
+  tradability filters, score normalization, ranking, portfolio construction, and
+  attribution as separate ports.</li>
+<li>Implement executable-price backtesting before live/paper factor promotion.</li>
+<li>Include spread, depth, tick size, fees, latency, order type, queue position,
+  adverse selection, capacity, and partial-fill assumptions.</li>
+<li>Reject midpoint-only backtests as evidence for tradability.</li>
+</ul>
+<h3 id="phase-7-factor-strategies-and-promotion-governance">Phase 7: Factor strategies and promotion governance<a class="headerlink" href="#phase-7-factor-strategies-and-promotion-governance" title="Permanent link">&para;</a></h3>
+<ul>
+<li>Momentum, regime/volatility, sentiment, fair-value/microstructure, structural
+  relative-value, composite, and hedge overlays start only after Phase 6 gates pass.</li>
+<li>Volume, spread, depth, fees, freshness, and time-to-resolution are tradability
+  filters unless a strategy document proves they are predictive signals.</li>
+<li>Each factor report separates signal evidence from execution evidence.</li>
+<li>Each promoted factor includes executable-price backtest, walk-forward results,
+  bootstrap or confidence-interval evidence, paper OMS results, capacity analysis,
+  execution-sensitivity report, and failure analysis.</li>
+<li>PASS, FAIL, NO EDGE, and INCONCLUSIVE are valid research outcomes.</li>
+</ul>
+<h3 id="phase-8-ai-studio">Phase 8: AI studio<a class="headerlink" href="#phase-8-ai-studio" title="Permanent link">&para;</a></h3>
+<ul>
+<li>Natural language maps to typed strategy configuration only.</li>
+<li>LLM output never bypasses schema validation, implementation-status checks,
+  risk checks, preflight checks, paper/live gates, or promotion status.</li>
+<li>AI factor discovery proposes research candidates; it does not directly promote
+  live strategies.</li>
+<li>Generated configurations include provenance, source strategy version, risk
+  limits, and execution policy.</li>
+</ul>
+<h3 id="phase-9-operator-readiness-release-and-expansion">Phase 9: Operator readiness, release, and expansion<a class="headerlink" href="#phase-9-operator-readiness-release-and-expansion" title="Permanent link">&para;</a></h3>
+<ul>
+<li>Documentation site.</li>
+<li>CI pipeline for docs, lint, tests, security scan, license/provenance checks,
+  adapter conformance, and factor regression.</li>
+<li>Operator dashboard or reports for fills, positions, reconciliation gaps, P&amp;L
+  decomposition, decile spread, capacity, and alerts.</li>
+<li>PyPI release only after the public package exposes implemented modules rather
+  than target-only facades.</li>
+<li>Strategy templates gallery.</li>
+<li>Plugin system and multi-platform research are explicit extensions; Kalshi,
+  Limitless, and other venues require venue-specific adapter and data gates.</li>
+</ul>
+<hr />
+<h2 id="execution-reality-gate">Execution Reality Gate<a class="headerlink" href="#execution-reality-gate" title="Permanent link">&para;</a></h2>
+<p>Any roadmap item that claims tradable edge must show:</p>
+<ol>
+<li>Data source: CLOB bid/ask snapshots or full order book, not Gamma midpoint alone.</li>
+<li>Execution source: passive limit-order model, actual paper fills, or documented taker-cost model.</li>
+<li>Cost model: spread, fees, tick size, depth, latency, and partial fills.</li>
+<li>Reconciliation: user-channel events checked against on-chain balances where applicable.</li>
+<li>Restart safety: fills, positions, dedupe markers, and open intents persisted outside process memory.</li>
+<li>Promotion rule: backtest success alone cannot promote a strategy to live trading.</li>
+</ol>
+<hr />
+<h2 id="design-decisions">Design Decisions<a class="headerlink" href="#design-decisions" title="Permanent link">&para;</a></h2>
+<h3 id="why-python-as-the-primary-application-stack">Why Python as the primary application stack<a class="headerlink" href="#why-python-as-the-primary-application-stack" title="Permanent link">&para;</a></h3>
+<p>Single-language application code keeps packaging, deployment, and agent-driven
+maintenance simple. The merged projects are not all Python, however:
+<code>probablyprofit-ai-framework</code>, <code>pm-official-mm-keeper</code>, <code>warproxxx-mm-bot</code>,
+<code>Polymarket-Edge-Research</code>, <code>prediction-market-backtesting</code>, and
+<code>polymarket-quant</code> are Python-centered; <code>pm-terminal-all-in-one</code> is Node.js;
+<code>polymarket-cross-sectional-momentum</code> is TypeScript; and
+<code>prediction-market-backtesting</code> also contains NautilusTrader/Rust-adjacent
+data-loading and LGPL-scoped extension concerns.</p>
+<p>TypeScript/Node logic is ported to Python only behind parity gates. The goal is
+not line-for-line translation; it is preserving strategy semantics, execution
+assumptions, reconciliation behavior, and failure-mode handling.</p>
+<h3 id="factor-strategies-use-execution-aware-bridges">Factor strategies use execution-aware bridges<a class="headerlink" href="#factor-strategies-use-execution-aware-bridges" title="Permanent link">&para;</a></h3>
+<p><strong>Critical lesson from recallnet/polymarket-cross-sectional-momentum</strong>:
+midpoint-based backtesting systematically overstates returns. CLOB bid-ask
+spread can exceed the factor signal. Polymind factor strategies therefore
+produce portfolio targets or order intents and pass them through an execution
+bridge. The bridge may use passive market-making mechanics, but factor
+strategies do not inherit market-making strategy semantics.</p>
+<h3 id="factor-pipeline-is-real-time-not-batch">Factor pipeline is real-time, not batch<a class="headerlink" href="#factor-pipeline-is-real-time-not-batch" title="Permanent link">&para;</a></h3>
+<p>The reference project collected snapshots on a timer and ran scoring on each
+cycle. Polymind's factor pipeline runs continuously: new snapshots → validate
+freshness → update features → apply tradability filters → update factor scores
+→ construct portfolio targets → emit order intents. This allows tighter
+integration with execution and reconciliation infrastructure without hiding
+execution assumptions inside the factor score.</p>
+<h3 id="fill-detection-on-chain-balance-is-truth">Fill detection: on-chain balance is truth<a class="headerlink" href="#fill-detection-on-chain-balance-is-truth" title="Permanent link">&para;</a></h3>
+<p>Borrowing from pm-terminal's approach: WebSocket events are wake-up signals,
+CLOB API is cross-check, but on-chain ERC-1155 <code>balanceOf</code> via RPC is the
+source of truth for fill confirmation.</p>
+<hr />
+<h2 id="reference-project-learnings">Reference Project Learnings<a class="headerlink" href="#reference-project-learnings" title="Permanent link">&para;</a></h2>
+<p>The reference projects are evidence sources, not codebases to merge blindly.
+Each one contributes either a pattern to copy, a failure mode to avoid, or both.</p>
+<table>
+<thead>
+<tr>
+<th>Project</th>
+<th>Copy</th>
+<th>Do not copy blindly</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>probablyprofit-ai-framework</code></td>
+<td>Composition-root CLI, agent loop, risk/storage/backtesting boundaries, paper/live separation, plugin lessons</td>
+<td>Hidden singleton dependencies, over-broad public facade, AI output that bypasses typed schemas or risk gates</td>
+</tr>
+<tr>
+<td><code>pm-official-mm-keeper</code></td>
+<td>Snapshot to expected-orders to executor split; AMM/Bands invariants; graceful cancel/replace lifecycle</td>
+<td>Positional config unpacking, in-place band mutation, universal order identity based only on price/side/token</td>
+</tr>
+<tr>
+<td><code>warproxxx-mm-bot</code></td>
+<td>Event-driven shell, explicit merge/cooldown/risk concepts, operator parameterization lessons</td>
+<td>Global mutable state, monolithic <code>trading.py</code>, business logic in WebSocket callbacks</td>
+</tr>
+<tr>
+<td><code>pm-terminal-all-in-one</code></td>
+<td>Workflow-specific state machines, simulation modes, ghost-fill recovery, on-chain reconciliation, scheduler lessons</td>
+<td>Shared mutable config and JSON state embedded in services, callback injection, treating all workflows as generic trader flags</td>
+</tr>
+<tr>
+<td><code>polymarket-cross-sectional-momentum</code></td>
+<td>CLOB snapshot store, scanner shape, paper scaffold, postmortem discipline, experiment tombstones</td>
+<td>Midpoint-only backtests, market-order factor execution, static cost haircuts, replay contamination</td>
+</tr>
+<tr>
+<td><code>Polymarket-Edge-Research</code></td>
+<td>DuckDB panels, resolution truth, walk-forward validation, deployment gates, structural edge families</td>
+<td>Treating factor panels as execution proof or PASS as guaranteed profitability</td>
+</tr>
+<tr>
+<td><code>prediction-market-backtesting</code></td>
+<td>Nautilus-backed replay concepts, passive order modeling, queue/latency/partial-fill realism, multi-market reports</td>
+<td>Copying LGPL-scoped code into MIT-only package, assuming generic backtest fills match Polymarket CLOB execution</td>
+</tr>
+<tr>
+<td><code>polymarket-quant</code></td>
+<td>Orderbook state → fair value → executable edge, micro-price, latent state, regime and cross-book features</td>
+<td>Treating fair-value estimates or midpoint-like references as executable prices</td>
+</tr>
+</tbody>
+</table>
+<p>Detailed evidence belongs in <code>docs/references/</code>.</p>
+<h3 id="recallnetpolymarket-cross-sectional-momentum"><code>recallnet/polymarket-cross-sectional-momentum</code><a class="headerlink" href="#recallnetpolymarket-cross-sectional-momentum" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>Aspect</th>
+<th>Finding</th>
+<th>Polymind Response</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Momentum signal</td>
+<td>Real (6.19 Sharpe backtest)</td>
+<td>Implement momentum factor with multiple lookbacks</td>
+</tr>
+<tr>
+<td>Execution cost</td>
+<td>2–10% spread kills edge</td>
+<td>Factor strategies use executable-price models and documented passive/taker execution assumptions</td>
+</tr>
+<tr>
+<td>Midpoint prices</td>
+<td>Untradeable reference price</td>
+<td>Backtest against CLOB bid/ask only; never Gamma midpoint</td>
+</tr>
+<tr>
+<td>Hold period</td>
+<td>Short holds amplify cost</td>
+<td>Hold periods configurable per factor (1h–21d)</td>
+</tr>
+<tr>
+<td>CLOB data pipeline</td>
+<td>Collector + JSONL store worked correctly</td>
+<td>Reuse <code>collect → appendSnapshot → readSnapshots</code> pattern</td>
+</tr>
+<tr>
+<td>Data pipeline design</td>
+<td>Collect mid/bid/ask per token as JSONL</td>
+<td>Adopt the same JSONL snapshot store in <code>storage/price_store.py</code></td>
+</tr>
+<tr>
+<td>Paper trading scaffold</td>
+<td>Dedup, budget enforcement, fill tracking</td>
+<td>Integrate into backtesting engine</td>
+</tr>
+<tr>
+<td><strong>−13.6% live PnL</strong></td>
+<td><strong>18 trades, 11% hit rate</strong></td>
+<td><strong>Hybrid factor execution: directional signal + execution-aware bridge</strong></td>
+</tr>
+</tbody>
+</table>
+<h3 id="oscarc17polymarket-edge-research"><code>oscarc17/Polymarket-Edge-Research</code><a class="headerlink" href="#oscarc17polymarket-edge-research" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>Aspect</th>
+<th>Insight</th>
+<th>Polymind Response</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>DuckDB panels</td>
+<td>Structured factor research data model</td>
+<td>Adopt for large-scale factor analysis</td>
+</tr>
+<tr>
+<td>Walk-forward backtest</td>
+<td>Prevents overfitting in factor selection</td>
+<td><code>backtesting/factor_bt.py</code> with walk-forward support</td>
+</tr>
+<tr>
+<td>Execution-aware simulation</td>
+<td>Model slippage and spread, not midpoint</td>
+<td>Execution model that uses CLOB bid/ask</td>
+</tr>
+<tr>
+<td>Time-series feature panels</td>
+<td>Structured feature engineering for factors</td>
+<td>Factor computation pipeline with windowed features</td>
+</tr>
+<tr>
+<td>Gamma/CLOB/Data API integration</td>
+<td>Multiple data source ingestion</td>
+<td>Unified data layer in <code>polymarket/data_api.py</code></td>
+</tr>
+</tbody>
+</table>
+<h3 id="evan-kolbergprediction-market-backtesting"><code>evan-kolberg/prediction-market-backtesting</code><a class="headerlink" href="#evan-kolbergprediction-market-backtesting" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>Aspect</th>
+<th>Insight</th>
+<th>Polymind Response</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>NautilusTrader integration</td>
+<td>Professional-grade backtesting engine</td>
+<td>Adapter layer in <code>backtesting/engine.py</code></td>
+</tr>
+<tr>
+<td>Passive order modeling</td>
+<td>Queue position, fill probability, latency</td>
+<td>Order execution model for limit orders</td>
+</tr>
+<tr>
+<td>Slippage models</td>
+<td>Realistic cost estimation</td>
+<td>Backtest metrics with configurable slippage</td>
+</tr>
+<tr>
+<td>Multi-market runner</td>
+<td>Portfolio-level backtesting</td>
+<td>Factor strategy portfolio backtest</td>
+</tr>
+<tr>
+<td>PMXT custom instruments</td>
+<td>Polymarket-specific instrument definition</td>
+<td>Token-aware order management</td>
+</tr>
+</tbody>
+</table>
+<h3 id="chiantsiipolymarket-quant"><code>chiantsii/polymarket-quant</code><a class="headerlink" href="#chiantsiipolymarket-quant" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>Aspect</th>
+<th>Insight</th>
+<th>Polymind Response</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>State → fair value → edge</td>
+<td>Structured feature extraction from orderbook</td>
+<td>Factor construction methodology</td>
+</tr>
+<tr>
+<td>Micro-price</td>
+<td>Better reference price than midpoint</td>
+<td>Use as alternative to simple mid in factor computation</td>
+</tr>
+<tr>
+<td>Cross-book consistency</td>
+<td>Detect anomalous pricing across related markets</td>
+<td>Composite factor with cross-market validation</td>
+</tr>
+<tr>
+<td>Quote/spread/micro-price features</td>
+<td>Rich feature set for alpha research</td>
+<td>Factor feature library</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="future-considerations">Future Considerations<a class="headerlink" href="#future-considerations" title="Permanent link">&para;</a></h2>
+<p>These are extensions after the Phase 0–9 gates, not prerequisites for the
+initial Polymarket release:</p>
+<ul>
+<li><strong>Additional venues</strong>: Kalshi, Limitless, Metaculus. Each requires venue-
+  specific data, execution, reconciliation, fee, and compliance gates.</li>
+<li><strong>Third-party plugin ecosystem</strong>: pip-installable factors and workflows after
+  the core contracts are stable.</li>
+<li><strong>Advanced auto-factor discovery</strong>: ML/LLM proposes factor definitions,
+  backtests them, reports IC/Sharpe, and sends candidates through the same
+  promotion gates as human-authored strategies.</li>
+</ul>
+
+
+
+
+
+
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+        
+<div class="md-social">
+  
+    
+    
+    
+    
+      
+      
+    
+    <a href="https://github.com/" target="_blank" rel="noopener" title="github.com" class="md-social__link">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M173.9 397.4c0 2-2.3 3.6-5.2 3.6-3.3.3-5.6-1.3-5.6-3.6 0-2 2.3-3.6 5.2-3.6 3-.3 5.6 1.3 5.6 3.6m-31.1-4.5c-.7 2 1.3 4.3 4.3 4.9 2.6 1 5.6 0 6.2-2s-1.3-4.3-4.3-5.2c-2.6-.7-5.5.3-6.2 2.3m44.2-1.7c-2.9.7-4.9 2.6-4.6 4.9.3 2 2.9 3.3 5.9 2.6 2.9-.7 4.9-2.6 4.6-4.6-.3-1.9-3-3.2-5.9-2.9M252.8 8C114.1 8 8 113.3 8 252c0 110.9 69.8 205.8 169.5 239.2 12.8 2.3 17.3-5.6 17.3-12.1 0-6.2-.3-40.4-.3-61.4 0 0-70 15-84.7-29.8 0 0-11.4-29.1-27.8-36.6 0 0-22.9-15.7 1.6-15.4 0 0 24.9 2 38.6 25.8 21.9 38.6 58.6 27.5 72.9 20.9 2.3-16 8.8-27.1 16-33.7-55.9-6.2-112.3-14.3-112.3-110.5 0-27.5 7.6-41.3 23.6-58.9-2.6-6.5-11.1-33.3 2.6-67.9 20.9-6.5 69 27 69 27 20-5.6 41.5-8.5 62.8-8.5s42.8 2.9 62.8 8.5c0 0 48.1-33.6 69-27 13.7 34.7 5.2 61.4 2.6 67.9 16 17.7 25.8 31.5 25.8 58.9 0 96.5-58.9 104.2-114.8 110.5 9.2 7.9 17 22.9 17 46.4 0 33.7-.3 75.4-.3 83.6 0 6.5 4.6 14.4 17.3 12.1C436.2 457.8 504 362.9 504 252 504 113.3 391.5 8 252.8 8M105.2 352.9c-1.3 1-1 3.3.7 5.2 1.6 1.6 3.9 2.3 5.2 1 1.3-1 1-3.3-.7-5.2-1.6-1.6-3.9-2.3-5.2-1m-10.8-8.1c-.7 1.3.3 2.9 2.3 3.9 1.6 1 3.6.7 4.3-.7.7-1.3-.3-2.9-2.3-3.9-2-.6-3.6-.3-4.3.7m32.4 35.6c-1.6 1.3-1 4.3 1.3 6.2 2.3 2.3 5.2 2.6 6.5 1 1.3-1.3.7-4.3-1.3-6.2-2.2-2.3-5.2-2.6-6.5-1m-11.4-14.7c-1.6 1-1.6 3.6 0 5.9s4.3 3.3 5.6 2.3c1.6-1.3 1.6-3.9 0-6.2-1.4-2.3-4-3.3-5.6-2"/></svg>
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    
+      
+      
+      <script id="__config" type="application/json">{"annotate": null, "base": "..", "features": ["navigation.tabs", "navigation.sections", "toc.integrate"], "search": "../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
+    
+    
+      <script src="../assets/javascripts/bundle.79ae519e.min.js"></script>
+      
+    
+  </body>
+</html>
