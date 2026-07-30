@@ -17,6 +17,7 @@ htmlcov/
 coverage.xml
 site/
 *.md
+!README.md
 data/
 logs/
 *.log

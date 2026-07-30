@@ -191,7 +191,7 @@ class FillModel:
     def _fill_determinant(intent: OrderIntent) -> float:
         """Deterministic value in [0, 1) derived from the intent for reproducible simulation."""
         raw = f"{intent.market_id}:{intent.side.value}:{intent.price}:{intent.size}"
-        digest = hashlib.md5(raw.encode()).hexdigest()
+        digest = hashlib.md5(raw.encode(), usedforsecurity=False).hexdigest()
         return int(digest[:8], 16) / 0xFFFFFFFF
 
     @staticmethod

@@ -28,6 +28,7 @@ import signal
 import sys
 
 from polymind.data.collector import CollectorConfig, SnapshotCollector
+
 from polymind.polymarket.data_api import PolymarketDataAPI
 from polymind.storage.price_store import PriceStore
 from polymind.utils.logging import LogConfig, setup_logging
